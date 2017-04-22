@@ -18,10 +18,16 @@
 
 #include <iostream>
 
+#include "mmapheap.h"
 #include "command_parser.h"
+
+const auto DefaultHeapSize = 2 * 1024UL * 1024 * 1024;
+
+MmapHeap* heap = new MmapHeap(DefaultHeapSize);  
 
 int main(int argc, char *argv[])
 {
+    //std::cout << "heap size " << (heap->getSize())/1024/1024 << std::endl;
     char* cmd_str;
     size_t cmd_len;
 
@@ -39,6 +45,9 @@ int main(int argc, char *argv[])
 
         free(cmd_str);
     //}
+    //
+
+    //while(1);
 
     return 0;
 }
