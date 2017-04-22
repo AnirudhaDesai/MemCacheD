@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
         // read command
         cmd_len = 50;
         cmd_str = (char*)malloc(cmd_len);
-        sprintf(cmd_str,"set 0 0 0\r\nkey\r\nvalue");
+        sprintf(cmd_str,"set key 0 900 5\r\nvalue");
 
         // parse command
         parse_command(cmd_str,cmd_len);

@@ -3,6 +3,8 @@
 #define MAX_CMD_LINES 10
 #define NUM_COMMANDS 15
 
+void handle_set(char* cmd_lines[MAX_CMD_LINES]);
+
 typedef enum {
     SET =0,
     ADD ,
@@ -33,21 +35,21 @@ struct COMMAND_STRING_MAP
 
 COMMAND_STRING_MAP CMD_MAP[NUM_COMMANDS]
 {
-    { SET, "set" },
-    { ADD, "add" },
-    { REPLACE, "replace" },
-    { APPEND, "append" },
-    { PREPEND, "prepend" },
-    { CAS, "cas" },
-    { GET, "get" },
-    { GETS, "gets" },
-    { DELETE, "delete" },
-    { INCR, "incr" },
-    { DECR, "decr" },
-    { STATS, "stats" },
-    { FLUSH_ALL, "flush_all" },
-    { VERSION, "version" },
-    { QUIT, "quit" },
+    { SET, (char*)"set" },
+    { ADD, (char*)"add" },
+    { REPLACE, (char*)"replace" },
+    { APPEND, (char*)"append" },
+    { PREPEND, (char*)"prepend" },
+    { CAS, (char*)"cas" },
+    { GET, (char*)"get" },
+    { GETS, (char*)"gets" },
+    { DELETE, (char*)"delete" },
+    { INCR, (char*)"incr" },
+    { DECR, (char*)"decr" },
+    { STATS, (char*)"stats" },
+    { FLUSH_ALL, (char*)"flush_all" },
+    { VERSION, (char*)"version" },
+    { QUIT, (char*)"quit" },
 };
 
 void parse_command(char* cmd_str, size_t cmd_len)
@@ -90,7 +92,7 @@ void parse_command(char* cmd_str, size_t cmd_len)
     switch(command)
     {
         case SET:
-            printf("handling set...\n");
+            handle_set(cmd_lines);
             break;
         case ADD:
             break;
@@ -129,3 +131,13 @@ void parse_command(char* cmd_str, size_t cmd_len)
     }
 }
 
+void handle_set(char* cmd_lines[MAX_CMD_LINES])
+{
+    // parse the rest of the first line
+    char* key = strtok(NULL," ");
+    char* flags  = strtok(NULL," ");
+    char* exptime  = strtok(NULL," ");
+    char* bytes  = strtok(NULL," ");
+
+    printf("setting key=%s,flags=%s,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
+}
