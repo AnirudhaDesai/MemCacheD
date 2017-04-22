@@ -1,9 +1,12 @@
 /*
- * Memo : A Data Caching Service
- * Team Awesome
- * Vikram Anirudha Vinithra Shruthi
+ * 630 Systems Assignment 4
+ * Memo - A Data Caching Service
+ * Team : Team Awesome
+ * Members : Vikram Anirudha Vinithra Shruthi
  *
- * 
+ */
+
+/*
    m                                                                         
  mm#mm   mmm    mmm   mmmmm   mmm  m     m  mmm    mmm    mmm   mmmmm   mmm  
    #    #"  #  "   #  # # #  "   # "m m m" #"  #  #   "  #" "#  # # #  #"  # 
@@ -22,20 +25,20 @@ int main(int argc, char *argv[])
     char* cmd_str;
     size_t cmd_len;
 
-    while(1)
-    {
+    //while(1)
+    //{
         // listen on port 
         //
         // read command
         cmd_len = 50;
         cmd_str = (char*)malloc(cmd_len);
-        sprintf(cmd_str,"SET\r\nSTUFF\r\n");
+        sprintf(cmd_str,"set 0 0 0\r\nkey\r\nvalue");
 
         // parse command
         parse_command(cmd_str,cmd_len);
 
         free(cmd_str);
-    }
+    //}
 
     return 0;
 }
