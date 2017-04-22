@@ -27,6 +27,13 @@ MmapHeap* heap = new MmapHeap(DefaultHeapSize);
 
 int main(int argc, char *argv[])
 {
+    // parse command line args
+
+    for(int i=1;i<argc;i++)
+    {
+        printf("%s\n",argv[i]);
+    }
+
     //std::cout << "heap size " << (heap->getSize())/1024/1024 << std::endl;
     char* cmd_str;
     size_t cmd_len;
