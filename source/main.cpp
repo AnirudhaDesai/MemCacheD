@@ -15,8 +15,27 @@
 
 #include <iostream>
 
+#include "command_parser.h"
+
 int main(int argc, char *argv[])
 {
-    std::cout << "hello world" << std::endl;
+    char* cmd_str;
+    size_t cmd_len;
+
+    while(1)
+    {
+        // listen on port 
+        //
+        // read command
+        cmd_len = 50;
+        cmd_str = (char*)malloc(cmd_len);
+        sprintf(cmd_str,"SET\r\nSTUFF\r\n");
+
+        // parse command
+        parse_command(cmd_str,cmd_len);
+
+        free(cmd_str);
+    }
+
     return 0;
 }
