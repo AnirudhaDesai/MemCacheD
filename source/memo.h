@@ -6,11 +6,21 @@
 #include <unordered_map>
 
 #include "slabsalloc.h"
+#include "mmapheap.h"
 
 /*struct Header
 {
     int flags;
 };*/
+
+const auto HeapSize = 1024UL * 1024 * 1024;
+class HeapType : public SlabsAlloc<MmapHeap<HeapSize>> {};
+
+static HeapType& getHeap() {
+    static char theHeapBuf[sizeof(HeapType)];
+    static HeapType * h = new (theHeapBuf) HeapType;
+    return *h;
+}
 
 namespace  Memo
 {
@@ -34,7 +44,9 @@ namespace  Memo
 
     Header* add(std::string key)
     {
-        // do stuff
+        printf("called %s\n",__FUNCTION__);
+        //malloc(0);
+        getHeap().malloc(0);
     }
 
 

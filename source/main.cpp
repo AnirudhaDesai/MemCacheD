@@ -12,9 +12,8 @@
 #include <functional>
 
 #include "memo.h"
-#include "mmapheap.h"
 #include "command_parser.h"
- #include "slabsalloc.h"
+#include "slabsalloc.h"
 
 const auto DefaultHeapSize = 2 * 1024UL * 1024 * 1024;
 
@@ -25,8 +24,6 @@ typedef enum {
 } ALG_T;
 
 ALG_T cache_replacement_algorithm = LRU;
-
-MmapHeap* heap = new MmapHeap(DefaultHeapSize);  
 
 int main(int argc, char *argv[])
 {
@@ -71,7 +68,6 @@ int main(int argc, char *argv[])
     }
 
     std::cout << "cache replacement algorithm :" << cache_replacement_algorithm << std::endl;
-    std::cout << "heap size " << (heap->getSize())/1024/1024 << std::endl;
     char* cmd_str;
     size_t cmd_len;
 
@@ -79,6 +75,7 @@ int main(int argc, char *argv[])
     //obj->flags = 1;
     //Memo::Table.insert(std::make_pair("BLACK", obj));
 
+    Memo::add("mykey");
 
     //while(1)
     //{
