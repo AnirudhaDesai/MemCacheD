@@ -9,11 +9,13 @@
 #include <iostream>
 #include <unistd.h>
 #include <getopt.h>
+#include <functional>
 
+#include "memo.h"
 #include "mmapheap.h"
 #include "command_parser.h"
 
-const auto DefaultHeapSize = 1 * 1024UL * 1024 * 1024;
+const auto DefaultHeapSize = 2 * 1024UL * 1024 * 1024;
 
 typedef enum {
     LRU=0,
@@ -71,6 +73,11 @@ int main(int argc, char *argv[])
     std::cout << "heap size " << (heap->getSize())/1024/1024 << std::endl;
     char* cmd_str;
     size_t cmd_len;
+
+    /*Header* obj = (Header*)malloc(sizeof(Header));*/
+    //obj->flags = 1;
+    //Memo::Table.insert(std::make_pair("BLACK", obj));
+
 
     //while(1)
     //{
