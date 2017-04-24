@@ -17,8 +17,8 @@ class Header {
  public:
   char key[251];
   size_t data_size;  
-  uint16 flags;
-  int32 expiration_time;
+  uint16_t flags;
+  int32_t expiration_time;
 
   Header * prev;
   Header * next;
@@ -28,21 +28,24 @@ template <class SourceHeap>
 class SlabsAlloc : public SourceHeap {
 public:
   SlabsAlloc()
-    : allocatedObjects (nullptr),
-      requested (0),
+    : requested (0),
       allocated (0),
       maxRequested (0),
       maxAllocated (0)
   {
-    for (auto& f : freedObjects) {
+    //for (auto& f : FreedObjects) {
+     // f = nullptr;
+   // }
+    for (auto& f : head_AllocatedObjects) {
       f = nullptr;
     }
-    for (auto& f : allocatedObjects) {
+    for (auto& f : tail_AllocatedObjects) {
       f = nullptr;
     }
+
   }
 
-  ~StatsAlloc()
+  ~SlabsAlloc()
   {
   }
   
@@ -83,9 +86,8 @@ private:
   size_t maxRequested;
   
   Header * head_AllocatedObjects[23];
-  Header * head_FreedObjects[23];
   Header * tail_AllocatedObjects[23];
-  Header * tail_FreedObjects[23];
+  //Header * FreedObjects[23];
 };
 
 #include "slabsalloc.cpp"

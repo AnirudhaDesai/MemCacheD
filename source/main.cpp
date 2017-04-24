@@ -14,6 +14,7 @@
 #include "memo.h"
 #include "mmapheap.h"
 #include "command_parser.h"
+ #include "slabsalloc.h"
 
 const auto DefaultHeapSize = 2 * 1024UL * 1024 * 1024;
 

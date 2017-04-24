@@ -5,10 +5,12 @@
 #include <cstdint>
 #include <unordered_map>
 
-struct Header
+#include "slabsalloc.h"
+
+/*struct Header
 {
     int flags;
-};
+};*/
 
 namespace  Memo
 {
