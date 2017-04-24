@@ -46,7 +46,7 @@ namespace  Memo
     {
         printf("called %s\n",__FUNCTION__);
         //malloc(0);
-        getHeap().malloc(0);
+        printf("%p",(Header *)getHeap().malloc(0));
     }
 
 

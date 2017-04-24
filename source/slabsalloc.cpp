@@ -8,11 +8,55 @@ void * SlabsAlloc<SourceHeap>::malloc(size_t sz) {
   printf("called %s\n",__FUNCTION__);
 
   /*size will contain the closest base 16 size that needs to be alocated.*/
-  int i = getSizeClass(sz);
+  int i = getSizeClass(sz+sizeof(Header));
   size_t size = getSizeFromClass(i);  
   
   heapLock.lock();
   
+  if(head_AllocatedObjects[i] == nullptr )
+  {
+    void* ptr = SourceHeap::malloc(size);
+
+    if(ptr!=nullptr)
+    {
+      h = (Header *) ptr;  
+    }
+    else
+    {
+      heapLock.unlock();
+      return nullptr;
+    }
+
+    head_AllocatedObjects[i] = h;
+    tail_AllocatedObjects[i] = head_AllocatedObjects[i];
+
+    h->prev = nullptr;
+    h->next = nullptr;
+
+    return tail_AllocatedObjects[i];
+
+  }
+  else
+  {
+    void* ptr = SourceHeap::malloc(size);
+
+    if(ptr!=nullptr)
+    {
+      h = (Header *) ptr;  
+    }
+    else
+    {
+      heapLock.unlock();
+      return nullptr;
+    }
+
+    tail_AllocatedObjects[i]->next = h;
+    h->prev = tail_AllocatedObjects[i];
+
+    tail_AllocatedObjects[i]=h;
+    return tail_AllocatedObjects[i];
+  }
+
 
   /* Check in freedObjects */
   /*if(freedObjects[i]!=nullptr)
