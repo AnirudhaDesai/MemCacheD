@@ -1,4 +1,7 @@
 #include "command_parser.h"
+#include "memo.h"
+
+#include <string>
 
 #define MAX_CMD_LINES 10
 #define NUM_COMMANDS 15
@@ -140,4 +143,6 @@ void handle_set(char* cmd_lines[MAX_CMD_LINES])
     char* bytes  = strtok(NULL," ");
 
     printf("setting key=%s,flags=%s,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
+
+    Memo::add(std::string(key));
 }

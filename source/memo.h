@@ -45,8 +45,10 @@ namespace  Memo
     Header* add(std::string key)
     {
         printf("called %s\n",__FUNCTION__);
-        //malloc(0);
-        printf("%p",(Header *)getHeap().malloc(0));
+
+        printf("adding %s\n",key.c_str());
+        getHeap().malloc(0);
+
     }
 
 

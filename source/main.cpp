@@ -11,7 +11,6 @@
 #include <getopt.h>
 #include <functional>
 
-#include "memo.h"
 #include "command_parser.h"
 #include "slabsalloc.h"
 
@@ -75,7 +74,6 @@ int main(int argc, char *argv[])
     //obj->flags = 1;
     //Memo::Table.insert(std::make_pair("BLACK", obj));
 
-    Memo::add("mykey");
 
     //while(1)
     //{
