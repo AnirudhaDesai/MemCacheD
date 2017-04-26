@@ -1,7 +1,7 @@
 #include "server.h"
 
 int initializeServer(){
-	int  server_socket, client_socket;
+	long  server_socket, client_socket;
 	int Error;
 	pthread_t threadID;
 	
@@ -30,11 +30,11 @@ int initializeServer(){
 			return 1;
 		}
 
-		printf("Accepted From Client: %d\n", client_socket);
+		printf("Accepted From Client: %ld\n", client_socket);
 		// run pthread on client_socket
 
-		error = pthread_create(&threadID, NULL, &eventAction, (void *)client_socket );
-		if (error != 0)
+		Error = pthread_create(&threadID, NULL, &eventAction, (void *)client_socket );
+		if (Error != 0)
 			printf("Error creating thread\n");
 	}
 	pthread_exit(NULL);
@@ -48,7 +48,7 @@ void *eventAction(void *args){
 	long client_socket = (long)args;
 	char  buffer[256] = {0};
 	int bytesReceived = 0;
-	printf(" On thread : %l \n", client_socket);
+	printf(" On thread : %ld \n", client_socket);
 	while(true)
 	{
 		//read from socket
@@ -57,8 +57,19 @@ void *eventAction(void *args){
 		recv(client_socket, buffer, sizeof(buffer), 0);
 			
 		printf("%s",buffer);
+		char* cmd_str;
+    	size_t cmd_len;
+		cmd_len = 50;
+	    cmd_str = (char*)malloc(cmd_len);
+	    sprintf(cmd_str,"set key 0 900 5\r\nvalue");
+
+	    // parse command
+	    parse_command(cmd_str,cmd_len);
+
+	    free(cmd_str);
+		send(client_socket, "Test Send", sizeof("TEst Send"), 0);
 		
-		//parse command
+		
 		//action on command
 	}	
 }
