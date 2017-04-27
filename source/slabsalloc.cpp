@@ -8,14 +8,14 @@ void * SlabsAlloc<SourceHeap>::malloc(size_t sz) {
   printf("called %s\n",__FUNCTION__);
 
   /*size will contain the closest base 16 size that needs to be alocated.*/
-  int i = getSizeClass(sz+sizeof(Header));
+  int i = getSizeClass(sz);
   size_t size = getSizeFromClass(i);  
   
   heapLock.lock();
   
   if(head_AllocatedObjects[i] == nullptr )
   {
-    void* ptr = SourceHeap::malloc(size);
+    void* ptr = SourceHeap::malloc(size+sizeof(Header));
 
     if(ptr!=nullptr)
     {
@@ -38,7 +38,7 @@ void * SlabsAlloc<SourceHeap>::malloc(size_t sz) {
   }
   else
   {
-    void* ptr = SourceHeap::malloc(size);
+    void* ptr = SourceHeap::malloc(size+sizeof(Header));
 
     if(ptr!=nullptr)
     {
@@ -218,30 +218,14 @@ void SlabsAlloc<SourceHeap>::walk(const std::function< void(Header *) >& f) {
 template <class SourceHeap>
 size_t SlabsAlloc<SourceHeap>::getSizeFromClass(int index) {
 
-	if (index<1024)  
-  {
-    //heapLock.unlock();
-		return (size_t)((index+1)*16); 
-	}
-  else if(index>1023 && index<1039)
-  {
-     // heapLock.unlock();
-      return (size_t)(pow(2,index-1009));
-  }
+      return (size_t)(pow(2,index+3));
   
 }
 
 
 template <class SourceHeap>
 int SlabsAlloc<SourceHeap>::getSizeClass(size_t sz) {
-  //heapLock.lock();
-  if (sz<=16384)
-  { //heapLock.unlock();
-  	return (int)(ceil((float)sz/16))-1; 
-  }
-  else 
-  {
-    //heapLock.unlock();
-	return (int)(ceil(log2(sz)))+1009;
-  }
+  
+	return (int)(ceil(log2(sz)))-3;
+  
 }
