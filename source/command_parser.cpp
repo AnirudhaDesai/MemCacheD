@@ -7,6 +7,20 @@
 #define NUM_COMMANDS 15
 
 void handle_set(char* cmd_lines[MAX_CMD_LINES]);
+void handle_add(char* cmd_lines[MAX_CMD_LINES]);
+void handle_replace(char* cmd_lines[MAX_CMD_LINES]);
+void handle_append(char* cmd_lines[MAX_CMD_LINES]);
+void handle_prepend(char* cmd_lines[MAX_CMD_LINES]);
+void handle_cas(char* cmd_lines[MAX_CMD_LINES]);
+void handle_get(char* cmd_lines[MAX_CMD_LINES]);
+void handle_gets(char* cmd_lines[MAX_CMD_LINES]);
+void handle_delete(char* cmd_lines[MAX_CMD_LINES]);
+void handle_incr(char* cmd_lines[MAX_CMD_LINES]);
+void handle_decr(char* cmd_lines[MAX_CMD_LINES]);
+void handle_stats(char* cmd_lines[MAX_CMD_LINES]);
+void handle_flush_all(char* cmd_lines[MAX_CMD_LINES]);
+void handle_version(char* cmd_lines[MAX_CMD_LINES]);
+void handle_quit(char* cmd_lines[MAX_CMD_LINES]);
 
 typedef enum {
     SET =0,
@@ -98,35 +112,49 @@ void parse_command(char* cmd_str, size_t cmd_len)
             handle_set(cmd_lines);
             break;
         case ADD:
+            handle_add(cmd_lines);
             break;
         case REPLACE:
+            handle_replace(cmd_lines);
             break;
         case APPEND:
+            handle_append(cmd_lines);
             break;
         case PREPEND:
+            handle_prepend(cmd_lines);
             break;
         case CAS:
+            handle_cas(cmd_lines);
             break;
             // Retrieval commands
         case GET:
+            handle_get(cmd_lines);
             break;
         case GETS:
+            handle_gets(cmd_lines);
             break;
         case DELETE:
+            handle_delete(cmd_lines);
             break;
         case INCR:
+            handle_incr(cmd_lines);
             break;
         case DECR:
+            handle_decr(cmd_lines);
             break;
             // Stats commands
         case STATS:
+            handle_stats(cmd_lines);
             break;
             // Misc commands
         case FLUSH_ALL:
+            handle_flush_all(cmd_lines);
             break;
         case VERSION:
+            handle_version(cmd_lines);
             break;
         case QUIT:
+            handle_quit(cmd_lines);
             break;
         case NONE:
             // do nothing
@@ -138,11 +166,154 @@ void handle_set(char* cmd_lines[MAX_CMD_LINES])
 {
     // parse the rest of the first line
     char* key = strtok(NULL," ");
-    char* flags  = strtok(NULL," ");
-    char* exptime  = strtok(NULL," ");
-    char* bytes  = strtok(NULL," ");
+    uint16_t flags  = atoi((char*)strtok(NULL," "));
+    int32_t expiration_time  = atoi((char*)strtok(NULL," "));
+    size_t size = atoi((char*)strtok(NULL," "));
+    char* value  = strtok(NULL," ");
+    char* noreply = strtok(NULL, " ");
 
-    printf("setting key=%s,flags=%s,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
+    //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
-    Memo::set(std::string(key));
+    Memo::set(std::string(key), flags, expiration_time, size, std::string(value), false);
+}
+
+void handle_add(char* cmd_lines[MAX_CMD_LINES])
+{
+    // parse the rest of the first line
+    char* key = strtok(NULL," ");
+    uint16_t flags  = atoi((char*)strtok(NULL," "));
+    int32_t expiration_time  = atoi((char*)strtok(NULL," "));
+    size_t size = atoi((char*)strtok(NULL," "));
+    char* value  = strtok(NULL," ");
+    char* noreply = strtok(NULL, " ");
+
+    //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
+
+    Memo::add(std::string(key), flags, expiration_time, size, std::string(value));
+}
+
+void handle_replace(char* cmd_lines[MAX_CMD_LINES])
+{
+    // parse the rest of the first line
+    char* key = strtok(NULL," ");
+    uint16_t flags  = atoi((char*)strtok(NULL," "));
+    int32_t expiration_time  = atoi((char*)strtok(NULL," "));
+    size_t size = atoi((char*)strtok(NULL," "));
+    char* value  = strtok(NULL," ");
+    char* noreply = strtok(NULL, " ");
+
+
+    //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
+
+    Memo::replace(std::string(key), flags, expiration_time, size, std::string(value), false);
+}
+
+void handle_append(char* cmd_lines[MAX_CMD_LINES])
+{
+    // parse the rest of the first line
+    char* key = strtok(NULL," ");
+    uint16_t flags  = atoi((char*)strtok(NULL," "));
+    int32_t expiration_time  = atoi((char*)strtok(NULL," "));
+    size_t size = atoi((char*)strtok(NULL," "));
+    char* value  = strtok(NULL," ");
+    char* noreply = strtok(NULL, " ");
+
+    //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
+
+    Memo::append(std::string(key), size, std::string(value));
+}
+
+void handle_prepend(char* cmd_lines[MAX_CMD_LINES])
+{
+    // parse the rest of the first line
+    char* key = strtok(NULL," ");
+    uint16_t flags  = atoi((char*)strtok(NULL," "));
+    int32_t expiration_time  = atoi((char*)strtok(NULL," "));
+    size_t size = atoi((char*)strtok(NULL," "));
+    char* value  = strtok(NULL," ");
+    char* noreply = strtok(NULL, " ");
+
+    //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
+
+    Memo::prepend(std::string(key), size, std::string(value));
+}
+
+void handle_cas(char* cmd_lines[MAX_CMD_LINES])
+{
+    // parse the rest of the first line
+    char* key = strtok(NULL," ");
+    uint16_t flags  = atoi((char*)strtok(NULL," "));
+    int32_t expiration_time  = atoi((char*)strtok(NULL," "));
+    size_t size = atoi((char*)strtok(NULL," "));
+    char* value  = strtok(NULL," ");
+    char* noreply = strtok(NULL, " ");
+
+    //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
+
+    Memo::set(std::string(key), flags, expiration_time, size, std::string(value), true);
+}
+
+void handle_get(char* cmd_lines[MAX_CMD_LINES])
+{
+    char* key = strtok(NULL," ");
+    while(key != NULL) {
+        key = strtok(NULL, " ");
+        Memo::get(std::string(key));
+    }
+}
+
+void handle_gets(char* cmd_lines[MAX_CMD_LINES])
+{
+    char* key = strtok(NULL," ");
+    while(key != NULL) {
+        key = strtok(NULL, " ");
+        Memo::get(std::string(key));
+    }
+}
+
+void handle_delete(char* cmd_lines[MAX_CMD_LINES])
+{
+    char* key = strtok(NULL," ");
+    char* noreply = strtok(NULL, " ");
+
+    Memo::mem_delete(std::string(key));
+}
+
+void handle_incr(char* cmd_lines[MAX_CMD_LINES])
+{
+    char* key = strtok(NULL," ");
+    char* value= strtok(NULL," ");
+    char* noreply = strtok(NULL, " ");
+
+    Memo::incr(std::string(key), std::string(value));
+}
+
+void handle_decr(char* cmd_lines[MAX_CMD_LINES])
+{
+    char* key = strtok(NULL," ");
+    char* value= strtok(NULL," ");
+    char* noreply = strtok(NULL, " ");
+
+    Memo::decr(std::string(key), std::string(value));
+}
+
+void handle_stats(char* cmd_lines[MAX_CMD_LINES])
+{
+    Memo::stats();
+}
+
+void handle_flush_all(char * cmd_lines[MAX_CMD_LINES])
+{
+    int32_t exptime = atoi((char*) strtok(NULL, " "));
+    Memo::flush_all(exptime);
+}
+
+void handle_version(char * cmd_lines[MAX_CMD_LINES])
+{
+    Memo::version();
+}
+
+void handle_quit(char * cmd_lines[MAX_CMD_LINES])
+{
+    // send client a command to quit
 }
