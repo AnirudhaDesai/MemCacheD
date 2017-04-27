@@ -48,6 +48,23 @@ namespace  Memo
         getHeap().malloc(0);
     }
 
+    void add(std::string key, std::string value)
+    {
+        Header* h;
+        printf("called %s\n",__FUNCTION__);
+
+        if(h!=nullptr)
+        {
+            h=h+1;
+
+            
+
+        }
+        printf("adding %s\n",key.c_str());
+
+        getHeap().malloc(0);
+    }
+
     void replace(std::string key)
     {
         // do stuff

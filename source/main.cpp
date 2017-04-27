@@ -11,6 +11,8 @@
 #include <getopt.h>
 #include <functional>
 
+ #include "server.h"
+
 #include "command_parser.h"
 #include "slabsalloc.h"
 
@@ -80,14 +82,16 @@ int main(int argc, char *argv[])
     // listen on port 
     //
     // read command
-    cmd_len = 50;
-    cmd_str = (char*)malloc(cmd_len);
-    sprintf(cmd_str,"set key 0 900 5\r\nvalue");
+    initializeServer();
 
-    // parse command
-    parse_command(cmd_str,cmd_len);
+    // cmd_len = 50;
+    // cmd_str = (char*)malloc(cmd_len);
+    // sprintf(cmd_str,"set key 0 900 5\r\nvalue");
 
-    free(cmd_str);
+    // // parse command
+    // parse_command(cmd_str,cmd_len);
+
+    // free(cmd_str);
     //}
     //
 

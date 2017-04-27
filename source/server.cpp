@@ -17,7 +17,6 @@ typedef enum
     // deletion 
     // incr/decr
     DELETED,
-    NOT_FOUND,
     // touch
     TOUCHED
 
@@ -29,28 +28,28 @@ struct RESPONSE_STRING_MAP
     char* res_str;
 };
 
-RESPONSE CMD_MAP[NUM_RESPONSES]
+RESPONSE_STRING_MAP RESPONSE_MAP[NUM_RESPONSES]
 {
     // error strings
-    {ERROR,"error"},
-    {CLIENT_ERROR,"client_error"},
-    {SERVER_ERROR,"server_error"},
+    {ERROR,(char*)"error"},
+    {CLIENT_ERROR,(char*)"client_error"},
+    {SERVER_ERROR,(char*)"server_error"},
     // storage command responses 
-    {STORED,"stored"},
-    {EXISTS,"exists"},
-    {NOT_FOUND,"not_found"},
+    {STORED,(char*)"stored"},
+    {EXISTS,(char*)"exists"},
+    {NOT_FOUND,(char*)"not_found"},
     // retrieval command responses
-    {END,"end"},
+    {END,(char*)"end"},
     // deletion 
     // incr/decr
-    {DELETED,"deleted"},
-    {NOT_FOUND,"not_found"},
+    {DELETED,(char*)"deleted"},
+    {NOT_FOUND,(char*)"not_found"},
     // touch
-    {TOUCHED,"touched"}
+    {TOUCHED,(char*)"touched"}
 };
 
 int initializeServer(){
-    int  server_socket, client_socket;
+    long  server_socket, client_socket;
     int Error;
     pthread_t threadID;
 
@@ -79,11 +78,11 @@ int initializeServer(){
             return 1;
         }
 
-        printf("Accepted From Client: %d\n", client_socket);
+        printf("Accepted From Client: %ld\n", client_socket);
         // run pthread on client_socket
 
-        error = pthread_create(&threadID, NULL, &eventAction, (void *)client_socket );
-        if (error != 0)
+        Error = pthread_create(&threadID, NULL, &eventAction, (void *)client_socket );
+        if (Error != 0)
             printf("Error creating thread\n");
     }
     pthread_exit(NULL);
@@ -93,11 +92,10 @@ int initializeServer(){
 
 void *eventAction(void *args){
 
-
     long client_socket = (long)args;
     char  buffer[256] = {0};
     int bytesReceived = 0;
-    printf(" On thread : %l \n", client_socket);
+    printf(" On thread : %ld \n", client_socket);
     while(true)
     {
         //read from socket
@@ -106,8 +104,19 @@ void *eventAction(void *args){
         recv(client_socket, buffer, sizeof(buffer), 0);
 
         printf("%s",buffer);
+        char* cmd_str;
+        size_t cmd_len;
+        cmd_len = 50;
+        cmd_str = (char*)malloc(cmd_len);
+        sprintf(cmd_str,"set key 0 900 5\r\nvalue");
 
-        //parse command
+        // parse command
+        parse_command(cmd_str,cmd_len);
+
+        free(cmd_str);
+        send(client_socket, "Test Send", sizeof("TEst Send"), 0);
+
+
         //action on command
     }	
 }
