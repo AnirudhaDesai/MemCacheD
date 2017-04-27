@@ -26,7 +26,6 @@ namespace  Memo
 {
     std::unordered_map<std::string, Header*> Table;
 
-
     Header* get(std::string key)
     {
         std::unordered_map<std::string,Header*>::const_iterator got = Table.find (key);
@@ -42,17 +41,15 @@ namespace  Memo
         }
     }
 
-    Header* add(std::string key)
+    void set(std::string key)
     {
         printf("called %s\n",__FUNCTION__);
 
         printf("adding %s\n",key.c_str());
         getHeap().malloc(0);
-
     }
 
-
-    Header* replace(std::string key)
+    void replace(std::string key)
     {
         // do stuff
     }

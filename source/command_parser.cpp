@@ -144,5 +144,5 @@ void handle_set(char* cmd_lines[MAX_CMD_LINES])
 
     printf("setting key=%s,flags=%s,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
-    Memo::add(std::string(key));
+    Memo::set(std::string(key));
 }
