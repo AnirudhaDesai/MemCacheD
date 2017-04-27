@@ -49,21 +49,27 @@ namespace  Memo
         getHeap().malloc(0);
     }
 
-    void add(std::string key, std::string value)
+    void add(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value ) 
     {
-        Header* h;
+        Header* h,temp;
         printf("called %s\n",__FUNCTION__);
 
-        if(h!=nullptr)
+        h=get(key);
+
+        if(h==nullptr)//if value not present in hash table already, allocate memory and update header. 
         {
-            h=h+1;
-
-            
-
+            //add header information 
+            h = getHeap().malloc(0);
+            h->flags = flags;
+            h->expiration_time = expiration_time; 
+            h->size = size;
+            temp = h;
+            h = h+1;
+            strncpy(h,value.c_str(),size);
         }
         printf("adding %s\n",key.c_str());
 
-        getHeap().malloc(0);
+       //need to add key, address to hash table. use temp.  
     }
 
     void replace(std::string key)
