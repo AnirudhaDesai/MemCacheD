@@ -44,7 +44,6 @@ namespace  Memo
     void set(std::string key)
     {
         printf("called %s\n",__FUNCTION__);
-
         printf("adding %s\n",key.c_str());
         getHeap().malloc(0);
     }
