@@ -82,6 +82,7 @@ namespace  Memo
             std::strncpy(temp,value.c_str(),size);
         }
         printf("adding %s\n",key.c_str());
+        Table.insert({key,h})
 
        //need to add key, address to hash table. use temp.  
     }
