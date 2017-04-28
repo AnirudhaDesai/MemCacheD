@@ -92,8 +92,10 @@ int initializeServer(){
 
 void *eventAction(void *args){
 
+#define buf_size 256
+
     long client_socket = (long)args;
-    char  buffer[256] = {0};
+    char  buffer[buf_size] = {0};
     int bytesReceived = 0;
     printf(" On thread : %ld \n", client_socket);
     while(true)
@@ -101,21 +103,20 @@ void *eventAction(void *args){
         //read from socket
         //printf("Entered eventAction : \n");
 
-        recv(client_socket, buffer, sizeof(buffer), 0);
+        recv(client_socket, buffer, buf_size, 0);
 
         printf("%s",buffer);
-        char* cmd_str;
-        size_t cmd_len;
-        cmd_len = 50;
-        cmd_str = (char*)malloc(cmd_len);
-        sprintf(cmd_str,"set key 0 900 5\r\nvalue");
+/*        char* cmd_str;*/
+        //size_t cmd_len;
+        //cmd_len = 50;
+        //cmd_str = (char*)malloc(cmd_len);
+        //sprintf(cmd_str,"set key 0 900 5\r\nvalue");
 
         // parse command
-        parse_command(cmd_str,cmd_len);
+        parse_command(buffer,buf_size);
 
-        free(cmd_str);
-        send(client_socket, "Test Send", sizeof("TEst Send"), 0);
-
+        //free(cmd_str);
+        send(client_socket, "END", sizeof("END"), 0);
 
         //action on command
     }	

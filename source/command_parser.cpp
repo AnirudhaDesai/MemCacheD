@@ -170,9 +170,10 @@ void handle_set(char* cmd_lines[MAX_CMD_LINES])
     int32_t expiration_time  = atoi((char*)strtok(NULL," "));
     size_t size = atoi((char*)strtok(NULL," "));
     char* value  = strtok(NULL," ");
-    char* noreply = strtok(NULL, " ");
+    //char* noreply = strtok(NULL, " ");
 
-    //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
+    //printf("setting key=%s,flags=%d,exptime=%s,size=%s\n",key,flags,expiration_time,size);
+    printf("setting key=%s\n",key);
 
     Memo::set(std::string(key), flags, expiration_time, size, std::string(value), false);
 }

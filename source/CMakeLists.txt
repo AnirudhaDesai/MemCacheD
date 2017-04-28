@@ -10,3 +10,6 @@ set(SOURCES main.cpp command_parser.cpp server.cpp)
 add_executable(memo ${SOURCES})
 target_link_libraries(memo pthread)
 
+set (SOURCES Client.cpp)
+add_executable(client ${SOURCES})
+

@@ -32,7 +32,7 @@ int main() {
 	char server_response[256];
 	
 	printf("Starting Send \n");
-	send(network_socket	, "SSSSS", sizeof("SSSSS"), 0);
+	//send(network_socket	, "SSSSS", sizeof("SSSSS"), 0);
 	printf("End of Send.. \n"); 
 	
 	//recv(network_socket, &server_response, sizeof(server_response), 0);
