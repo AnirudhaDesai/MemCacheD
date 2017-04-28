@@ -78,7 +78,7 @@ int initializeServer(){
             return 1;
         }
 
-        printf("Accepted From Client: %ld\n", client_socket);
+        printf("Client Connected: %ld\n", client_socket);
         // run pthread on client_socket
 
         Error = pthread_create(&threadID, NULL, &eventAction, (void *)client_socket );
@@ -101,21 +101,14 @@ void *eventAction(void *args){
     while(true)
     {
         //read from socket
-        //printf("Entered eventAction : \n");
-
+        
         recv(client_socket, buffer, buf_size, 0);
 
-        printf("%s",buffer);
-/*        char* cmd_str;*/
-        //size_t cmd_len;
-        //cmd_len = 50;
-        //cmd_str = (char*)malloc(cmd_len);
-        //sprintf(cmd_str,"set key 0 900 5\r\nvalue");
+        printf("Message from Client %ld is : %s",client_socket, buffer);
 
         // parse command
         parse_command(buffer,buf_size);
-
-        //free(cmd_str);
+        
         send(client_socket, "END", sizeof("END"), 0);
 
         //action on command

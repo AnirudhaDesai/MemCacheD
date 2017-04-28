@@ -5,6 +5,9 @@ void * SlabsAlloc<SourceHeap>::malloc(size_t sz) {
   
   Header *h;
 
+  if(sz<=0)
+    return nullptr;
+
   printf("called %s\n",__FUNCTION__);
 
   /*size will contain the closest base 16 size that needs to be alocated.*/
