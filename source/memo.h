@@ -60,7 +60,7 @@ namespace  Memo
     {
         printf("called %s\n",__FUNCTION__);
         printf("adding %s\n",key.c_str());
-        getHeap().malloc(0);
+        getHeap().malloc(size);
     }
 
     void add(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value)
