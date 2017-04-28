@@ -19,7 +19,7 @@ class Header {
   size_t data_size;  
   uint16_t flags;
   int32_t expiration_time;
-    int64_t cas;
+  int64_t cas;
 
   Header * prev;
   Header * next;
