@@ -88,13 +88,13 @@ void parse_command(char* cmd_str, size_t cmd_len, char*& res_str, size_t* res_le
 
     // start by storing all command lines in an array
     char* cmd_lines[MAX_CMD_LINES];
-    cmd_lines[0] = strtok(cmd_str, "\r\n");
+    cmd_lines[0] = strtok(cmd_str, "\\r\\n");
 
     unsigned short cmd_num = 0;
 
     while (cmd_num < MAX_CMD_LINES)
     {
-        cmd_lines[++cmd_num] = strtok(NULL, "\r\n");
+        cmd_lines[++cmd_num] = strtok(NULL, "\\r\\n");
     }
 
     // figure out the main command
@@ -193,8 +193,9 @@ void handle_add(char* cmd_lines[MAX_CMD_LINES],char*& response_str, size_t* resp
     uint16_t flags  = atoi((char*)strtok(NULL," "));
     int32_t expiration_time  = atoi((char*)strtok(NULL," "));
     size_t size = atoi((char*)strtok(NULL," "));
+    char* noreply = (char*)strtok(NULL," ");
     char* value  = cmd_lines[1];
-    char* noreply = cmd_lines[2];
+
 
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
@@ -213,8 +214,8 @@ void handle_replace(char* cmd_lines[MAX_CMD_LINES])
     uint16_t flags  = atoi((char*)strtok(NULL," "));
     int32_t expiration_time  = atoi((char*)strtok(NULL," "));
     size_t size = atoi((char*)strtok(NULL," "));
-    char* value  = strtok(NULL," ");
     char* noreply = strtok(NULL, " ");
+    char* value  = cmd_lines[1];
 
 
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
@@ -229,8 +230,8 @@ void handle_append(char* cmd_lines[MAX_CMD_LINES])
     uint16_t flags  = atoi((char*)strtok(NULL," "));
     int32_t expiration_time  = atoi((char*)strtok(NULL," "));
     size_t size = atoi((char*)strtok(NULL," "));
-    char* value  = strtok(NULL," ");
     char* noreply = strtok(NULL, " ");
+    char* value  = cmd_lines[1];
 
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
@@ -244,8 +245,8 @@ void handle_prepend(char* cmd_lines[MAX_CMD_LINES])
     uint16_t flags  = atoi((char*)strtok(NULL," "));
     int32_t expiration_time  = atoi((char*)strtok(NULL," "));
     size_t size = atoi((char*)strtok(NULL," "));
-    char* value  = strtok(NULL," ");
     char* noreply = strtok(NULL, " ");
+    char* value  = cmd_lines[1];
 
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
@@ -259,8 +260,8 @@ void handle_cas(char* cmd_lines[MAX_CMD_LINES])
     uint16_t flags  = atoi((char*)strtok(NULL," "));
     int32_t expiration_time  = atoi((char*)strtok(NULL," "));
     size_t size = atoi((char*)strtok(NULL," "));
-    char* value  = strtok(NULL," ");
     char* noreply = strtok(NULL, " ");
+    char* value  = cmd_lines[1];
 
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
@@ -271,8 +272,11 @@ void handle_get(char* cmd_lines[MAX_CMD_LINES])
 {
     char* key = strtok(NULL," ");
     while(key != NULL) {
+        Header* h = Memo::get(std::string(key));
+        if (h != NULL) {
+            printf("Get Result: %s -> %s", h->key, (char*) (h+1));
+        }
         key = strtok(NULL, " ");
-        Memo::get(std::string(key));
     }
 }
 
@@ -280,8 +284,8 @@ void handle_gets(char* cmd_lines[MAX_CMD_LINES])
 {
     char* key = strtok(NULL," ");
     while(key != NULL) {
-        key = strtok(NULL, " ");
         Memo::get(std::string(key));
+        key = strtok(NULL, " ");
     }
 }
 
@@ -296,8 +300,8 @@ void handle_delete(char* cmd_lines[MAX_CMD_LINES])
 void handle_incr(char* cmd_lines[MAX_CMD_LINES])
 {
     char* key = strtok(NULL," ");
-    char* value= strtok(NULL," ");
     char* noreply = strtok(NULL, " ");
+    char* value  = cmd_lines[1];
 
     Memo::incr(std::string(key), std::string(value));
 }
@@ -305,8 +309,8 @@ void handle_incr(char* cmd_lines[MAX_CMD_LINES])
 void handle_decr(char* cmd_lines[MAX_CMD_LINES])
 {
     char* key = strtok(NULL," ");
-    char* value= strtok(NULL," ");
     char* noreply = strtok(NULL, " ");
+    char* value  = cmd_lines[1];
 
     Memo::decr(std::string(key), std::string(value));
 }

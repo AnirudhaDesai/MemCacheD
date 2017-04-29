@@ -2,15 +2,27 @@
 
 template <class SourceHeap>
 void * SlabsAlloc<SourceHeap>::malloc(size_t sz) {
+  
+  Header *h;
 
-    Header *h;
+  if(sz<=0)
+    return nullptr;
 
-    if(sz<=0)
-        return nullptr;
+  printf("called %s\n",__FUNCTION__);
+  
+  
+  /*size will contain the closest base 16 size that needs to be alocated.*/
+  int i = getSizeClass(sz);
+  size_t size = getSizeFromClass(i);  
+  
+  heapLock.lock();
 
-    printf("called %s\n",__FUNCTION__);
-
-    if(sz <= 0)
+  /* Check in freedObjects */
+  if(freedObjects[i]!=nullptr)
+  {
+    h = freedObjects[i];
+    freedObjects[i]=freedObjects[i]->prev;
+    if(freedObjects[i]!=nullptr)
     {
         return nullptr;
     }
