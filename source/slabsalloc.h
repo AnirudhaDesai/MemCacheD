@@ -19,7 +19,8 @@ class Header {
   size_t data_size;  
   uint16_t flags;
   int32_t expiration_time;
-    int64_t cas;
+  int64_t cas;
+  bool valid;
 
   Header * prev;
   Header * next;
@@ -34,9 +35,9 @@ public:
       maxRequested (0),
       maxAllocated (0)
   {
-    //for (auto& f : FreedObjects) {
-     // f = nullptr;
-   // }
+   for (auto& f : freedObjects) {
+      f = nullptr;
+    }
     for (auto& f : head_AllocatedObjects) {
       f = nullptr;
     }
@@ -88,7 +89,7 @@ private:
   
   Header * head_AllocatedObjects[23];
   Header * tail_AllocatedObjects[23];
-  //Header * FreedObjects[23];
+  Header * freedObjects[23];
 };
 
 #include "slabsalloc.cpp"

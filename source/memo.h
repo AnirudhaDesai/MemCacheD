@@ -80,16 +80,45 @@ namespace  Memo
             h->data_size = size;
             temp = (char*) (h+1);
             std::strncpy(temp,value.c_str(),size);
-        }
-        printf("adding %s\n",key.c_str());
-        Table.insert({key,h});
 
+            printf("adding %s\n",key.c_str());
+        
+            Table.insert({key,h});
+        }
        //need to add key, address to hash table. use temp.  
     }
 
     void replace(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas)
     {
-        // do stuff
+        Header* h;
+        char* temp;
+        printf("called %s\n",__FUNCTION__);
+
+        h=get(key);
+        //printf("%p",h);
+
+
+        if(h!=nullptr)
+        {
+            if(size==h->data_size)
+            {   
+                h->flags = flags;
+                h->expiration_time = expiration_time; 
+                h->data_size = size;
+                
+                temp = (char*) (h+1);
+                printf("%s",temp);
+                std::strncpy(temp,value.c_str(),size);
+                printf(": replaced with : %s",temp);
+            }
+            else
+            {   printf("different size");
+                getHeap().free((void*)h);
+               // Table.delete({key,h});
+                add(std::string(key),flags,expiration_time,size,std::string(value));
+            }
+
+        }
     }
 
     void append(std::string key, size_t size, std::string value) {
