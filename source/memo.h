@@ -97,16 +97,27 @@ namespace  Memo
         printf("called %s\n",__FUNCTION__);
 
         h=get(key);
+        //printf("%p",h);
 
 
         if(h!=nullptr)
         {
             if(size==h->data_size)
-            {
+            {   
+                h->flags = flags;
+                h->expiration_time = expiration_time; 
+                h->data_size = size;
+                
                 temp = (char*) (h+1);
-                print("%s",temp);
+                printf("%s",temp);
                 std::strncpy(temp,value.c_str(),size);
                 printf(": replaced with : %s",temp);
+            }
+            else
+            {   printf("different size");
+                getHeap().free((void*)h);
+               // Table.delete({key,h});
+                add(std::string(key),flags,expiration_time,size,std::string(value));
             }
 
         }

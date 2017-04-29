@@ -15,8 +15,25 @@ void * SlabsAlloc<SourceHeap>::malloc(size_t sz) {
   size_t size = getSizeFromClass(i);  
   
   heapLock.lock();
-  
-  if(head_AllocatedObjects[i] == nullptr )
+
+  /* Check in freedObjects */
+  if(freedObjects[i]!=nullptr)
+  {
+    h = freedObjects[i];
+    freedObjects[i]=freedObjects[i]->prev;
+    if(freedObjects[i]!=nullptr)
+    {
+      freedObjects[i]->next = nullptr;
+    }
+
+    h->prev = tail_AllocatedObjects[i];
+    h->next = nullptr;
+    tail_AllocatedObjects[i]=h;
+
+    heapLock.unlock();
+    return h;
+  }
+  else if(head_AllocatedObjects[i] == nullptr )
   {
     void* ptr = SourceHeap::malloc(size+sizeof(Header));
 
@@ -60,17 +77,7 @@ void * SlabsAlloc<SourceHeap>::malloc(size_t sz) {
     return tail_AllocatedObjects[i];
   }
 
-
-  /* Check in freedObjects */
-  /*if(freedObjects[i]!=nullptr)
-  {
-    h = freedObjects[i];
-    freedObjects[i]=freedObjects[i]->prevObject;
-    if(freedObjects[i]!=nullptr)
-    {
-      freedObjects[i]->nextObject = nullptr;
-    }
-  }
+/*
   else
   { 
   /*Try allocating from the heap.*/ 
@@ -114,7 +121,7 @@ void * SlabsAlloc<SourceHeap>::malloc(size_t sz) {
 
 }
 
-/*  
+  
 template <class SourceHeap>
 void SlabsAlloc<SourceHeap>::free(void * ptr) {
 
@@ -127,31 +134,31 @@ void SlabsAlloc<SourceHeap>::free(void * ptr) {
   }
   
   Header *h;
-  h = (Header *)ptr-1;
+  h = (Header *)ptr;
 
-  int i = getSizeClass(h->allocatedSize);
+  int i = getSizeClass(h->data_size);
 
-  if(h->prevObject!=nullptr)
-  	(h->prevObject)->nextObject = h->nextObject;
+  if(h->prev!=nullptr)
+  	(h->prev)->next = h->next;
 
-  if(h->nextObject!=nullptr)
-  	(h->nextObject)->prevObject = h->prevObject;
+  if(h->next!=nullptr)
+  	(h->next)->prev = h->prev;
  
   if(freedObjects[i]!=nullptr)
-  	freedObjects[i]->nextObject = h;
+  	freedObjects[i]->next = h;
 
-  if(h==allocatedObjects)
-    allocatedObjects=h->prevObject;
+  if(h==tail_AllocatedObjects[i])
+    tail_AllocatedObjects[i]=h->prev;
   
-  h->prevObject = freedObjects[i];
+  h->prev = freedObjects[i];
   freedObjects[i] = h;
-  h->nextObject = nullptr; 
+  h->next= nullptr; 
 
-  allocated -= (h->allocatedSize);
+  //allocated -= (h->allocatedSize);
 
   heapLock.unlock();
   
-}*/
+}
 
 /*
 template <class SourceHeap>
