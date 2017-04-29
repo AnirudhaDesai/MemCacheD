@@ -1,53 +1,5 @@
 #include "server.h"
 
-#define NUM_RESPONSES 10
-
-typedef enum 
-{
-    // error strings
-    ERROR=0,
-    CLIENT_ERROR,
-    SERVER_ERROR,
-    // storage command responses 
-    STORED,
-    EXISTS,
-    NOT_FOUND,
-    // retrieval command responses
-    END,
-    // deletion 
-    // incr/decr
-    DELETED,
-    // touch
-    TOUCHED
-
-} RESPONSE;
-
-struct RESPONSE_STRING_MAP
-{
-    RESPONSE rsp;
-    char* res_str;
-};
-
-RESPONSE_STRING_MAP RESPONSE_MAP[NUM_RESPONSES]
-{
-    // error strings
-    {ERROR,(char*)"error"},
-    {CLIENT_ERROR,(char*)"client_error"},
-    {SERVER_ERROR,(char*)"server_error"},
-    // storage command responses 
-    {STORED,(char*)"stored"},
-    {EXISTS,(char*)"exists"},
-    {NOT_FOUND,(char*)"not_found"},
-    // retrieval command responses
-    {END,(char*)"end"},
-    // deletion 
-    // incr/decr
-    {DELETED,(char*)"deleted"},
-    {NOT_FOUND,(char*)"not_found"},
-    // touch
-    {TOUCHED,(char*)"touched"}
-};
-
 int initializeServer(){
     long  server_socket, client_socket;
     int Error, opt=0;
@@ -110,6 +62,9 @@ void *beginConnect(void *args){
     long client_socket = (long)args;
     char  buffer[buf_size] = {0};
     int bytesReceived = 0;
+    char* response_str;
+    size_t response_length;
+
     printf(" On thread : %ld \n", client_socket);
     while(true)
     {
@@ -120,9 +75,13 @@ void *beginConnect(void *args){
         printf("Message from Client %ld is : %s",client_socket, buffer);
 
         // parse command
-        parse_command(buffer,buf_size);
+        parse_command(buffer,buf_size, response_str, &response_length);
+
+        printf("got response %s\n",response_str);
         
-        send(client_socket, "END", sizeof("END"), 0);
+        send(client_socket, response_str, response_length, 0);
+
+        free(response_str);
 
         //action on command
     }	

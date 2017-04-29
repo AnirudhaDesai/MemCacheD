@@ -1,13 +1,41 @@
 #include "command_parser.h"
-#include "memo.h"
 
 #include <string>
 
 #define MAX_CMD_LINES 10
 #define NUM_COMMANDS 15
 
+#define NUM_RESPONSES 10
+struct RESPONSE_STRING_MAP
+{
+    RESPONSE rsp;
+    char* res_str;
+};
+
+RESPONSE_STRING_MAP RESPONSE_MAP[NUM_RESPONSES]
+{
+    // error strings
+    {ERROR,(char*)"error"},
+    {CLIENT_ERROR,(char*)"client_error"},
+    {SERVER_ERROR,(char*)"server_error"},
+    // storage command responses 
+    {STORED,(char*)"stored"},
+    {EXISTS,(char*)"exists"},
+    {NOT_FOUND,(char*)"not_found"},
+    // retrieval command responses
+    {END,(char*)"end"},
+    // deletion 
+    // incr/decr
+    {DELETED,(char*)"deleted"},
+    {NOT_FOUND,(char*)"not_found"},
+    // touch
+    {TOUCHED,(char*)"touched"}
+};
+
+
+
 void handle_set(char* cmd_lines[MAX_CMD_LINES]);
-void handle_add(char* cmd_lines[MAX_CMD_LINES]);
+void handle_add(char* cmd_lines[MAX_CMD_LINES],char*& response_str, size_t* response_len);
 void handle_replace(char* cmd_lines[MAX_CMD_LINES]);
 void handle_append(char* cmd_lines[MAX_CMD_LINES]);
 void handle_prepend(char* cmd_lines[MAX_CMD_LINES]);
@@ -21,28 +49,6 @@ void handle_stats(char* cmd_lines[MAX_CMD_LINES]);
 void handle_flush_all(char* cmd_lines[MAX_CMD_LINES]);
 void handle_version(char* cmd_lines[MAX_CMD_LINES]);
 void handle_quit(char* cmd_lines[MAX_CMD_LINES]);
-
-typedef enum {
-    SET =0,
-    ADD ,
-    REPLACE ,
-    APPEND ,
-    PREPEND ,
-    CAS ,
-    // Retrieval commands
-    GET ,
-    GETS ,
-    DELETE ,
-    INCR ,
-    DECR ,
-    // Stats commands
-    STATS ,
-    // Misc commands
-    FLUSH_ALL ,
-    VERSION ,
-    QUIT,
-    NONE
-} COMMAND;
 
 struct COMMAND_STRING_MAP
 {
@@ -69,7 +75,7 @@ COMMAND_STRING_MAP CMD_MAP[NUM_COMMANDS]
     { QUIT, (char*)"quit" },
 };
 
-void parse_command(char* cmd_str, size_t cmd_len)
+void parse_command(char* cmd_str, size_t cmd_len, char*& res_str, size_t* res_len)
 {
 
     if(cmd_len <=0
@@ -77,6 +83,8 @@ void parse_command(char* cmd_str, size_t cmd_len)
     {
         return;
     }
+
+    std::string response;
 
     // start by storing all command lines in an array
     char* cmd_lines[MAX_CMD_LINES];
@@ -112,7 +120,7 @@ void parse_command(char* cmd_str, size_t cmd_len)
             handle_set(cmd_lines);
             break;
         case ADD:
-            handle_add(cmd_lines);
+            handle_add(cmd_lines, res_str, res_len);
             break;
         case REPLACE:
             handle_replace(cmd_lines);
@@ -178,7 +186,7 @@ void handle_set(char* cmd_lines[MAX_CMD_LINES])
     Memo::set(std::string(key), flags, expiration_time, size, std::string(value), false);
 }
 
-void handle_add(char* cmd_lines[MAX_CMD_LINES])
+void handle_add(char* cmd_lines[MAX_CMD_LINES],char*& response_str, size_t* response_len)
 {
     // parse the rest of the first line
     char* key = strtok(NULL," ");
@@ -190,7 +198,12 @@ void handle_add(char* cmd_lines[MAX_CMD_LINES])
 
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
-    Memo::add(std::string(key), flags, expiration_time, size, std::string(value));
+    RESPONSE res = Memo::add(std::string(key), flags, expiration_time, size, std::string(value));
+
+    response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str));
+
+    strcpy(response_str,RESPONSE_MAP[res].res_str);
+    *response_len = strlen(RESPONSE_MAP[res].res_str);
 }
 
 void handle_replace(char* cmd_lines[MAX_CMD_LINES])

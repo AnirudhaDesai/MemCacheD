@@ -11,9 +11,8 @@
 #include <getopt.h>
 #include <functional>
 
- #include "server.h"
+#include "server.h"
 
-#include "command_parser.h"
 #include "slabsalloc.h"
 
 const auto DefaultHeapSize = 2 * 1024UL * 1024 * 1024;
