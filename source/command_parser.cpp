@@ -185,8 +185,8 @@ void handle_add(char* cmd_lines[MAX_CMD_LINES])
     uint16_t flags  = atoi((char*)strtok(NULL," "));
     int32_t expiration_time  = atoi((char*)strtok(NULL," "));
     size_t size = atoi((char*)strtok(NULL," "));
-    char* value  = strtok(NULL," ");
-    char* noreply = strtok(NULL, " ");
+    char* value  = cmd_lines[1];
+    char* noreply = cmd_lines[2];
 
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 

@@ -74,7 +74,7 @@ namespace  Memo
         if(h==nullptr)//if value not present in hash table already, allocate memory and update header. 
         {
             //add header information 
-            h = (Header*) getHeap().malloc(0);
+            h = (Header*) getHeap().malloc(size);
             h->flags = flags;
             h->expiration_time = expiration_time; 
             h->data_size = size;
@@ -82,7 +82,7 @@ namespace  Memo
             std::strncpy(temp,value.c_str(),size);
         }
         printf("adding %s\n",key.c_str());
-        Table.insert({key,h})
+        Table.insert({key,h});
 
        //need to add key, address to hash table. use temp.  
     }
