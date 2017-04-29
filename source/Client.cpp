@@ -16,6 +16,8 @@ int main() {
 	// create a socket
 	int network_socket;
 	char server_message[] = "SS";
+	char test[256];
+	
 	network_socket = socket(AF_INET, SOCK_STREAM, 0);
 
 	// specify an address for the socket
@@ -37,14 +39,15 @@ int main() {
 	
 	//recv(network_socket, &server_response, sizeof(server_response), 0);
 	
-
 	// print out the response
-	printf("the server sent the data:  %s\n", server_response);
+	printf("The server sent the data:  %s\n", server_response);
 
 	while(true){
 		std::cout<<"Enter next command : \n";
 		std::fgets(server_response, 256, stdin);
 		send(network_socket	, server_response, sizeof(server_response), 0);
+		recv(network_socket, test, sizeof(test), 0);
+		std::cout<<test;
 	}
 
 	// close the sockett

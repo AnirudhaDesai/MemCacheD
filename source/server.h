@@ -10,7 +10,7 @@
 
 #include <netinet/in.h>
 #include <pthread.h>
-#include <command_parser.h>
+#include "command_parser.h"
 
 int initializeServer();
 void *eventAction(void *args);
