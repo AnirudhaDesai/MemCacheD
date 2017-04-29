@@ -13,4 +13,4 @@
 #include "command_parser.h"
 
 int initializeServer();
-void *eventAction(void *args);
+void *beginConnect(void *args);

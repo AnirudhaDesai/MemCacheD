@@ -50,25 +50,38 @@ RESPONSE_STRING_MAP RESPONSE_MAP[NUM_RESPONSES]
 
 int initializeServer(){
     long  server_socket, client_socket;
-    int Error;
+    int Error, opt=0;
+
     pthread_t threadID;
 
-    server_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if(server_socket == -1){
-        return 1;
+    if((server_socket = socket(AF_INET, SOCK_STREAM, 0))==0)
+    {
+        perror("Server Socket Creation Failed \n");
+        exit(EXIT_FAILURE);
+    }
+
+    if( setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, 
+          sizeof(opt)) < 0 )  
+    {  
+        perror("setsockopt");  
+        exit(EXIT_FAILURE);  
     }
 
     //define the server address
     struct sockaddr_in server_address;
     server_address.sin_family = AF_INET;
-    server_address.sin_port = htons(9002);
+    server_address.sin_port = htons(9005);
     server_address.sin_addr.s_addr = INADDR_ANY;
 
     //bind the socket to our specified IP and port
-    bind(server_socket, (struct sockaddr*) 
-            &server_address, sizeof(server_address));
+    if(bind(server_socket, (struct sockaddr*) 
+        &server_address, sizeof(server_address))<0)
+    {
+        perror("Bind Failed\n");
+        exit (EXIT_FAILURE);
+    }
 
-    printf("Starting Listen..\n");
+    printf("Waiting for Connections.. \n");
 
     listen(server_socket, 5);
 
@@ -81,7 +94,7 @@ int initializeServer(){
         printf("Client Connected: %ld\n", client_socket);
         // run pthread on client_socket
 
-        Error = pthread_create(&threadID, NULL, &eventAction, (void *)client_socket );
+        Error = pthread_create(&threadID, NULL, &beginConnect, (void *)client_socket );
         if (Error != 0)
             printf("Error creating thread\n");
     }
@@ -90,7 +103,7 @@ int initializeServer(){
 
 }
 
-void *eventAction(void *args){
+void *beginConnect(void *args){
 
 #define buf_size 256
 
