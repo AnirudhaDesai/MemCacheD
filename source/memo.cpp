@@ -1,5 +1,6 @@
 #include "memo.h"
 #include <cstring>
+#include "time.h"
 
 
 namespace  Memo
@@ -7,41 +8,53 @@ namespace  Memo
 
     std::unordered_map<std::string, Header*> Table;
 
+    void update_Expiration_Timestamp(Header* h, int32_t expiration_time)
+    {
+        if (expiration_time >  SecondsIn30Days) {
+            h->expiration_timestamp = expiration_time;
+        }
+        else {
+            h->expiration_timestamp = time(NULL) + expiration_time;
+        }
+    }
+
     Header* get(std::string key)
     {
         std::unordered_map<std::string,Header*>::const_iterator got = Table.find (key);
-        if ( got == Table.end() )
+        if ( got != Table.end() )
         {
-            std::cout << "not found" << std::endl;
-            return nullptr;
+            if (got->second->expiration_timestamp > time(NULL)) {
+                return got->second;
+            }
         }
-        else
-        {
-            //std::cout << got->first << " is " << got->second->flags << std::endl;
-            return got->second;
-        }
+        return nullptr;
     }
 
     Header* gets(std::string key)
     {
         std::unordered_map<std::string,Header*>::const_iterator got = Table.find (key);
-        if ( got == Table.end() )
+        if ( got != Table.end() )
         {
-            std::cout << "not found" << std::endl;
-            return nullptr;
+            if (got->second->expiration_timestamp > time(NULL)) {
+                return got->second;
+            }
         }
-        else
-        {
-            //std::cout << got->first << " is " << got->second->flags << std::endl;
-            return got->second;
-        }
+        return nullptr;
     }
 
-    void set(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas)
+    void set(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas=false)
     {
         printf("called %s\n",__FUNCTION__);
-        printf("adding %s\n",key.c_str());
-        getHeap().malloc(size);
+        Header* h;
+        printf("called %s\n",__FUNCTION__);
+
+        h=get(key);
+        if (h == nullptr) {
+            add(key, flags, expiration_time, size, value);
+        }
+        else {
+            replace(key, flags, expiration_time, size, value, cas);
+        }
     }
 
     RESPONSE add(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value)
@@ -57,7 +70,7 @@ namespace  Memo
             //add header information 
             h = (Header*) getHeap().malloc(size);
             h->flags = flags;
-            h->expiration_time = expiration_time; 
+            update_Expiration_Timestamp(h, expiration_time);
             h->data_size = size;
             temp = (char*) (h+1);
             std::strncpy(temp,value.c_str(),size);
@@ -71,7 +84,7 @@ namespace  Memo
         return STORED;
     }
 
-    void replace(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas)
+    void replace(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas=false)
     {
         Header* h;
         char* temp;
@@ -86,7 +99,7 @@ namespace  Memo
             if(size==h->data_size)
             {   
                 h->flags = flags;
-                h->expiration_time = expiration_time; 
+                update_Expiration_Timestamp(h, expiration_time);
                 h->data_size = size;
 
                 temp = (char*) (h+1);

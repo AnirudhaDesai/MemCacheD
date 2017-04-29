@@ -26,7 +26,7 @@ int initializeServer(){
     server_address.sin_addr.s_addr = INADDR_ANY;
 
     //bind the socket to our specified IP and port
-    if(bind(server_socket, (struct sockaddr*) 
+    if(::bind(server_socket, (struct sockaddr*)
         &server_address, sizeof(server_address))<0)
     {
         perror("Bind Failed\n");

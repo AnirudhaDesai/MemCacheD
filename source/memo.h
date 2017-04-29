@@ -53,6 +53,7 @@ typedef enum
 
 
 const auto HeapSize = 1024UL * 1024 * 1024;
+const auto SecondsIn30Days =  60 * 60 * 24 * 30;
 class HeapType : public SlabsAlloc<MmapHeap<HeapSize>> {};
 
 static HeapType& getHeap() {

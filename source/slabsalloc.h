@@ -21,6 +21,8 @@ class Header {
         uint16_t flags;
         int32_t expiration_time;
         time_t expiration_timestamp;
+        time_t last_updated_timestamp;
+        unsigned int last_updated_client;
         int64_t cas_unique;
         bool valid;
 
