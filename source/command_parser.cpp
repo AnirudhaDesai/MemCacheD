@@ -115,52 +115,52 @@ void parse_command(char* cmd_str, size_t cmd_len, char*& res_str, size_t* res_le
     switch(command)
     {
         case SET:
-            handle_set(cmd_lines);
+            handle_set(cmd_lines, res_str, res_len);
             break;
         case ADD:
             handle_add(cmd_lines, res_str, res_len);
             break;
         case REPLACE:
-            handle_replace(cmd_lines);
+            handle_replace(cmd_lines, res_str, res_len);
             break;
         case APPEND:
-            handle_append(cmd_lines);
+            handle_append(cmd_lines, res_str, res_len);
             break;
         case PREPEND:
-            handle_prepend(cmd_lines);
+            handle_prepend(cmd_lines, res_str, res_len);
             break;
         case CAS:
-            handle_cas(cmd_lines);
+            handle_cas(cmd_lines, res_str, res_len);
             break;
             // Retrieval commands
         case GET:
-            handle_get(cmd_lines);
+            handle_get(cmd_lines, res_str, res_len);
             break;
         case GETS:
-            handle_gets(cmd_lines);
+            handle_gets(cmd_lines, res_str, res_len);
             break;
         case DELETE:
-            handle_delete(cmd_lines);
+            handle_delete(cmd_lines, res_str, res_len);
             break;
         case INCR:
-            handle_incr(cmd_lines);
+            handle_incr(cmd_lines, res_str, res_len);
             break;
         case DECR:
-            handle_decr(cmd_lines);
+            handle_decr(cmd_lines, res_str, res_len);
             break;
             // Stats commands
         case STATS:
-            handle_stats(cmd_lines);
+            handle_stats(cmd_lines, res_str, res_len);
             break;
             // Misc commands
         case FLUSH_ALL:
-            handle_flush_all(cmd_lines);
+            handle_flush_all(cmd_lines, res_str, res_len);
             break;
         case VERSION:
-            handle_version(cmd_lines);
+            handle_version(cmd_lines, res_str, res_len);
             break;
         case QUIT:
-            handle_quit(cmd_lines);
+            handle_quit(cmd_lines, res_str, res_len);
             break;
         case NONE:
             // do nothing
