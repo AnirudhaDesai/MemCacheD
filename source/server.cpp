@@ -62,7 +62,7 @@ void *beginConnect(void *args){
     long client_socket = (long)args;
     char  buffer[buf_size] = {0};
     int bytesReceived = 0;
-    char* response_str;
+    char* response_str=nullptr;
     size_t response_length;
 
     printf(" On thread : %ld \n", client_socket);
@@ -81,8 +81,10 @@ void *beginConnect(void *args){
         
         send(client_socket, response_str, response_length, 0);
 
-        free(response_str);
-
+        if(response_str!=nullptr)
+        {  
+            free(response_str);
+        }
         //action on command
     }	
 }

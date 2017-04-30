@@ -215,7 +215,7 @@ namespace  Memo
     }
 
     RESPONSE incr(std::string key, std::string value) {
-        
+        /*
         Header* h;
         printf("called %s\n",__FUNCTION__);
 
@@ -229,7 +229,9 @@ namespace  Memo
         }
         else
         {
+            /*
             temp = (char*) h+1;
+            printf("value=%s",temp);
             try
             {
                 num = strtol(temp, NULL,10);
@@ -246,10 +248,10 @@ namespace  Memo
             else num++;
 
             sprintf(temp,"%lu",num);
+*/
+         //   return INCREMENTED;
 
-            return INCREMENTED;
-
-        }
+       // }
     }
 
     RESPONSE decr(std::string key, std::string value) {
