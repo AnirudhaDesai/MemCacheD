@@ -142,25 +142,27 @@ namespace  Memo
         {
             return NOT_FOUND;
         }
-        else if(getHeap().getSizeClass(h->dat_size)==getHeap().getSizeClass(h->dat_size + size))
+        else if(getHeap().getSizeClass(h->data_size)==getHeap().getSizeClass(h->dat_size + size))
         {
             temp = (char*) h+1;
             strcat(temp,value);
+
+            return STORED;
         }
         else
         {    
             temp = (char*) h+1;
             strcat(temp,value);
 
-            size = h->dat_size + size;
-            f = h->flags;
-            k = h->key;
-            etime = h->expiration_time;
+            size = h->data_size + size;
+            temp_flags = h->flags;
+            temp_key = h->key;
+            temp_expiration_time = h->expiration_time;
 
             getHeap().free((void*)h);
             Table.delete({key,h});
 
-            return(add(std::string(temp_key),temp_flags,etime,temp_expiration_time,size,std::string(temp)));
+            return(add(std::string(temp_key),temp_flags,temp_expiration_time,size,std::string(temp)));
           
         }
 
