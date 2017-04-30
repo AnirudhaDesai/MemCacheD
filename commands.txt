@@ -1,0 +1,2 @@
+add key 0 300 5\r\nvalue\r\n
+get key
