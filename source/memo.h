@@ -76,7 +76,7 @@ namespace  Memo
     RESPONSE replace(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas);
 
     RESPONSE append(std::string key, size_t size, std::string value);
-    void prepend(std::string key, size_t size, std::string value);
+    RESPONSE prepend(std::string key, size_t size, std::string value);
     void mem_delete(std::string key);
     void incr(std::string key, std::string value);
     void decr(std::string key, std::string value);

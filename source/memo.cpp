@@ -166,8 +166,43 @@ namespace  Memo
 
     }
 
-    void prepend(std::string key, size_t size, std::string value) {
-        // prepend code
+    RESPONSE prepend(std::string key, size_t size, std::string value) {
+        Header* h;
+        char* data;
+        char* temp_key;
+        int16_t temp_flags;
+        int32_t temp_expiration_time;
+
+        printf("called %s\n",__FUNCTION__);
+
+        h = get(key);
+
+        if(h==nullptr)
+        {
+            return NOT_FOUND;
+        }
+        else if(getHeap().getSizeClass(h->data_size)==getHeap().getSizeClass(h->data_size + size))
+        {
+            data = (char*) h+1;
+            std::string temp = value + std::string(data);
+            std::strncpy(data, temp.c_str(), std::strlen(temp.c_str()));
+            return STORED;
+        }
+        else
+        {
+            data = (char*) h+1;
+            std::string temp = value + std::string(data);
+            size = h->data_size + size;
+            temp_flags = h->flags;
+            temp_expiration_time = h->expiration_time;
+
+            getHeap().free((void*)h);
+            Table.erase({key});
+
+            return(add(key,temp_flags,temp_expiration_time,size,temp));
+
+        }
+
     }
 
     void mem_delete(std::string key) {
