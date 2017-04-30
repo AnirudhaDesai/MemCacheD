@@ -100,7 +100,7 @@ namespace  Memo
 
         if(h!=nullptr)
         {
-            if(size==h->data_size)
+            if(getHeap().getSizeClass(h->data_size)==getHeap().getSizeClass(h->data_size + size))
             {   
                 h->flags = flags;
                 update_Expiration_Timestamp(h, expiration_time);
