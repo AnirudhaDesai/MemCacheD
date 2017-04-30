@@ -26,11 +26,15 @@ for command in commands:
         amount_received = 0
         amount_expected = len(message)
 
-        while amount_received < amount_expected:
+        while True: 
             data = sock.recv(16)
             amount_received += len(data)
             print sys.stderr, 'received "%s"' % data
+            if amount_received < 16:
+                break
 
-    finally:
-        print sys.stderr, 'closing socket'
-        sock.close()
+    except e:
+        print e
+
+print sys.stderr, 'closing socket'
+sock.close()

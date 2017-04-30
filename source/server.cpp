@@ -72,7 +72,7 @@ void *beginConnect(void *args){
         
         recv(client_socket, buffer, buf_size, 0);
 
-        printf("Message from Client %ld is : %s",client_socket, buffer);
+        printf("Message from Client %ld is : %s\n",client_socket, buffer);
 
         // parse command
         parse_command(buffer,buf_size, response_str, &response_length);
