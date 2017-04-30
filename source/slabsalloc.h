@@ -10,20 +10,24 @@
 #include <mutex>
 #include <sys/mman.h>
 #include <stdint.h>
+#include <time.h>
 
 using namespace std;
 
 class Header {
- public:
-  char key[251];
-  size_t data_size;  
-  uint16_t flags;
-  int32_t expiration_time;
-  int64_t cas;
-  bool valid;
+    public:
+        char key[251];
+        size_t data_size;
+        uint16_t flags;
+        int32_t expiration_time;
+        time_t expiration_timestamp;
+        time_t last_updated_timestamp;
+        unsigned int last_updated_client;
+        int64_t cas_unique;
+        bool valid;
 
-  Header * prev;
-  Header * next;
+        Header * prev;
+        Header * next;
 };
 
 template <class SourceHeap>
