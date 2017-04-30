@@ -182,7 +182,15 @@ void handle_set(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* res
     //printf("setting key=%s,flags=%d,exptime=%s,size=%s\n",key,flags,expiration_time,size);
     printf("setting key=%s\n",key);
 
-    Memo::set(std::string(key), flags, expiration_time, size, std::string(value), false);
+    RESPONSE res = Memo::set(std::string(key), flags, expiration_time, size, std::string(value), false);
+
+    response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n"));
+
+    strcpy(response_str, RESPONSE_MAP[res].res_str);
+    strcat(response_str, "\r\n");
+    *response_len = strlen(RESPONSE_MAP[res].res_str);
+
+
 }
 
 void handle_add(char* cmd_lines[MAX_CMD_LINES],char*& response_str, size_t* response_len)
@@ -221,7 +229,13 @@ void handle_replace(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t*
 
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
-    Memo::replace(std::string(key), flags, expiration_time, size, std::string(value), false);
+    RESPONSE res = Memo::replace(std::string(key), flags, expiration_time, size, std::string(value), false);
+
+    response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n"));
+
+    strcpy(response_str, RESPONSE_MAP[res].res_str);
+    strcat(response_str, "\r\n");
+    *response_len = strlen(RESPONSE_MAP[res].res_str);
 }
 
 void handle_append(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
@@ -236,7 +250,13 @@ void handle_append(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* 
 
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
-    Memo::append(std::string(key), size, std::string(value));
+    RESPONSE res = Memo::append(std::string(key), size, std::string(value));
+
+    response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n"));
+
+    strcpy(response_str, RESPONSE_MAP[res].res_str);
+    strcat(response_str, "\r\n");
+    *response_len = strlen(RESPONSE_MAP[res].res_str);
 }
 
 void handle_prepend(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
@@ -251,7 +271,13 @@ void handle_prepend(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t*
 
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
-    Memo::prepend(std::string(key), size, std::string(value));
+    RESPONSE res = Memo::prepend(std::string(key), size, std::string(value));
+
+    response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n"));
+
+    strcpy(response_str, RESPONSE_MAP[res].res_str);
+    strcat(response_str, "\r\n");
+    *response_len = strlen(RESPONSE_MAP[res].res_str);
 }
 
 void handle_cas(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)

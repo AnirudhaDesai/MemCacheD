@@ -1,6 +1,9 @@
 #include "memo.h"
 #include <cstring>
 #include "time.h"
+#include <stdlib.h>
+#include <limits.h>
+#include <exception>
 
 
 namespace  Memo
@@ -69,8 +72,9 @@ namespace  Memo
 
         if(h==nullptr)//if value not present in hash table already, allocate memory and update header. 
         {
-            //add header information 
+            //add header information
             h = (Header*) getHeap().malloc(size);
+            std::strncpy(h->key, key.c_str(), 251);
             h->flags = flags;
             update_Expiration_Timestamp(h, expiration_time);
             h->data_size = size;
@@ -99,7 +103,7 @@ namespace  Memo
 
         if(h!=nullptr)
         {
-            if(size==h->data_size)
+            if(getHeap().getSizeClass(h->data_size)==getHeap().getSizeClass(h->data_size + size))
             {   
                 h->flags = flags;
                 update_Expiration_Timestamp(h, expiration_time);
@@ -115,7 +119,7 @@ namespace  Memo
             else
             {   printf("different size");
                 getHeap().free((void*)h);
-                // Table.delete({key,h});
+                Table.erase({key});
                 return(add(std::string(key),flags,expiration_time,size,std::string(value)));
             }
         }
@@ -126,9 +130,13 @@ namespace  Memo
     }
 
     RESPONSE append(std::string key, size_t size, std::string value) {
-/*
+
         Header* h;
         char* temp;
+        char* temp_key;
+        int16_t temp_flags;
+        int32_t temp_expiration_time; 
+
         printf("called %s\n",__FUNCTION__);
 
         h = get(key);
@@ -137,38 +145,114 @@ namespace  Memo
         {
             return NOT_FOUND;
         }
-        else
+        else if(getHeap().getSizeClass(h->data_size)==getHeap().getSizeClass(h->data_size + size))
         {
-            
             temp = (char*) h+1;
-            strcat(temp,value);
-
-            size = h->dat_size + size;
+            std::strcat(temp,value.c_str());
+            return STORED;
+        }
+        else
+        {    
+            temp = (char*) h+1;
+            std::strcat(temp, value.c_str());
+            size = h->data_size + size;
+            temp_flags = h->flags;
+            temp_expiration_time = h->expiration_time;
 
             getHeap().free((void*)h);
+            Table.erase({key});
 
-            return(add(std::string(key),flags,expiration_time,size,std::string(value)))
 
-            
+            return(add(key,temp_flags,temp_expiration_time,size,std::string(temp)));
+
+          
+        }
+
+
+    }
+
+    RESPONSE prepend(std::string key, size_t size, std::string value) {
+        Header* h;
+        char* data;
+        char* temp_key;
+        int16_t temp_flags;
+        int32_t temp_expiration_time;
+
+        printf("called %s\n",__FUNCTION__);
+
+        h = get(key);
+
+        if(h==nullptr)
+        {
+            return NOT_FOUND;
+        }
+        else if(getHeap().getSizeClass(h->data_size)==getHeap().getSizeClass(h->data_size + size))
+        {
+            data = (char*) h+1;
+            std::string temp = value + std::string(data);
+            std::strncpy(data, temp.c_str(), std::strlen(temp.c_str()));
+            return STORED;
+        }
+        else
+        {
+            data = (char*) h+1;
+            std::string temp = value + std::string(data);
+            size = h->data_size + size;
+            temp_flags = h->flags;
+            temp_expiration_time = h->expiration_time;
+
+            getHeap().free((void*)h);
+            Table.erase({key});
+
+            return(add(key,temp_flags,temp_expiration_time,size,temp));
 
         }
 
-*/
-    }
-
-    void prepend(std::string key, size_t size, std::string value) {
-        // prepend code
     }
 
     void mem_delete(std::string key) {
         // delete code
     }
 
-    void incr(std::string key, std::string value) {
-        // incr code
+    RESPONSE incr(std::string key, std::string value) {
+        
+        Header* h;
+        printf("called %s\n",__FUNCTION__);
+
+        h = get(key);
+        char* temp;
+        long unsigned int num;
+
+        if(h==nullptr)
+        {
+            return NOT_FOUND;
+        }
+        else
+        {
+            temp = (char*) h+1;
+            try
+            {
+                num = strtol(temp, NULL,10);
+            }
+            catch(std::exception& e)
+            {
+                return ERROR;
+            }
+            if(num==LONG_MAX || num==LONG_MIN)
+            {
+                return ERROR;
+            }
+
+            else num++;
+
+            sprintf(temp,"%lu",num);
+
+            return INCREMENTED;
+
+        }
     }
 
-    void decr(std::string key, std::string value) {
+    RESPONSE decr(std::string key, std::string value) {
         // decr code
     }
 
