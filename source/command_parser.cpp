@@ -15,40 +15,38 @@ struct RESPONSE_STRING_MAP
 RESPONSE_STRING_MAP RESPONSE_MAP[NUM_RESPONSES]
 {
     // error strings
-    {ERROR,(char*)"error"},
-    {CLIENT_ERROR,(char*)"client_error"},
-    {SERVER_ERROR,(char*)"server_error"},
+    {ERROR,(char*)"ERROR"},
+    {CLIENT_ERROR,(char*)"CLIENT_ERROR"},
+    {SERVER_ERROR,(char*)"SERVER_ERROR"},
     // storage command responses 
-    {STORED,(char*)"stored"},
-    {EXISTS,(char*)"exists"},
-    {NOT_FOUND,(char*)"not_found"},
+    {STORED,(char*)"STORED"},
+    {EXISTS,(char*)"EXISTS"},
+    {NOT_FOUND,(char*)"NOT_FOUND"},
     // retrieval command responses
-    {END,(char*)"end"},
+    {END,(char*)"END"},
     // deletion 
     // incr/decr
-    {DELETED,(char*)"deleted"},
-    {NOT_FOUND,(char*)"not_found"},
-    // touch
-    {TOUCHED,(char*)"touched"}
+    {DELETED,(char*)"DELETED"},
+    {NOT_FOUND,(char*)"NOT_FOUND"}
 };
 
 
 
-void handle_set(char* cmd_lines[MAX_CMD_LINES]);
+void handle_set(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
 void handle_add(char* cmd_lines[MAX_CMD_LINES],char*& response_str, size_t* response_len);
-void handle_replace(char* cmd_lines[MAX_CMD_LINES]);
-void handle_append(char* cmd_lines[MAX_CMD_LINES]);
-void handle_prepend(char* cmd_lines[MAX_CMD_LINES]);
-void handle_cas(char* cmd_lines[MAX_CMD_LINES]);
-void handle_get(char* cmd_lines[MAX_CMD_LINES]);
-void handle_gets(char* cmd_lines[MAX_CMD_LINES]);
-void handle_delete(char* cmd_lines[MAX_CMD_LINES]);
-void handle_incr(char* cmd_lines[MAX_CMD_LINES]);
-void handle_decr(char* cmd_lines[MAX_CMD_LINES]);
-void handle_stats(char* cmd_lines[MAX_CMD_LINES]);
-void handle_flush_all(char* cmd_lines[MAX_CMD_LINES]);
-void handle_version(char* cmd_lines[MAX_CMD_LINES]);
-void handle_quit(char* cmd_lines[MAX_CMD_LINES]);
+void handle_replace(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
+void handle_append(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
+void handle_prepend(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
+void handle_cas(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
+void handle_get(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
+void handle_gets(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
+void handle_delete(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
+void handle_incr(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
+void handle_decr(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
+void handle_stats(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
+void handle_flush_all(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
+void handle_version(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
+void handle_quit(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
 
 struct COMMAND_STRING_MAP
 {
@@ -170,7 +168,7 @@ void parse_command(char* cmd_str, size_t cmd_len, char*& res_str, size_t* res_le
     }
 }
 
-void handle_set(char* cmd_lines[MAX_CMD_LINES])
+void handle_set(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
 {
     // parse the rest of the first line
     char* key = strtok(NULL," ");
@@ -201,13 +199,14 @@ void handle_add(char* cmd_lines[MAX_CMD_LINES],char*& response_str, size_t* resp
 
     RESPONSE res = Memo::add(std::string(key), flags, expiration_time, size, std::string(value));
 
-    response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str));
+    response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n"));
 
     strcpy(response_str,RESPONSE_MAP[res].res_str);
+    strcat(response_str,"\r\n");
     *response_len = strlen(RESPONSE_MAP[res].res_str);
 }
 
-void handle_replace(char* cmd_lines[MAX_CMD_LINES])
+void handle_replace(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
 {
     // parse the rest of the first line
     char* key = strtok(NULL," ");
@@ -223,7 +222,7 @@ void handle_replace(char* cmd_lines[MAX_CMD_LINES])
     Memo::replace(std::string(key), flags, expiration_time, size, std::string(value), false);
 }
 
-void handle_append(char* cmd_lines[MAX_CMD_LINES])
+void handle_append(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
 {
     // parse the rest of the first line
     char* key = strtok(NULL," ");
@@ -238,7 +237,7 @@ void handle_append(char* cmd_lines[MAX_CMD_LINES])
     Memo::append(std::string(key), size, std::string(value));
 }
 
-void handle_prepend(char* cmd_lines[MAX_CMD_LINES])
+void handle_prepend(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
 {
     // parse the rest of the first line
     char* key = strtok(NULL," ");
@@ -253,7 +252,7 @@ void handle_prepend(char* cmd_lines[MAX_CMD_LINES])
     Memo::prepend(std::string(key), size, std::string(value));
 }
 
-void handle_cas(char* cmd_lines[MAX_CMD_LINES])
+void handle_cas(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
 {
     // parse the rest of the first line
     char* key = strtok(NULL," ");
@@ -268,7 +267,7 @@ void handle_cas(char* cmd_lines[MAX_CMD_LINES])
     Memo::set(std::string(key), flags, expiration_time, size, std::string(value), true);
 }
 
-void handle_get(char* cmd_lines[MAX_CMD_LINES])
+void handle_get(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
 {
     char* key = strtok(NULL," ");
     while(key != NULL) {
@@ -280,7 +279,7 @@ void handle_get(char* cmd_lines[MAX_CMD_LINES])
     }
 }
 
-void handle_gets(char* cmd_lines[MAX_CMD_LINES])
+void handle_gets(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
 {
     char* key = strtok(NULL," ");
     while(key != NULL) {
@@ -289,7 +288,7 @@ void handle_gets(char* cmd_lines[MAX_CMD_LINES])
     }
 }
 
-void handle_delete(char* cmd_lines[MAX_CMD_LINES])
+void handle_delete(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
 {
     char* key = strtok(NULL," ");
     char* noreply = strtok(NULL, " ");
@@ -297,7 +296,7 @@ void handle_delete(char* cmd_lines[MAX_CMD_LINES])
     Memo::mem_delete(std::string(key));
 }
 
-void handle_incr(char* cmd_lines[MAX_CMD_LINES])
+void handle_incr(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
 {
     char* key = strtok(NULL," ");
     char* noreply = strtok(NULL, " ");
@@ -306,7 +305,7 @@ void handle_incr(char* cmd_lines[MAX_CMD_LINES])
     Memo::incr(std::string(key), std::string(value));
 }
 
-void handle_decr(char* cmd_lines[MAX_CMD_LINES])
+void handle_decr(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
 {
     char* key = strtok(NULL," ");
     char* noreply = strtok(NULL, " ");
@@ -315,23 +314,23 @@ void handle_decr(char* cmd_lines[MAX_CMD_LINES])
     Memo::decr(std::string(key), std::string(value));
 }
 
-void handle_stats(char* cmd_lines[MAX_CMD_LINES])
+void handle_stats(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
 {
     Memo::stats();
 }
 
-void handle_flush_all(char * cmd_lines[MAX_CMD_LINES])
+void handle_flush_all(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
 {
     int32_t exptime = atoi((char*) strtok(NULL, " "));
     Memo::flush_all(exptime);
 }
 
-void handle_version(char * cmd_lines[MAX_CMD_LINES])
+void handle_version(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
 {
     Memo::version();
 }
 
-void handle_quit(char * cmd_lines[MAX_CMD_LINES])
+void handle_quit(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
 {
     // send client a command to quit
 }
