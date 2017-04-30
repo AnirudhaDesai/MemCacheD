@@ -1,6 +1,9 @@
 #include "memo.h"
 #include <cstring>
 #include "time.h"
+#include <stdlib.h>
+#include <limits.h>
+#include <exception>
 
 
 namespace  Memo
@@ -176,11 +179,45 @@ namespace  Memo
         // delete code
     }
 
-    void incr(std::string key, std::string value) {
-        // incr code
+    RESPONSE incr(std::string key, std::string value) {
+        
+        Header* h;
+        printf("called %s\n",__FUNCTION__);
+
+        h = get(key);
+        char* temp;
+        long unsigned int num;
+
+        if(h==nullptr)
+        {
+            return NOT_FOUND;
+        }
+        else
+        {
+            temp = (char*) h+1;
+            try
+            {
+                num = strtol(temp, NULL,10);
+            }
+            catch(std::exception& e)
+            {
+                return ERROR;
+            }
+            if(num==LONG_MAX || num==LONG_MIN)
+            {
+                return ERROR;
+            }
+
+            else num++;
+
+            sprintf(temp,"%lu",num);
+
+            return INCREMENTED;
+
+        }
     }
 
-    void decr(std::string key, std::string value) {
+    RESPONSE decr(std::string key, std::string value) {
         // decr code
     }
 

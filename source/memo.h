@@ -44,7 +44,8 @@ typedef enum
     // retrieval command responses
     END,
     // deletion 
-    // incr/decr
+    INCREMENTED,
+    DECREMENTED,
     DELETED,
     // touch
     TOUCHED
@@ -78,8 +79,8 @@ namespace  Memo
     RESPONSE append(std::string key, size_t size, std::string value);
     void prepend(std::string key, size_t size, std::string value);
     void mem_delete(std::string key);
-    void incr(std::string key, std::string value);
-    void decr(std::string key, std::string value);
+    RESPONSE incr(std::string key, std::string value);
+    RESPONSE decr(std::string key, std::string value);
     void stats();
     void flush_all(int32_t exptime);
     void version(); 
