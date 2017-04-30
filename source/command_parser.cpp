@@ -195,6 +195,7 @@ void handle_add(char* cmd_lines[MAX_CMD_LINES],char*& response_str, size_t* resp
     char* value  = cmd_lines[1];
 
 
+    printf("handle_add,%s",key);
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
     RESPONSE res = Memo::add(std::string(key), flags, expiration_time, size, std::string(value));
