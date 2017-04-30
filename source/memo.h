@@ -42,6 +42,7 @@ typedef enum
     EXISTS,
     NOT_FOUND,
     // retrieval command responses
+    VALUE,
     END,
     // deletion 
     INCREMENTED,

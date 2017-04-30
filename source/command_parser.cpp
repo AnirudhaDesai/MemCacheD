@@ -23,6 +23,7 @@ RESPONSE_STRING_MAP RESPONSE_MAP[NUM_RESPONSES]
     {EXISTS,(char*)"EXISTS"},
     {NOT_FOUND,(char*)"NOT_FOUND"},
     // retrieval command responses
+    {VALUE,(char*)"VALUE"},
     {END,(char*)"END"},
     // deletion 
     // incr/decr
@@ -296,14 +297,57 @@ void handle_cas(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* res
 
 void handle_get(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
 {
+
+    char* single_response_str = nullptr;
+    response_str == nullptr;
+    *response_len = 0;
+
+
     char* key = strtok(NULL," ");
     while(key != NULL) {
         Header* h = Memo::get(std::string(key));
-        if (h != NULL) {
-            printf("Get Result: %s -> %s", h->key, (char*) (h+1));
+        if (h != NULL) 
+        {
+            printf("Get Result: key=%s, data_size=%u, flags=%u", h->key,h->data_size,h->flags);
+            //printf("Get Result: key=%s, data_size=%u, flags=%u", h->key,h->data_size,h->flags, (char*) (h+1));
+            if(response_str == nullptr)
+            {
+                response_str = (char*)malloc(strlen(RESPONSE_MAP[VALUE].res_str));
+            }
+            else
+            {
+                response_str = (char*)realloc(response_str,strlen(RESPONSE_MAP[VALUE].res_str));
+            }
+
+            strcpy(response_str,RESPONSE_MAP[VALUE].res_str);
+            response_str = (char*)realloc(response_str,1);
+            strcat(response_str," ");
+            response_str = (char*)realloc(response_str,strlen(key));
+            strcat(response_str,key);
+            response_str = (char*)realloc(response_str,1);
+            strcat(response_str," ");
+            char flags_str[20];
+            sprintf(flags_str,"%u",h->flags); 
+            response_str = (char*)realloc(response_str,strlen(flags_str));
+            strcat(response_str,flags_str);
+            response_str = (char*)realloc(response_str,1);
+            strcat(response_str," ");
+            char data_size_str[20];
+            sprintf(data_size_str,"%u",h->data_size);
+            response_str = (char*)realloc(response_str,strlen(data_size_str));
+            strcat(response_str,data_size_str);
+            response_str = (char*)realloc(response_str,4);
+            strcat(response_str,"\r\n");
+            response_str = (char*)realloc(response_str,h->data_size);
+            strncat(response_str,(char*)(h+1),h->data_size);
+            response_str = (char*)realloc(response_str,4);
+            strcat(response_str,"\r\n");
         }
+
         key = strtok(NULL, " ");
     }
+
+    *response_len = strlen(response_str);
 }
 
 void handle_gets(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
