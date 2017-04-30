@@ -33,7 +33,7 @@ for command in commands:
             if amount_received < 16:
                 break
 
-    except e:
+    except(e) :
         print e
 
 print sys.stderr, 'closing socket'
