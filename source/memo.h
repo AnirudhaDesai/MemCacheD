@@ -69,13 +69,13 @@ namespace  Memo
     
     Header* gets(std::string key);
     
-    void set(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas);
+    RESPONSE set(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas);
     
     RESPONSE add(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value);
     
-    void replace(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas);
-    
-    void append(std::string key, size_t size, std::string value);
+    RESPONSE replace(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas);
+
+    RESPONSE append(std::string key, size_t size, std::string value);
     void prepend(std::string key, size_t size, std::string value);
     void mem_delete(std::string key);
     void incr(std::string key, std::string value);
