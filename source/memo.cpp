@@ -70,6 +70,7 @@ namespace  Memo
         if(h==nullptr)//if value not present in hash table already, allocate memory and update header. 
         {
             //add header information 
+            h->key=key.c_str();
             h = (Header*) getHeap().malloc(size);
             h->flags = flags;
             update_Expiration_Timestamp(h, expiration_time);
@@ -115,7 +116,7 @@ namespace  Memo
             else
             {   printf("different size");
                 getHeap().free((void*)h);
-                // Table.delete({key,h});
+                Table.delete({key,h});
                 return(add(std::string(key),flags,expiration_time,size,std::string(value)));
             }
         }
@@ -126,9 +127,13 @@ namespace  Memo
     }
 
     RESPONSE append(std::string key, size_t size, std::string value) {
-/*
+
         Header* h;
         char* temp;
+        char* temp_key;
+        int16_t temp_flags;
+        int32_t temp_expiration_time; 
+
         printf("called %s\n",__FUNCTION__);
 
         h = get(key);
@@ -137,23 +142,29 @@ namespace  Memo
         {
             return NOT_FOUND;
         }
-        else
+        else if(getHeap().getSizeClass(h->dat_size)==getHeap().getSizeClass(h->dat_size + size))
         {
-            
+            temp = (char*) h+1;
+            strcat(temp,value);
+        }
+        else
+        {    
             temp = (char*) h+1;
             strcat(temp,value);
 
             size = h->dat_size + size;
+            f = h->flags;
+            k = h->key;
+            etime = h->expiration_time;
 
             getHeap().free((void*)h);
+            Table.delete({key,h});
 
-            return(add(std::string(key),flags,expiration_time,size,std::string(value)))
-
-            
-
+            return(add(std::string(temp_key),temp_flags,etime,temp_expiration_time,size,std::string(temp)));
+          
         }
 
-*/
+
     }
 
     void prepend(std::string key, size_t size, std::string value) {
