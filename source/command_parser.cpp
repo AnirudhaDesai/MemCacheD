@@ -181,7 +181,9 @@ void handle_set(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* res
     //printf("setting key=%s,flags=%d,exptime=%s,size=%s\n",key,flags,expiration_time,size);
     printf("setting key=%s\n",key);
 
-    Memo::set(std::string(key), flags, expiration_time, size, std::string(value), false);
+    RESPONSE res = Memo::set(std::string(key), flags, expiration_time, size, std::string(value), false);
+
+//    response_str = (char*)malloc(strlen())
 }
 
 void handle_add(char* cmd_lines[MAX_CMD_LINES],char*& response_str, size_t* response_len)
