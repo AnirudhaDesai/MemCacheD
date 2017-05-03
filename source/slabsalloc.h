@@ -14,6 +14,14 @@
 
 using namespace std;
 
+#define MAX_ALLOC 2*1024*1024*1024
+
+typedef enum {
+    LRU=0,
+    RANDOM,
+    LANDLORD
+} ALG_T;
+
 class Header {
     public:
         char key[251];
@@ -30,14 +38,14 @@ class Header {
         Header * next;
 };
 
-template <class SourceHeap>
-class SlabsAlloc : public SourceHeap {
+class SlabsAlloc {
 public:
-  SlabsAlloc()
+  SlabsAlloc(ALG_T algorithm)
     : requested (0),
       allocated (0),
       maxRequested (0),
-      maxAllocated (0)
+      maxAllocated (0),
+      algorithm(algorithm)
   {
    for (auto& f : freedObjects) {
       f = nullptr;
@@ -49,6 +57,8 @@ public:
       f = nullptr;
     }
 
+    printf("slabsalloc constructor called\n");
+
   }
 
   ~SlabsAlloc()
@@ -57,8 +67,8 @@ public:
   
   enum { Alignment = 16 };
   
-  void * malloc(size_t sz);
-  void free(void * ptr);
+  void * store(size_t sz);
+  void remove(void * ptr);
   size_t getSize(void * p);
 
   // number of bytes currently allocated  
@@ -73,6 +83,8 @@ public:
   
   // max number of bytes *requested*
   size_t maxBytesRequested();
+
+  ALG_T algorithm;
 
   void walk(const std::function< void(Header *) >& f); 
 
@@ -96,7 +108,6 @@ private:
   Header * freedObjects[23];
 };
 
-#include "slabsalloc.cpp"
 
 extern "C" {
   void reportStats();

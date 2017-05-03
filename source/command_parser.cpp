@@ -299,7 +299,7 @@ void handle_get(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* res
 {
 
     char* single_response_str = nullptr;
-    response_str == nullptr;
+    response_str = nullptr;
     *response_len = 0;
 
 

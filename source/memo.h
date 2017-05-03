@@ -6,7 +6,6 @@
 #include <unordered_map>
 
 #include "slabsalloc.h"
-#include "mmapheap.h"
 
 typedef enum {
     SET =0,
@@ -54,15 +53,16 @@ typedef enum
 } RESPONSE;
 
 
-const auto HeapSize = 1024UL * 1024 * 1024;
+const auto HeapSize = 2* 1024UL * 1024 * 1024;
 const auto SecondsIn30Days =  60 * 60 * 24 * 30;
-class HeapType : public SlabsAlloc<MmapHeap<HeapSize>> {};
 
-static HeapType& getHeap() {
-    static char theHeapBuf[sizeof(HeapType)];
-    static HeapType * h = new (theHeapBuf) HeapType;
-    return *h;
-}
+/*class HeapType : public SlabsAlloc {};*/
+
+//static HeapType& getHeap() {
+    //static char theHeapBuf[sizeof(HeapType)];
+    //static HeapType * h = new (theHeapBuf) HeapType;
+    //return *h;
+//}
 
 namespace  Memo
 {

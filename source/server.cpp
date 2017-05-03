@@ -77,7 +77,7 @@ void *beginConnect(void *args){
         // parse command
         parse_command(buffer,buf_size, response_str, &response_length);
 
-        printf("got response %s\n",response_str);
+        printf("got response %s, length=%d\n",response_str,response_length);
         
         send(client_socket, response_str, response_length, 0);
 

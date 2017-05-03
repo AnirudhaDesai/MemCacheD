@@ -16,6 +16,8 @@ print commands
 
 
 for command in commands:
+    if len(command) <= 1:
+        break
     try:
         # Send data
         message = command
@@ -28,8 +30,8 @@ for command in commands:
 
         while True: 
             data = sock.recv(16)
-            amount_received += len(data)
-            print sys.stderr, 'received "%s"' % data
+            amount_received = len(data)
+            print 'received "%s"' % data
             if amount_received < 16:
                 break
 
