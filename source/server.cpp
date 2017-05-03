@@ -62,13 +62,14 @@ void *beginConnect(void *args){
     long client_socket = (long)args;
     char  buffer[buf_size] = {0};
     int bytesReceived = 0;
-    char* response_str=nullptr;
+    
     size_t response_length;
 
     printf(" On thread : %ld \n", client_socket);
     while(true)
     {
         //read from socket
+        char* response_str=nullptr;
         
         recv(client_socket, buffer, buf_size, 0);
 

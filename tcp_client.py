@@ -29,10 +29,10 @@ for command in commands:
         amount_expected = len(message)
 
         while True: 
-            data = sock.recv(16)
+            data = sock.recv(256)
             amount_received = len(data)
             print 'received "%s"' % data
-            if amount_received < 16:
+            if amount_received < 256:
                 break
 
     except(e) :

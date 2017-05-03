@@ -20,13 +20,32 @@ void * SlabsAlloc::store(size_t sz) {
     /* If this malloc will push the memory usage over the limit,
      * perform an eviction before storing
      */
-    if(sz+allocated >= MAX_ALLOC)
+    if(sz+allocated >= MAX_ALLOC || AllocatedCount[i]>=CLASS_LIM )
     {
         // use appropriate cache replacement algorithm
         
         // if LRU, evict from tail
+        if (algorithm == LRU)
+        {
+
+
+        }
+
         // else if RANDOM, evict from random location
+        else if(algorithm == RANDOM)
+        {
+
+        }
         // else if ______, do something else
+        else if(algorithm == LANDLORD)
+        {
+
+        }
+        else
+        {
+            // error out 
+            ;
+        }
     }
 
     /* Check in freedObjects */
@@ -42,6 +61,8 @@ void * SlabsAlloc::store(size_t sz) {
         h->prev = tail_AllocatedObjects[i];
         h->next = nullptr;
         tail_AllocatedObjects[i]=h;
+
+        AllocatedCount[i]++;
 
         //heapLock.unlock();
         return h;
@@ -68,6 +89,8 @@ void * SlabsAlloc::store(size_t sz) {
         h->prev = nullptr;
         h->next = nullptr;
 
+        AllocatedCount[i]++;
+
         return tail_AllocatedObjects[i];
 
     }
@@ -91,6 +114,9 @@ void * SlabsAlloc::store(size_t sz) {
         h->prev = tail_AllocatedObjects[i];
 
         tail_AllocatedObjects[i]=h;
+
+        AllocatedCount[i]++;
+
         return tail_AllocatedObjects[i];
     }
 
@@ -172,6 +198,8 @@ void SlabsAlloc::remove(void * ptr) {
     h->prev = freedObjects[i];
     freedObjects[i] = h;
     h->next= nullptr; 
+
+    AllocatedCount[i]--;
 
     //allocated -= (h->allocatedSize);
 

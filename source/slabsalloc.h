@@ -14,7 +14,9 @@
 
 using namespace std;
 
-#define MAX_ALLOC 2*1024*1024*1024
+#define MAX_ALLOC   2*1024*1024*1024
+#define CLASS_LIM   1024  //limit on number of objects per size class
+#define NUM_CLASSES 23
 
 typedef enum {
     LRU=0,
@@ -55,6 +57,9 @@ public:
     }
     for (auto& f : tail_AllocatedObjects) {
       f = nullptr;
+    }
+    for (auto& f : AllocatedCount) {
+      f = 0;
     }
 
     printf("slabsalloc constructor called\n");
@@ -102,10 +107,12 @@ private:
   size_t requested;
   size_t maxAllocated;
   size_t maxRequested;
+  uint16_t AllocatedCount[NUM_CLASSES];
   
-  Header * head_AllocatedObjects[23];
-  Header * tail_AllocatedObjects[23];
-  Header * freedObjects[23];
+  Header * head_AllocatedObjects[NUM_CLASSES];
+  Header * tail_AllocatedObjects[NUM_CLASSES];
+  Header * freedObjects[NUM_CLASSES];
+  
 };
 
 

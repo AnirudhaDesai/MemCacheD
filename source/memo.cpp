@@ -88,7 +88,7 @@ namespace  Memo
         }
         //need to add key, address to hash table. use temp.  
         //
-        
+        return ERROR;
     }
 
     RESPONSE replace(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas=false)
@@ -256,6 +256,7 @@ namespace  Memo
 
     RESPONSE decr(std::string key, std::string value) {
         // decr code
+        return ERROR;
     }
 
     void stats() {
