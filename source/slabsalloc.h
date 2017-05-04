@@ -11,6 +11,7 @@
 #include <sys/mman.h>
 #include <stdint.h>
 #include <time.h>
+#include <random>
 
 using namespace std;
 
@@ -63,7 +64,7 @@ public:
     }
 
     printf("slabsalloc constructor called\n");
-
+   
   }
 
   ~SlabsAlloc()
@@ -108,6 +109,8 @@ private:
   size_t maxAllocated;
   size_t maxRequested;
   uint16_t AllocatedCount[NUM_CLASSES];
+  uint16_t rndNum;
+  std::random_device rd;
   
   Header * head_AllocatedObjects[NUM_CLASSES];
   Header * tail_AllocatedObjects[NUM_CLASSES];

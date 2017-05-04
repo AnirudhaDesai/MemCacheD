@@ -8,15 +8,14 @@ void * SlabsAlloc::store(size_t sz) {
         return nullptr;
 
     //printf("called %s\n",__FUNCTION__);
-
-
     /*size will contain the closest base 16 size that needs to be alocated.*/
     int i = getSizeClass(sz);
     size_t size = getSizeFromClass(i);  
 
     //heapLock.lock();
     std::lock_guard<std::recursive_mutex> lock(heapLock);
-
+    
+    
     /* If this malloc will push the memory usage over the limit,
      * perform an eviction before storing
      */
@@ -27,13 +26,28 @@ void * SlabsAlloc::store(size_t sz) {
         // if LRU, evict from tail
         if (algorithm == LRU)
         {
-
+            freedObjects[i] = head_AllocatedObjects[i];
+            head_AllocatedObjects[i] = head_AllocatedObjects[i]->next; 
 
         }
 
         // else if RANDOM, evict from random location
         else if(algorithm == RANDOM)
         {
+            printf("Entered RANDOM Algorithm\n" );
+            std::uniform_int_distribution<int> dis(0, AllocatedCount[i]);
+            std::mt19937 gen(rd());
+            rndNum = dis(gen);
+            printf("The random number generated is : %d\n",rndNum ); 
+            Header * tempObject = head_AllocatedObjects[i];
+            while(rndNum!=0)
+            {
+                tempObject = tempObject->next;
+                rndNum--;
+
+            }
+
+            remove((void *)tempObject);  
 
         }
         // else if ______, do something else
