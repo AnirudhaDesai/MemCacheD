@@ -1,4 +1,6 @@
 add key 0 300 5\r\nvalue\r\n
-get key
+get key\r\n
 add key2 0 333 4\r\ndata\r\n
+get key key2\r\n
 add key3 00 222 4\r\nhola\r\n
+get key key2 key3\r\n

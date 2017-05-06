@@ -1,6 +1,7 @@
 #include "command_parser.h"
 
 #include <string>
+#include <regex>
 
 #define MAX_CMD_LINES 10
 #define NUM_COMMANDS 15
@@ -33,21 +34,21 @@ RESPONSE_STRING_MAP RESPONSE_MAP[NUM_RESPONSES]
 
 
 
-void handle_set(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
-void handle_add(char* cmd_lines[MAX_CMD_LINES],char*& response_str, size_t* response_len);
-void handle_replace(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
-void handle_append(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
-void handle_prepend(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
-void handle_cas(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
-void handle_get(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
-void handle_gets(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
-void handle_delete(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
-void handle_incr(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
-void handle_decr(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
-void handle_stats(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
-void handle_flush_all(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
-void handle_version(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
-void handle_quit(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len);
+void handle_set(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
+void handle_add(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
+void handle_replace(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
+void handle_append(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
+void handle_prepend(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
+void handle_cas(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
+void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
+void handle_gets(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
+void handle_delete(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
+void handle_incr(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
+void handle_decr(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
+void handle_stats(char*& response_str, size_t* response_len);
+void handle_flush_all(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
+void handle_version(char*& response_str, size_t* response_len);
+void handle_quit(char*& response_str, size_t* response_len);
 
 struct COMMAND_STRING_MAP
 {
@@ -84,20 +85,21 @@ void parse_command(char* cmd_str, size_t cmd_len, char*& res_str, size_t* res_le
     }
 
     std::string response;
-
+    std::regex ws_re("\\s+");
+    std::regex end_re("\\\\r\\\\n");
+    std::string cmd = std::string(cmd_str);
     // start by storing all command lines in an array
-    char* cmd_lines[MAX_CMD_LINES];
-    cmd_lines[0] = strtok(cmd_str, "\\r\\n");
-
-    unsigned short cmd_num = 0;
-
-    while (cmd_num < MAX_CMD_LINES)
-    {
-        cmd_lines[++cmd_num] = strtok(NULL, "\\r\\n");
-    }
+//    const const char* cmd_lines[MAX_CMD_LINES];
+    std::string command_str;
+    //cmd_lines[0] = strtok(cmd_str, "\\r\\n");
+    std::sregex_token_iterator cmd_itr = std::sregex_token_iterator(cmd.begin(), cmd.end(), end_re, -1);
+    printf("setting key=%s\n",cmd_itr->str().c_str());
+    command_str = cmd_itr++->str().c_str();
+    std::sregex_token_iterator end_itr;
 
     // figure out the main command
-    char* main_command_str = strtok(cmd_lines[0]," ");
+    std::sregex_token_iterator param_itr = std::sregex_token_iterator(command_str.begin(), command_str.end(), ws_re, -1);
+    const char* main_command_str = param_itr++->str().c_str();
 
     COMMAND command = NONE;
 
@@ -116,52 +118,52 @@ void parse_command(char* cmd_str, size_t cmd_len, char*& res_str, size_t* res_le
     switch(command)
     {
         case SET:
-            handle_set(cmd_lines, res_str, res_len);
+            handle_set(cmd_itr, param_itr, res_str, res_len);
             break;
         case ADD:
-            handle_add(cmd_lines, res_str, res_len);
+            handle_add(cmd_itr, param_itr, res_str, res_len);
             break;
         case REPLACE:
-            handle_replace(cmd_lines, res_str, res_len);
+            handle_replace(cmd_itr, param_itr, res_str, res_len);
             break;
         case APPEND:
-            handle_append(cmd_lines, res_str, res_len);
+            handle_append(cmd_itr, param_itr, res_str, res_len);
             break;
         case PREPEND:
-            handle_prepend(cmd_lines, res_str, res_len);
+            handle_prepend(cmd_itr, param_itr, res_str, res_len);
             break;
         case CAS:
-            handle_cas(cmd_lines, res_str, res_len);
+            handle_cas(cmd_itr, param_itr, res_str, res_len);
             break;
             // Retrieval commands
         case GET:
-            handle_get(cmd_lines, res_str, res_len);
+            handle_get(param_itr, res_str, res_len);
             break;
         case GETS:
-            handle_gets(cmd_lines, res_str, res_len);
+            handle_gets(param_itr, res_str, res_len);
             break;
         case DELETE:
-            handle_delete(cmd_lines, res_str, res_len);
+            handle_delete(param_itr, res_str, res_len);
             break;
         case INCR:
-            handle_incr(cmd_lines, res_str, res_len);
+            handle_incr(cmd_itr, param_itr, res_str, res_len);
             break;
         case DECR:
-            handle_decr(cmd_lines, res_str, res_len);
+            handle_decr(cmd_itr, param_itr, res_str, res_len);
             break;
             // Stats commands
         case STATS:
-            handle_stats(cmd_lines, res_str, res_len);
+            handle_stats(res_str, res_len);
             break;
             // Misc commands
         case FLUSH_ALL:
-            handle_flush_all(cmd_lines, res_str, res_len);
+            handle_flush_all(param_itr, res_str, res_len);
             break;
         case VERSION:
-            handle_version(cmd_lines, res_str, res_len);
+            handle_version(res_str, res_len);
             break;
         case QUIT:
-            handle_quit(cmd_lines, res_str, res_len);
+            handle_quit(res_str, res_len);
             break;
         case NONE:
             // do nothing
@@ -169,20 +171,24 @@ void parse_command(char* cmd_str, size_t cmd_len, char*& res_str, size_t* res_le
     }
 }
 
-void handle_set(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
+void handle_set(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
 {
     // parse the rest of the first line
-    char* key = strtok(NULL," ");
-    uint16_t flags  = atoi((char*)strtok(NULL," "));
-    int32_t expiration_time  = atoi((char*)strtok(NULL," "));
-    size_t size = atoi((char*)strtok(NULL," "));
-    char* value  = cmd_lines[1];
-    //char* noreply = strtok(NULL, " ");
+    std::sregex_token_iterator end_itr;
+    std::string key = param_itr++->str();
+    uint16_t flags  = atoi(param_itr++->str().c_str());
+    int32_t expiration_time  = atoi(param_itr++->str().c_str());
+    size_t size = atoi(param_itr++->str().c_str());
+    bool noreply = false;
+    if (param_itr != end_itr) {
+        noreply = true;
+    }
+    std::string value = cmd_itr++->str();
 
     //printf("setting key=%s,flags=%d,exptime=%s,size=%s\n",key,flags,expiration_time,size);
-    printf("setting key=%s\n",key);
+    printf("setting key=%s\n", key.c_str());
 
-    RESPONSE res = Memo::set(std::string(key), flags, expiration_time, size, std::string(value), false);
+    RESPONSE res = Memo::set(key, flags, expiration_time, size, value, false);
 
     response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n"));
 
@@ -193,21 +199,25 @@ void handle_set(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* res
 
 }
 
-void handle_add(char* cmd_lines[MAX_CMD_LINES],char*& response_str, size_t* response_len)
+void handle_add(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
 {
     // parse the rest of the first line
-    char* key = strtok(NULL," ");
-    uint16_t flags  = atoi((char*)strtok(NULL," "));
-    int32_t expiration_time  = atoi((char*)strtok(NULL," "));
-    size_t size = atoi((char*)strtok(NULL," "));
-    char* noreply = (char*)strtok(NULL," ");
-    char* value  = cmd_lines[1];
+    std::sregex_token_iterator end_itr;
+    std::string key = param_itr++->str();
+    uint16_t flags  = atoi(param_itr++->str().c_str());
+    int32_t expiration_time  = atoi(param_itr++->str().c_str());
+    size_t size = atoi(param_itr++->str().c_str());
+    bool noreply = false;
+    if (param_itr != end_itr) {
+        noreply = true;
+    }
+    std::string value = cmd_itr++->str();
 
 
-    printf("handle_add,%s",key);
+    printf("handle_add,%s",key.c_str());
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
-    RESPONSE res = Memo::add(std::string(key), flags, expiration_time, size, std::string(value));
+    RESPONSE res = Memo::add(key, flags, expiration_time, size, value);
 
     response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n"));
 
@@ -216,20 +226,24 @@ void handle_add(char* cmd_lines[MAX_CMD_LINES],char*& response_str, size_t* resp
     *response_len = strlen(response_str);
 }
 
-void handle_replace(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
+void handle_replace(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
 {
     // parse the rest of the first line
-    char* key = strtok(NULL," ");
-    uint16_t flags  = atoi((char*)strtok(NULL," "));
-    int32_t expiration_time  = atoi((char*)strtok(NULL," "));
-    size_t size = atoi((char*)strtok(NULL," "));
-    char* noreply = strtok(NULL, " ");
-    char* value  = cmd_lines[1];
+    std::sregex_token_iterator end_itr;
+    std::string key = param_itr++->str();
+    uint16_t flags  = atoi(param_itr++->str().c_str());
+    int32_t expiration_time  = atoi(param_itr++->str().c_str());
+    size_t size = atoi(param_itr++->str().c_str());
+    bool noreply = false;
+    if (param_itr != end_itr) {
+        noreply = true;
+    }
+    std::string value = cmd_itr++->str();
 
 
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
-    RESPONSE res = Memo::replace(std::string(key), flags, expiration_time, size, std::string(value), false);
+    RESPONSE res = Memo::replace(key, flags, expiration_time, size, value, false);
 
     response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n"));
 
@@ -238,19 +252,21 @@ void handle_replace(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t*
     *response_len = strlen(response_str);
 }
 
-void handle_append(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
+void handle_append(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
 {
     // parse the rest of the first line
-    char* key = strtok(NULL," ");
-    uint16_t flags  = atoi((char*)strtok(NULL," "));
-    int32_t expiration_time  = atoi((char*)strtok(NULL," "));
-    size_t size = atoi((char*)strtok(NULL," "));
-    char* noreply = strtok(NULL, " ");
-    char* value  = cmd_lines[1];
+    std::sregex_token_iterator end_itr;
+    std::string key = param_itr++->str();
+    size_t size = atoi(param_itr++->str().c_str());
+    bool noreply = false;
+    if (param_itr != end_itr) {
+        noreply = true;
+    }
+    std::string value = cmd_itr++->str();
 
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
-    RESPONSE res = Memo::append(std::string(key), size, std::string(value));
+    RESPONSE res = Memo::append(key, size, value);
 
     response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n"));
 
@@ -259,19 +275,21 @@ void handle_append(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* 
     *response_len = strlen(response_str);
 }
 
-void handle_prepend(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
+void handle_prepend(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
 {
     // parse the rest of the first line
-    char* key = strtok(NULL," ");
-    uint16_t flags  = atoi((char*)strtok(NULL," "));
-    int32_t expiration_time  = atoi((char*)strtok(NULL," "));
-    size_t size = atoi((char*)strtok(NULL," "));
-    char* noreply = strtok(NULL, " ");
-    char* value  = cmd_lines[1];
+    std::sregex_token_iterator end_itr;
+    std::string key = param_itr++->str();
+    size_t size = atoi(param_itr++->str().c_str());
+    bool noreply = false;
+    if (param_itr != end_itr) {
+        noreply = true;
+    }
+    std::string value = cmd_itr++->str();
 
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
-    RESPONSE res = Memo::prepend(std::string(key), size, std::string(value));
+    RESPONSE res = Memo::prepend(key, size, value);
 
     response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n"));
 
@@ -280,127 +298,144 @@ void handle_prepend(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t*
     *response_len = strlen(response_str);
 }
 
-void handle_cas(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
+void handle_cas(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
 {
     // parse the rest of the first line
-    char* key = strtok(NULL," ");
-    uint16_t flags  = atoi((char*)strtok(NULL," "));
-    int32_t expiration_time  = atoi((char*)strtok(NULL," "));
-    size_t size = atoi((char*)strtok(NULL," "));
-    char* noreply = strtok(NULL, " ");
-    char* value  = cmd_lines[1];
+    std::sregex_token_iterator end_itr;
+    std::string key = param_itr++->str();
+    uint16_t flags  = atoi(param_itr++->str().c_str());
+    int32_t expiration_time  = atoi(param_itr++->str().c_str());
+    size_t size = atoi(param_itr++->str().c_str());
+    bool noreply = false;
+    if (param_itr != end_itr) {
+        noreply = true;
+    }
+    std::string value = cmd_itr++->str();
 
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
-    Memo::set(std::string(key), flags, expiration_time, size, std::string(value), true);
+    Memo::set(key, flags, expiration_time, size, value, true);
 }
 
-void handle_get(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
+void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
 {
 
     char* single_response_str = nullptr;
     response_str = nullptr;
     *response_len = 0;
+    std::sregex_token_iterator end_itr;
 
-
-    char* key = strtok(NULL," ");
-    while(key != NULL) {
-        Header* h = Memo::get(std::string(key));
+    std::string key;
+    do {
+        key = param_itr++->str();
+        Header* h = Memo::get(key);
         if (h != NULL) 
         {
             printf("Get Result: key=%s, data_size=%u, flags=%u", h->key,h->data_size,h->flags);
             //printf("Get Result: key=%s, data_size=%u, flags=%u", h->key,h->data_size,h->flags, (char*) (h+1));
             if(response_str == nullptr)
             {
-                response_str = (char*)malloc(strlen(RESPONSE_MAP[VALUE].res_str));
+                response_str = (char*)calloc(1,strlen(RESPONSE_MAP[VALUE].res_str));
             }
             else
             {
-                response_str = (char*)realloc(response_str,strlen(RESPONSE_MAP[VALUE].res_str));
-            }
+                response_str = (char*)realloc(response_str,std::strlen(response_str)+std::strlen(RESPONSE_MAP[VALUE].res_str)+1);
 
-            strcpy(response_str,RESPONSE_MAP[VALUE].res_str);
+            }
+            std::strcat(response_str,RESPONSE_MAP[VALUE].res_str);
             response_str = (char*)realloc(response_str,1);
-            strcat(response_str," ");
-            response_str = (char*)realloc(response_str,strlen(key));
-            strcat(response_str,key);
+            std::strcat(response_str," ");
+            response_str = (char*)std::realloc(response_str, std::strlen(key.c_str()));
+            std::strcat(response_str, key.c_str());
             response_str = (char*)realloc(response_str,1);
-            strcat(response_str," ");
+            std::strcat(response_str," ");
             char flags_str[20];
             sprintf(flags_str,"%u",h->flags); 
-            response_str = (char*)realloc(response_str,strlen(flags_str));
-            strcat(response_str,flags_str);
+            response_str = (char*)realloc(response_str, std::strlen(flags_str));
+            std::strcat(response_str,flags_str);
             response_str = (char*)realloc(response_str,1);
-            strcat(response_str," ");
+            std::strcat(response_str," ");
             char data_size_str[20];
             sprintf(data_size_str,"%u",h->data_size);
-            response_str = (char*)realloc(response_str,strlen(data_size_str));
-            strcat(response_str,data_size_str);
+            response_str = (char*)realloc(response_str, std::strlen(data_size_str));
+            std::strcat(response_str,data_size_str);
             response_str = (char*)realloc(response_str,4);
-            strcat(response_str,"\r\n");
+            std::strcat(response_str,"\r\n");
             response_str = (char*)realloc(response_str,h->data_size);
-            strncat(response_str,(char*)(h+1),h->data_size);
+            std::strncat(response_str,(char*)(h+1),h->data_size);
             response_str = (char*)realloc(response_str,4);
-            strcat(response_str,"\r\n");
+            std::strcat(response_str,"\r\n");
         }
-
-        key = strtok(NULL, " ");
-    }
+    } while(param_itr != end_itr);
     *response_len = strlen(response_str);
 }
 
-void handle_gets(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
+void handle_gets(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
 {
-    char* key = strtok(NULL," ");
-    while(key != NULL) {
-        Memo::get(std::string(key));
-        key = strtok(NULL, " ");
+    std::sregex_token_iterator end_itr;
+    std::string key = param_itr++->str();
+    while(param_itr != end_itr) {
+        Memo::get(key);
+        key = param_itr++->str();
     }
 }
 
-void handle_delete(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
+void handle_delete(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
 {
-    char* key = strtok(NULL," ");
-    char* noreply = strtok(NULL, " ");
+    std::sregex_token_iterator end_itr;
+    std::string key = param_itr++->str();
+    bool noreply = false;
+    if (param_itr != end_itr) {
+        noreply = true;
+    }
 
-    Memo::mem_delete(std::string(key));
+    Memo::mem_delete(key);
 }
 
-void handle_incr(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
+void handle_incr(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
 {
-    char* key = strtok(NULL," ");
-    char* noreply = strtok(NULL, " ");
-    char* value  = cmd_lines[1];
+    std::sregex_token_iterator end_itr;
+    std::string key = param_itr++->str();
+    bool noreply = false;
+    if (param_itr != end_itr) {
+        noreply = true;
+    }
+    std::string value = cmd_itr++->str();
 
-    Memo::incr(std::string(key), std::string(value));
+    Memo::incr(key, value);
 }
 
-void handle_decr(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
+void handle_decr(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
 {
-    char* key = strtok(NULL," ");
-    char* noreply = strtok(NULL, " ");
-    char* value  = cmd_lines[1];
+    std::sregex_token_iterator end_itr;
+    std::string key = param_itr++->str();
+    bool noreply = false;
+    if (param_itr != end_itr) {
+        noreply = true;
+    }
+    std::string value = cmd_itr++->str();
 
-    Memo::decr(std::string(key), std::string(value));
+    Memo::decr(key, value);
 }
 
-void handle_stats(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
+void handle_stats(char*& response_str, size_t* response_len)
 {
     Memo::stats();
 }
 
-void handle_flush_all(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
+void handle_flush_all(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
 {
-    int32_t exptime = atoi((char*) strtok(NULL, " "));
+    std::sregex_token_iterator end_itr;
+    int32_t exptime = atoi(param_itr++->str().c_str());
     Memo::flush_all(exptime);
 }
 
-void handle_version(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
+void handle_version(char*& response_str, size_t* response_len)
 {
     Memo::version();
 }
 
-void handle_quit(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
+void handle_quit(char*& response_str, size_t* response_len)
 {
     // send client a command to quit
 }
