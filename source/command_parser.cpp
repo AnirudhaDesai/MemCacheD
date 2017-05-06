@@ -176,7 +176,7 @@ void handle_set(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* res
     uint16_t flags  = atoi((char*)strtok(NULL," "));
     int32_t expiration_time  = atoi((char*)strtok(NULL," "));
     size_t size = atoi((char*)strtok(NULL," "));
-    char* value  = strtok(NULL," ");
+    char* value  = cmd_lines[1];
     //char* noreply = strtok(NULL, " ");
 
     //printf("setting key=%s,flags=%d,exptime=%s,size=%s\n",key,flags,expiration_time,size);
@@ -188,7 +188,7 @@ void handle_set(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* res
 
     strcpy(response_str, RESPONSE_MAP[res].res_str);
     strcat(response_str, "\r\n");
-    *response_len = strlen(RESPONSE_MAP[res].res_str);
+    *response_len = strlen(response_str);
 
 
 }
@@ -213,7 +213,7 @@ void handle_add(char* cmd_lines[MAX_CMD_LINES],char*& response_str, size_t* resp
 
     strcpy(response_str,RESPONSE_MAP[res].res_str);
     strcat(response_str,"\r\n");
-    *response_len = strlen(RESPONSE_MAP[res].res_str);
+    *response_len = strlen(response_str);
 }
 
 void handle_replace(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
@@ -235,7 +235,7 @@ void handle_replace(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t*
 
     strcpy(response_str, RESPONSE_MAP[res].res_str);
     strcat(response_str, "\r\n");
-    *response_len = strlen(RESPONSE_MAP[res].res_str);
+    *response_len = strlen(response_str);
 }
 
 void handle_append(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
@@ -256,7 +256,7 @@ void handle_append(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* 
 
     strcpy(response_str, RESPONSE_MAP[res].res_str);
     strcat(response_str, "\r\n");
-    *response_len = strlen(RESPONSE_MAP[res].res_str);
+    *response_len = strlen(response_str);
 }
 
 void handle_prepend(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
@@ -277,7 +277,7 @@ void handle_prepend(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t*
 
     strcpy(response_str, RESPONSE_MAP[res].res_str);
     strcat(response_str, "\r\n");
-    *response_len = strlen(RESPONSE_MAP[res].res_str);
+    *response_len = strlen(response_str);
 }
 
 void handle_cas(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
@@ -299,7 +299,7 @@ void handle_get(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* res
 {
 
     char* single_response_str = nullptr;
-    response_str == nullptr;
+    response_str = nullptr;
     *response_len = 0;
 
 
@@ -346,7 +346,6 @@ void handle_get(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* res
 
         key = strtok(NULL, " ");
     }
-
     *response_len = strlen(response_str);
 }
 

@@ -11,8 +11,19 @@
 #include <sys/mman.h>
 #include <stdint.h>
 #include <time.h>
+#include <random>
 
 using namespace std;
+
+#define MAX_ALLOC   2*1024*1024*1024
+#define CLASS_LIM   1024  //limit on number of objects per size class
+#define NUM_CLASSES 23
+
+typedef enum {
+    LRU=0,
+    RANDOM,
+    LANDLORD
+} ALG_T;
 
 class Header {
     public:
@@ -30,14 +41,14 @@ class Header {
         Header * next;
 };
 
-template <class SourceHeap>
-class SlabsAlloc : public SourceHeap {
+class SlabsAlloc {
 public:
-  SlabsAlloc()
+  SlabsAlloc(ALG_T algorithm)
     : requested (0),
       allocated (0),
       maxRequested (0),
-      maxAllocated (0)
+      maxAllocated (0),
+      algorithm(algorithm)
   {
    for (auto& f : freedObjects) {
       f = nullptr;
@@ -48,7 +59,12 @@ public:
     for (auto& f : tail_AllocatedObjects) {
       f = nullptr;
     }
+    for (auto& f : AllocatedCount) {
+      f = 0;
+    }
 
+    printf("slabsalloc constructor called\n");
+   
   }
 
   ~SlabsAlloc()
@@ -57,8 +73,8 @@ public:
   
   enum { Alignment = 16 };
   
-  void * malloc(size_t sz);
-  void free(void * ptr);
+  void * store(size_t sz);
+  void remove(void * ptr);
   size_t getSize(void * p);
 
   // number of bytes currently allocated  
@@ -73,6 +89,8 @@ public:
   
   // max number of bytes *requested*
   size_t maxBytesRequested();
+
+  ALG_T algorithm;
 
   void walk(const std::function< void(Header *) >& f); 
 
@@ -90,13 +108,16 @@ private:
   size_t requested;
   size_t maxAllocated;
   size_t maxRequested;
+  uint16_t AllocatedCount[NUM_CLASSES];
+  uint16_t rndNum;
+  std::random_device rd;
   
-  Header * head_AllocatedObjects[23];
-  Header * tail_AllocatedObjects[23];
-  Header * freedObjects[23];
+  Header * head_AllocatedObjects[NUM_CLASSES];
+  Header * tail_AllocatedObjects[NUM_CLASSES];
+  Header * freedObjects[NUM_CLASSES];
+  
 };
 
-#include "slabsalloc.cpp"
 
 extern "C" {
   void reportStats();

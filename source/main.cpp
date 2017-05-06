@@ -13,17 +13,9 @@
 
 #include "server.h"
 
-#include "slabsalloc.h"
-
-const auto DefaultHeapSize = 2 * 1024UL * 1024 * 1024;
-
-typedef enum {
-    LRU=0,
-    RANDOM,
-    LANDLORD
-} ALG_T;
-
 ALG_T cache_replacement_algorithm = LRU;
+
+extern SlabsAlloc* alloc;
 
 int main(int argc, char *argv[])
 {
@@ -68,6 +60,9 @@ int main(int argc, char *argv[])
     }
 
     std::cout << "cache replacement algorithm :" << cache_replacement_algorithm << std::endl;
+
+    alloc = new SlabsAlloc(cache_replacement_algorithm);
+
     char* cmd_str;
     size_t cmd_len;
 
