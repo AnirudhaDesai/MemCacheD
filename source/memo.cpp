@@ -1,9 +1,9 @@
 #include "memo.h"
 #include <cstring>
 #include "time.h"
-#include <stdlib.h>
-#include <limits.h>
-#include <exception>
+//#include <stdlib.h>
+//#include <limits.h>
+//#include <exception>
 
 
 namespace  Memo
