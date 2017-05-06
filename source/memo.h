@@ -6,7 +6,6 @@
 #include <unordered_map>
 
 #include "slabsalloc.h"
-#include "mmapheap.h"
 
 typedef enum {
     SET =0,
@@ -42,9 +41,11 @@ typedef enum
     EXISTS,
     NOT_FOUND,
     // retrieval command responses
+    VALUE,
     END,
     // deletion 
-    // incr/decr
+    INCREMENTED,
+    DECREMENTED,
     DELETED,
     // touch
     TOUCHED
@@ -52,15 +53,16 @@ typedef enum
 } RESPONSE;
 
 
-const auto HeapSize = 1024UL * 1024 * 1024;
+const auto HeapSize = 2* 1024UL * 1024 * 1024;
 const auto SecondsIn30Days =  60 * 60 * 24 * 30;
-class HeapType : public SlabsAlloc<MmapHeap<HeapSize>> {};
 
-static HeapType& getHeap() {
-    static char theHeapBuf[sizeof(HeapType)];
-    static HeapType * h = new (theHeapBuf) HeapType;
-    return *h;
-}
+/*class HeapType : public SlabsAlloc {};*/
+
+//static HeapType& getHeap() {
+    //static char theHeapBuf[sizeof(HeapType)];
+    //static HeapType * h = new (theHeapBuf) HeapType;
+    //return *h;
+//}
 
 namespace  Memo
 {
@@ -78,8 +80,8 @@ namespace  Memo
     RESPONSE append(std::string key, size_t size, std::string value);
     RESPONSE prepend(std::string key, size_t size, std::string value);
     void mem_delete(std::string key);
-    void incr(std::string key, std::string value);
-    void decr(std::string key, std::string value);
+    RESPONSE incr(std::string key, std::string value);
+    RESPONSE decr(std::string key, std::string value);
     void stats();
     void flush_all(int32_t exptime);
     void version(); 

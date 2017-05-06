@@ -62,13 +62,14 @@ void *beginConnect(void *args){
     long client_socket = (long)args;
     char  buffer[buf_size] = {0};
     int bytesReceived = 0;
-    char* response_str;
+    
     size_t response_length;
 
     printf(" On thread : %ld \n", client_socket);
     while(true)
     {
         //read from socket
+        char* response_str=nullptr;
         
         recv(client_socket, buffer, buf_size, 0);
 
@@ -77,12 +78,14 @@ void *beginConnect(void *args){
         // parse command
         parse_command(buffer,buf_size, response_str, &response_length);
 
-        printf("got response %s\n",response_str);
+        printf("got response %s, length=%d\n",response_str,response_length);
         
         send(client_socket, response_str, response_length, 0);
 
-        free(response_str);
-
+        if(response_str!=nullptr)
+        {  
+            free(response_str);
+        }
         //action on command
     }	
 }

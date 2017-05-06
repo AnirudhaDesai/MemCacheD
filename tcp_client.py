@@ -16,6 +16,8 @@ print commands
 
 
 for command in commands:
+    if len(command) <= 1:
+        break
     try:
         # Send data
         message = command
@@ -27,13 +29,13 @@ for command in commands:
         amount_expected = len(message)
 
         while True: 
-            data = sock.recv(16)
-            amount_received += len(data)
-            print sys.stderr, 'received "%s"' % data
-            if amount_received < 16:
+            data = sock.recv(256)
+            amount_received = len(data)
+            print 'received "%s"' % data
+            if amount_received < 256:
                 break
 
-    except e:
+    except(e) :
         print e
 
 print sys.stderr, 'closing socket'

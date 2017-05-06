@@ -45,4 +45,8 @@ you don't exceed this size.
 
 Use the protocol described in `protocol.md`. You only need to implement the text
 protocol and commands described as essential in `requirements.md`.
+-------------------------------------------------------------------------------
+Implementation
+--------------
 
+* Eviction is performed when memory exceeds the maximum

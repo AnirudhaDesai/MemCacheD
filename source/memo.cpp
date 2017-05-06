@@ -1,11 +1,14 @@
 #include "memo.h"
 #include <cstring>
 #include "time.h"
+#include <stdlib.h>
+#include <limits.h>
+#include <exception>
 
+SlabsAlloc* alloc;
 
 namespace  Memo
 {
-
     std::unordered_map<std::string, Header*> Table;
 
     void update_Expiration_Timestamp(Header* h, int32_t expiration_time)
@@ -70,7 +73,7 @@ namespace  Memo
         if(h==nullptr)//if value not present in hash table already, allocate memory and update header. 
         {
             //add header information
-            h = (Header*) getHeap().malloc(size);
+            h = (Header*) alloc->store(size);
             std::strncpy(h->key, key.c_str(), 251);
             h->flags = flags;
             update_Expiration_Timestamp(h, expiration_time);
@@ -85,7 +88,7 @@ namespace  Memo
         }
         //need to add key, address to hash table. use temp.  
         //
-        
+        return ERROR;
     }
 
     RESPONSE replace(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas=false)
@@ -100,7 +103,7 @@ namespace  Memo
 
         if(h!=nullptr)
         {
-            if(getHeap().getSizeClass(h->data_size)==getHeap().getSizeClass(size))
+            if(alloc->getSizeClass(h->data_size)==alloc->getSizeClass(h->data_size + size))
             {   
                 h->flags = flags;
                 update_Expiration_Timestamp(h, expiration_time);
@@ -115,7 +118,7 @@ namespace  Memo
             }
             else
             {   printf("different size");
-                getHeap().free((void*)h);
+                alloc->remove((void*)h);
                 Table.erase({key});
                 return(add(std::string(key),flags,expiration_time,size,std::string(value)));
             }
@@ -142,7 +145,7 @@ namespace  Memo
         {
             return NOT_FOUND;
         }
-        else if(getHeap().getSizeClass(h->data_size)==getHeap().getSizeClass(h->data_size + size))
+        else if(alloc->getSizeClass(h->data_size)==alloc->getSizeClass(h->data_size + size))
         {
             temp = (char*) h+1;
             std::strcat(temp,value.c_str());
@@ -156,7 +159,7 @@ namespace  Memo
             temp_flags = h->flags;
             temp_expiration_time = h->expiration_time;
 
-            getHeap().free((void*)h);
+            alloc->remove((void*)h);
             Table.erase({key});
 
 
@@ -183,7 +186,7 @@ namespace  Memo
         {
             return NOT_FOUND;
         }
-        else if(getHeap().getSizeClass(h->data_size)==getHeap().getSizeClass(h->data_size + size))
+        else if(alloc->getSizeClass(h->data_size)==alloc->getSizeClass(h->data_size + size))
         {
             data = (char*) h+1;
             std::string temp = value + std::string(data);
@@ -198,7 +201,7 @@ namespace  Memo
             temp_flags = h->flags;
             temp_expiration_time = h->expiration_time;
 
-            getHeap().free((void*)h);
+            alloc->remove((void*)h);
             Table.erase({key});
 
             return(add(key,temp_flags,temp_expiration_time,size,temp));
@@ -211,12 +214,49 @@ namespace  Memo
         // delete code
     }
 
-    void incr(std::string key, std::string value) {
-        // incr code
+    RESPONSE incr(std::string key, std::string value) {
+        /*
+        Header* h;
+        printf("called %s\n",__FUNCTION__);
+
+        h = get(key);
+        char* temp;
+        long unsigned int num;
+
+        if(h==nullptr)
+        {
+            return NOT_FOUND;
+        }
+        else
+        {
+            /*
+            temp = (char*) h+1;
+            printf("value=%s",temp);
+            try
+            {
+                num = strtol(temp, NULL,10);
+            }
+            catch(std::exception& e)
+            {
+                return ERROR;
+            }
+            if(num==LONG_MAX || num==LONG_MIN)
+            {
+                return ERROR;
+            }
+
+            else num++;
+
+            sprintf(temp,"%lu",num);
+*/
+         //   return INCREMENTED;
+
+       // }
     }
 
-    void decr(std::string key, std::string value) {
+    RESPONSE decr(std::string key, std::string value) {
         // decr code
+        return ERROR;
     }
 
     void stats() {
