@@ -1,2 +1,3 @@
-add key 0 300 5\r\nvalue\r\n
-get key
+set key 1 400 7\r\newvalue\r\n
+append key 0 250 1\r\ns\r\n
+prepend key 0 250 2\r\new\r\n
