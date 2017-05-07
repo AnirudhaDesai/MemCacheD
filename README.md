@@ -9,11 +9,14 @@ Building
   
 Running
 -------
-* If you have used the build.sh script, the binary should be available under the out directory. 
-   ./out/memo --lru 2048M 
+* If you have used the build.sh script, the binary should be available under the out directory. Run:
+  
+  ./out/memo --lru 2048M 
 * If you have built the project using a different compiler or method, locate the built executable and run:
-   ./<executable> --lru 2048M
+
+   ./[executable] --lru 2048M
 * To run the test suite:
+   
    python auto_tester.py
 
 
