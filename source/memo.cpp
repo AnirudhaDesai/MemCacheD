@@ -188,6 +188,7 @@ namespace  Memo
         }
         else if(alloc->getSizeClass(h->data_size)==alloc->getSizeClass(h->data_size + size))
         {
+            printf("same size class\n");
             data = (char*) h+1;
             std::string temp = value + std::string(data);
             std::strncpy(data, temp.c_str(), std::strlen(temp.c_str()));
@@ -195,6 +196,8 @@ namespace  Memo
         }
         else
         {
+
+            printf("different size class\n");
             data = (char*) h+1;
             std::string temp = value + std::string(data);
             size = h->data_size + size;

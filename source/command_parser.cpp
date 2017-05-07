@@ -128,6 +128,7 @@ void parse_command(char* cmd_str, size_t cmd_len, char*& res_str, size_t* res_le
             handle_append(cmd_lines, res_str, res_len);
             break;
         case PREPEND:
+            printf("#####################");
             handle_prepend(cmd_lines, res_str, res_len);
             break;
         case CAS:
@@ -261,15 +262,18 @@ void handle_append(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* 
 
 void handle_prepend(char* cmd_lines[MAX_CMD_LINES], char*& response_str, size_t* response_len)
 {
+    printf("called********** %s\n",__FUNCTION__);
     // parse the rest of the first line
     char* key = strtok(NULL," ");
-    uint16_t flags  = atoi((char*)strtok(NULL," "));
-    int32_t expiration_time  = atoi((char*)strtok(NULL," "));
+    //uint16_t flags  = atoi((char*)strtok(NULL," "));
+    //int32_t expiration_time  = atoi((char*)strtok(NULL," "));
     size_t size = atoi((char*)strtok(NULL," "));
     char* noreply = strtok(NULL, " ");
     char* value  = cmd_lines[1];
 
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
+
+    
 
     RESPONSE res = Memo::prepend(std::string(key), size, std::string(value));
 

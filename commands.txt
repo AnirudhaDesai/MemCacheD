@@ -1,4 +1,5 @@
 add key 0 300 5\r\nvalue\r\n
 get key
-add key2 0 333 4\r\ndata\r\n
-add key3 00 222 4\r\nhola\r\n
+prepend key 5\r\nabcde\r\n
+get key
+
