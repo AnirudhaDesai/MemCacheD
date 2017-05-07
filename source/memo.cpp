@@ -27,7 +27,7 @@ namespace  Memo
         if ( got != Table.end() )
         {
             if (got->second->expiration_timestamp > time(NULL)) {
-                alloc->updateRecentlyUsed((Header*)got->second);
+                alloc->cacheReplacementUpdates((Header*)got->second);
                 return got->second;
             }
         }

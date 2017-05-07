@@ -37,6 +37,7 @@ class Header {
         unsigned int last_updated_client;
         int64_t cas_unique;
         bool valid;
+        uint16_t landlordCost; //for landlord replacement algorithm
 
         Header * prev;
         Header * next;
@@ -78,6 +79,7 @@ public:
   void remove(void * ptr);
   size_t getSize(void * p);
   void updateRecentlyUsed(Header* h);
+  void cacheReplacementUpdates(Header* h);
 
   // number of bytes currently allocated  
   size_t bytesAllocated();

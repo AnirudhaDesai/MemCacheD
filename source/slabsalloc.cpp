@@ -34,9 +34,8 @@ void * SlabsAlloc::store(size_t sz) {
             
             printf("Entered LRU Cache Replacement\n");
             printf("Object being removed %s\n",head_AllocatedObjects[i]->key );
-            freedObjects[i] = head_AllocatedObjects[i];
-            head_AllocatedObjects[i] = head_AllocatedObjects[i]->next; 
-           // remove((void *) head_AllocatedObjects[i]);
+             
+            remove((void *) head_AllocatedObjects[i]);
 
         }
 
@@ -60,9 +59,11 @@ void * SlabsAlloc::store(size_t sz) {
             remove((void *)tempObject);  
 
         }
-        // else if ______, do something else
+        // else if LANDLORD, evict based on least credit
+        
         else if(algorithm == LANDLORD)
         {
+
 
         }
         else
@@ -191,6 +192,21 @@ void SlabsAlloc::remove(void * ptr) {
    size_t size = getSizeFromClass(getSizeClass(h->allocatedSize));
    return size; 
    }*/
+void SlabsAlloc::cacheReplacementUpdates(Header* h)
+{
+    if(algorithm == LRU)
+    {
+        updateRecentlyUsed(h);
+    }
+    else if(algorithm == RANDOM)
+    {
+        ; //do nothing
+    }
+    else if (algorithm == LANDLORD)
+    {
+        //modify credit of the file
+    }
+}
 void SlabsAlloc::updateRecentlyUsed(Header* h)
 {
     Header* temp;
