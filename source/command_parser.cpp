@@ -2,6 +2,8 @@
 
 #include <string>
 #include <regex>
+#include <iterator>
+
 
 #define MAX_CMD_LINES 10
 #define NUM_COMMANDS 15
@@ -94,7 +96,7 @@ void parse_command(char* cmd_str, size_t cmd_len, char*& res_str, size_t* res_le
     //cmd_lines[0] = strtok(cmd_str, "\\r\\n");
     std::sregex_token_iterator cmd_itr = std::sregex_token_iterator(cmd.begin(), cmd.end(), end_re, -1);
     printf("setting key=%s\n",cmd_itr->str().c_str());
-    command_str = cmd_itr++->str().c_str();
+    command_str = cmd_itr++->str();
     std::sregex_token_iterator end_itr;
 
     // figure out the main command
@@ -335,11 +337,11 @@ void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_
             //printf("Get Result: key=%s, data_size=%u, flags=%u", h->key,h->data_size,h->flags, (char*) (h+1));
             if(response_str == nullptr)
             {
-                response_str = (char*)calloc(1,strlen(RESPONSE_MAP[VALUE].res_str));
+                response_str = (char*)calloc(1,strlen(RESPONSE_MAP[VALUE].res_str+1));
             }
             else
             {
-                response_str = (char*)realloc(response_str,std::strlen(response_str)+std::strlen(RESPONSE_MAP[VALUE].res_str)+1);
+                response_str = (char*)realloc(response_str,std::strlen(RESPONSE_MAP[VALUE].res_str)+1);
 
             }
             std::strcat(response_str,RESPONSE_MAP[VALUE].res_str);

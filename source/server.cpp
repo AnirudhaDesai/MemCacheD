@@ -70,7 +70,7 @@ void *beginConnect(void *args){
     {
         //read from socket
         char* response_str=nullptr;
-        
+        buffer[buf_size] = {0};
         recv(client_socket, buffer, buf_size, 0);
 
         printf("Message from Client %ld is : %s\n",client_socket, buffer);
