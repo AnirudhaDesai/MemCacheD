@@ -69,6 +69,7 @@ void *beginConnect(void *args){
     while(true)
     {
         //read from socket
+        buffer[buf_size] = {0};
         char* response_str=nullptr;
         buffer[buf_size] = {0};
         recv(client_socket, buffer, buf_size, 0);
