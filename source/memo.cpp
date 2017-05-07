@@ -297,6 +297,7 @@ namespace  Memo
 
     void stats() {
         // stats code
+        
     }
 
     void flush_all(int32_t exptime) {
