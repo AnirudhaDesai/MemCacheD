@@ -1,4 +1,4 @@
-set key 0 300 5\r\nvalue\r\n
+add key 0 333 4\r\ndata\r\n
 get key\r\n
 replace key 1 250 7\r\nrevalue\r\n
 get key\r\n

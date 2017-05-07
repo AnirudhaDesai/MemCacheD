@@ -16,7 +16,7 @@ void * SlabsAlloc::store(size_t sz) {
     std::lock_guard<std::recursive_mutex> lock(heapLock);
     
     
-    /* If this malloc will push the memory usage over the limit,
+    /* If this malloc will push the memory usage over the limit OR exceeds the class limit,
      * perform an eviction before storing
      */
     if(sz+allocated >= MAX_ALLOC || AllocatedCount[i]>=CLASS_LIM )
@@ -26,8 +26,12 @@ void * SlabsAlloc::store(size_t sz) {
         // if LRU, evict from tail
         if (algorithm == LRU)
         {
+            
+            printf("Entered LRU Cache Replacement\n");
+            printf("Object being removed %s\n",head_AllocatedObjects[i]->key );
             freedObjects[i] = head_AllocatedObjects[i];
             head_AllocatedObjects[i] = head_AllocatedObjects[i]->next; 
+           // remove((void *) head_AllocatedObjects[i]);
 
         }
 
@@ -46,6 +50,7 @@ void * SlabsAlloc::store(size_t sz) {
                 rndNum--;
 
             }
+            printf("Object being removed %s\n",tempObject->key );
 
             remove((void *)tempObject);  
 

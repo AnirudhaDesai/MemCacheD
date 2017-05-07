@@ -38,9 +38,13 @@ def TestExpirationTime(sock):
     message = "add expkey 012 5 11\\r\\nEXP MESSAGE\\r\\n"
     sendMessage(message,sock)
     sleep(8)
-    message = "get expkey"
+    message = "get expkey\\r\\n"
     sendMessage(message,sock)
 
+def TestCacheReplacement(sock):
+    for i in range(1027):
+        message = "add repKey%s 012 3000 11\\r\\nADD MESSAGE\\r\\n"%i
+        sendMessage(message,sock)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -51,7 +55,9 @@ sock.connect(server_address)
 
 # Test Functions can be called here 
 #TestAddGet(sock)
+#TestCacheReplacement(sock)
 #TestExpirationTime(sock)
+
 
 
 f = open("commands.txt")
