@@ -345,7 +345,7 @@ void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_
 
     std::string key;
     do {
-        key = *param_itr++;
+        key = *(param_itr++);
         Header* h = Memo::get(key);
         if (h != NULL)
         {
@@ -403,7 +403,7 @@ void handle_delete(std::sregex_token_iterator param_itr, char*& response_str, si
 void handle_incr(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
 {
     std::sregex_token_iterator end_itr;
-    std::string key = *param_itr++;
+    std::string key = *(param_itr++);
     bool noreply = false;
     if (param_itr != end_itr) {
         noreply = true;

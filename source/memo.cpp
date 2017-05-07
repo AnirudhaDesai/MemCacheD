@@ -1,9 +1,9 @@
 #include "memo.h"
 #include <cstring>
 #include "time.h"
-//#include <stdlib.h>
-//#include <limits.h>
-//#include <exception>
+#include <stdlib.h>
+#include <limits.h>
+#include <exception>
 
 SlabsAlloc* alloc;
 
@@ -211,7 +211,7 @@ namespace  Memo
     }
 
     RESPONSE incr(std::string key, std::string value) {
-        /*
+        
         Header* h;
         printf("called %s\n",__FUNCTION__);
 
@@ -225,8 +225,8 @@ namespace  Memo
         }
         else
         {
-            /*
-            temp = (char*) h+1;
+            
+            temp = (char*) (h+1);
             printf("value=%s",temp);
             try
             {
@@ -242,16 +242,55 @@ namespace  Memo
             }
 
             else num++;
+            printf("incremented:%lu",num);
 
             sprintf(temp,"%lu",num);
-*/
-         //   return INCREMENTED;
+            printf("temp:%s",temp);//To DO: check if this is reflecting in the object?
 
-       // }
+            return STORED;
+
+        }
     }
 
     RESPONSE decr(std::string key, std::string value) {
-        // decr code
+        Header* h;
+        printf("called %s\n",__FUNCTION__);
+
+        h = get(key);
+        char* temp;
+        long unsigned int num;
+
+        if(h==nullptr)
+        {
+            return NOT_FOUND;
+        }
+        else
+        {
+            
+            temp = (char*) (h+1);
+            printf("value=%s",temp);
+            try
+            {
+                num = strtol(temp, NULL,10);
+            }
+            catch(std::exception& e)
+            {
+                return ERROR;
+            }
+            if(num==LONG_MAX || num==LONG_MIN)
+            {
+                return ERROR;
+            }
+
+            else num--;
+            printf("decremented:%lu",num);
+
+            sprintf(temp,"%lu",num);
+            printf("temp:%s",temp);//To DO: check if this is reflecting in the object?
+
+            return STORED;
+
+        }
         return ERROR;
     }
 
