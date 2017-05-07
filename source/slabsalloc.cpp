@@ -88,8 +88,8 @@ void * SlabsAlloc::store(size_t sz) {
         tail_AllocatedObjects[i]=h;
 
         AllocatedCount[i]++;
-        statsObject.total_items++;
-        statsObject.bytes = statsObject.bytes + size;
+        Stats::Instance().total_items++;
+        Stats::Instance().bytes = Stats::Instance().bytes + size;
 
         return h;
     }
@@ -116,9 +116,9 @@ void * SlabsAlloc::store(size_t sz) {
 
         AllocatedCount[i]++;
         
-        statsObject.curr_items++;
-        statsObject.total_items++;
-        statsObject.bytes = statsObject.bytes + size_to_malloc;
+        Stats::Instance().curr_items++;
+        Stats::Instance().total_items++;
+        Stats::Instance().bytes = Stats::Instance().bytes + size_to_malloc;
 
         return tail_AllocatedObjects[i];
 
@@ -145,9 +145,9 @@ void * SlabsAlloc::store(size_t sz) {
 
         AllocatedCount[i]++;
        
-        statsObject.curr_items++;
-        statsObject.total_items++;
-        statsObject.bytes = statsObject.bytes + size_to_malloc;
+        Stats::Instance().curr_items++;
+        Stats::Instance().total_items++;
+        Stats::Instance().bytes = Stats::Instance().bytes + size_to_malloc;
 
 
         return tail_AllocatedObjects[i];
@@ -192,8 +192,8 @@ void SlabsAlloc::remove(void * ptr) {
     h->next= nullptr; 
 
     AllocatedCount[i]--;
-    statsObject.curr_items--;
-    statsObject.bytes = statsObject.bytes - size;
+    Stats::Instance().curr_items--;
+    Stats::Instance().bytes = Stats::Instance().bytes - size;
     allocated -= size;
 
 }

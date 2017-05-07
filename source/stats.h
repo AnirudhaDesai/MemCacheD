@@ -1,0 +1,121 @@
+#ifndef _STATS_H_
+#define _STATS_H_
+
+
+
+
+typedef struct r_usage    //used in stats class below 
+{
+    uint32_t seconds;
+    uint32_t microseconds; 
+};
+
+class Stats
+{
+
+    Stats() :
+        pid(0),
+        uptime(0),
+        version("1.0.0"),
+        pointer_size(0),
+        userUsage({0,0}),
+        systemUsage({0,0}),
+        curr_items(0),
+        total_items(0),
+        bytes(0),
+        curr_connections(0),
+        total_connections(0),
+        connection_structures(0),
+        reserved_fds(0),
+        cmd_get(0),
+        cmd_set(0),
+        cmd_flush(0),
+        cmd_touch(0),
+        get_hits(0),
+        get_misses(0),
+        delete_misses(0),
+        delete_hits(0),
+        incr_misses(0),
+        incr_hits(0),
+        decr_misses(0),
+        decr_hits(0),  
+        cas_misses(0), 
+        cas_hits(0), 
+        cas_badval(0),
+        touch_hits(0), 
+        touch_misses(0), 
+        auth_cmds(0), 
+        auth_errors(0), 
+        evictions(0),
+        reclaimed(0),
+        bytes_read(0),
+        bytes_written(0),
+        limit_maxbytes(0),
+        threads(0), 
+        conn_yields(0), 
+        hash_power_level(0),
+        hash_bytes(0),
+        hash_is_expanding(0),
+        expired_unfetched(0),
+        evicted_unfetched(0) 
+        {
+            pid=::getpid();
+        }
+    public:
+
+    static Stats& Instance()
+    {
+        static Stats s;
+        return s;
+
+    }
+
+    pid_t pid;
+    int32_t uptime;
+    std::string version;
+    int32_t pointer_size;
+    r_usage userUsage;
+    r_usage systemUsage;
+    uint32_t curr_items = 0;
+    uint32_t total_items;
+    uint64_t bytes;
+    uint32_t curr_connections;
+    uint32_t total_connections;
+    uint32_t connection_structures;
+    uint32_t reserved_fds;
+    uint64_t cmd_get;
+    uint64_t cmd_set;
+    uint64_t cmd_flush;
+    uint64_t cmd_touch;
+    uint64_t get_hits;
+    uint64_t get_misses;
+    uint64_t delete_misses;
+    uint64_t delete_hits;
+    uint64_t incr_misses;
+    uint64_t incr_hits;
+    uint64_t decr_misses;
+    uint64_t decr_hits;  
+    uint64_t cas_misses; 
+    uint64_t cas_hits; 
+    uint64_t cas_badval;
+    uint64_t touch_hits; 
+    uint64_t touch_misses; 
+    uint64_t auth_cmds; 
+    uint64_t auth_errors; 
+    uint64_t evictions;
+    uint64_t reclaimed;
+    uint64_t bytes_read;
+    uint64_t bytes_written;
+    uint32_t limit_maxbytes;
+    uint32_t threads; 
+    uint64_t conn_yields; 
+    uint32_t hash_power_level;
+    uint64_t hash_bytes;
+    bool hash_is_expanding = false;
+    uint64_t expired_unfetched;
+    uint64_t evicted_unfetched; 
+
+};
+
+
+#endif // _STATS_H_

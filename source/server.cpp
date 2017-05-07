@@ -1,4 +1,5 @@
 #include "server.h"
+#include "stats.h"
 
 int initializeServer(){
     long  server_socket, client_socket;
@@ -58,6 +59,8 @@ int initializeServer(){
 void *beginConnect(void *args){
 
 #define buf_size 256
+
+    Stats::Instance().curr_connections++;
 
     long client_socket = (long)args;
     char  buffer[buf_size] = {0};
