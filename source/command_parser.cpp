@@ -19,14 +19,14 @@ RESPONSE_STRING_MAP RESPONSE_MAP[NUM_RESPONSES]
     {ERROR,(char*)"ERROR"},
     {CLIENT_ERROR,(char*)"CLIENT_ERROR"},
     {SERVER_ERROR,(char*)"SERVER_ERROR"},
-    // storage command responses 
+    // storage command responses
     {STORED,(char*)"STORED"},
     {EXISTS,(char*)"EXISTS"},
     {NOT_FOUND,(char*)"NOT_FOUND"},
     // retrieval command responses
     {VALUE,(char*)"VALUE"},
     {END,(char*)"END"},
-    // deletion 
+    // deletion
     // incr/decr
     {DELETED,(char*)"DELETED"},
     {NOT_FOUND,(char*)"NOT_FOUND"}
@@ -94,25 +94,25 @@ void parse_command(char* cmd_str, size_t cmd_len, char*& res_str, size_t* res_le
     //cmd_lines[0] = strtok(cmd_str, "\\r\\n");
     std::sregex_token_iterator cmd_itr = std::sregex_token_iterator(cmd.begin(), cmd.end(), end_re, -1);
     printf("setting key=%s\n",cmd_itr->str().c_str());
-    command_str = cmd_itr++->str().c_str();
+    command_str = *cmd_itr++;
     std::sregex_token_iterator end_itr;
 
     // figure out the main command
     std::sregex_token_iterator param_itr = std::sregex_token_iterator(command_str.begin(), command_str.end(), ws_re, -1);
-    const char* main_command_str = param_itr++->str().c_str();
+    string main_command_str = *param_itr++;
 
     COMMAND command = NONE;
 
     for(int i=0;i<NUM_COMMANDS;i++)
     {
-        if(strcmp(main_command_str,CMD_MAP[i].cmd_str)==0)
+        if(strcmp(main_command_str.c_str(),CMD_MAP[i].cmd_str)==0)
         {
             command = CMD_MAP[i].cmd;
             break;
         }
     }
 
-    printf ("got main command = %d %s\n",command, main_command_str);
+    printf ("got main command = %d %s\n",command, main_command_str.c_str());
 
     // now handle command-specific stuff
     switch(command)
@@ -175,15 +175,18 @@ void handle_set(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator p
 {
     // parse the rest of the first line
     std::sregex_token_iterator end_itr;
-    std::string key = param_itr++->str();
-    uint16_t flags  = atoi(param_itr++->str().c_str());
-    int32_t expiration_time  = atoi(param_itr++->str().c_str());
-    size_t size = atoi(param_itr++->str().c_str());
+    std::string key = *param_itr++;
+    std::string flags_str = *param_itr++;
+    uint16_t flags  = atoi(flags_str.c_str());
+    std::string expiration_time_str = *param_itr++;
+    int32_t expiration_time  = atoi(expiration_time_str.c_str());
+    std::string size_str = *param_itr++;
+    size_t size = atoi(size_str.c_str());
     bool noreply = false;
     if (param_itr != end_itr) {
         noreply = true;
     }
-    std::string value = cmd_itr++->str();
+    std::string value = *cmd_itr++;
 
     //printf("setting key=%s,flags=%d,exptime=%s,size=%s\n",key,flags,expiration_time,size);
     printf("setting key=%s\n", key.c_str());
@@ -203,15 +206,18 @@ void handle_add(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator p
 {
     // parse the rest of the first line
     std::sregex_token_iterator end_itr;
-    std::string key = param_itr++->str();
-    uint16_t flags  = atoi(param_itr++->str().c_str());
-    int32_t expiration_time  = atoi(param_itr++->str().c_str());
-    size_t size = atoi(param_itr++->str().c_str());
+    std::string key = *param_itr++;
+    std::string flags_str = *param_itr++;
+    uint16_t flags  = atoi(flags_str.c_str());
+    std::string expiration_time_str = *param_itr++;
+    int32_t expiration_time  = atoi(expiration_time_str.c_str());
+    std::string size_str = *param_itr++;
+    size_t size = atoi(size_str.c_str());
     bool noreply = false;
     if (param_itr != end_itr) {
         noreply = true;
     }
-    std::string value = cmd_itr++->str();
+    std::string value = *cmd_itr++;
 
 
     printf("handle_add,%s",key.c_str());
@@ -230,15 +236,18 @@ void handle_replace(std::sregex_token_iterator cmd_itr, std::sregex_token_iterat
 {
     // parse the rest of the first line
     std::sregex_token_iterator end_itr;
-    std::string key = param_itr++->str();
-    uint16_t flags  = atoi(param_itr++->str().c_str());
-    int32_t expiration_time  = atoi(param_itr++->str().c_str());
-    size_t size = atoi(param_itr++->str().c_str());
+    std::string key = *param_itr++;
+    std::string flags_str = *param_itr++;
+    uint16_t flags  = atoi(flags_str.c_str());
+    std::string expiration_time_str = *param_itr++;
+    int32_t expiration_time  = atoi(expiration_time_str.c_str());
+    std::string size_str = *param_itr++;
+    size_t size = atoi(size_str.c_str());
     bool noreply = false;
     if (param_itr != end_itr) {
         noreply = true;
     }
-    std::string value = cmd_itr++->str();
+    std::string value = *cmd_itr++;
 
 
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
@@ -256,13 +265,14 @@ void handle_append(std::sregex_token_iterator cmd_itr, std::sregex_token_iterato
 {
     // parse the rest of the first line
     std::sregex_token_iterator end_itr;
-    std::string key = param_itr++->str();
-    size_t size = atoi(param_itr++->str().c_str());
+    std::string key = *param_itr++;
+    std::string size_str = *param_itr++;
+    size_t size = atoi(size_str.c_str());
     bool noreply = false;
     if (param_itr != end_itr) {
         noreply = true;
     }
-    std::string value = cmd_itr++->str();
+    std::string value = *cmd_itr++;
 
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
@@ -279,13 +289,14 @@ void handle_prepend(std::sregex_token_iterator cmd_itr, std::sregex_token_iterat
 {
     // parse the rest of the first line
     std::sregex_token_iterator end_itr;
-    std::string key = param_itr++->str();
-    size_t size = atoi(param_itr++->str().c_str());
+    std::string key = *param_itr++;
+    std::string size_str = *param_itr++;
+    size_t size = atoi(size_str.c_str());
     bool noreply = false;
     if (param_itr != end_itr) {
         noreply = true;
     }
-    std::string value = cmd_itr++->str();
+    std::string value = *cmd_itr++;
 
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
@@ -302,15 +313,18 @@ void handle_cas(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator p
 {
     // parse the rest of the first line
     std::sregex_token_iterator end_itr;
-    std::string key = param_itr++->str();
-    uint16_t flags  = atoi(param_itr++->str().c_str());
-    int32_t expiration_time  = atoi(param_itr++->str().c_str());
-    size_t size = atoi(param_itr++->str().c_str());
+    std::string key = *param_itr++;
+    std::string flags_str = *param_itr++;
+    uint16_t flags  = atoi(flags_str.c_str());
+    std::string expiration_time_str = *param_itr++;
+    int32_t expiration_time  = atoi(expiration_time_str.c_str());
+    std::string size_str = *param_itr++;
+    size_t size = atoi(size_str.c_str());
     bool noreply = false;
     if (param_itr != end_itr) {
         noreply = true;
     }
-    std::string value = cmd_itr++->str();
+    std::string value = *cmd_itr++;
 
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
@@ -327,9 +341,9 @@ void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_
 
     std::string key;
     do {
-        key = param_itr++->str();
+        key = *param_itr++;
         Header* h = Memo::get(key);
-        if (h != NULL) 
+        if (h != NULL)
         {
             printf("Get Result: key=%s, data_size=%u, flags=%u", h->key,h->data_size,h->flags);
             //printf("Get Result: key=%s, data_size=%u, flags=%u", h->key,h->data_size,h->flags, (char*) (h+1));
@@ -350,7 +364,7 @@ void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_
             response_str = (char*)realloc(response_str,1);
             std::strcat(response_str," ");
             char flags_str[20];
-            sprintf(flags_str,"%u",h->flags); 
+            sprintf(flags_str,"%u",h->flags);
             response_str = (char*)realloc(response_str, std::strlen(flags_str));
             std::strcat(response_str,flags_str);
             response_str = (char*)realloc(response_str,1);
@@ -373,17 +387,17 @@ void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_
 void handle_gets(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
 {
     std::sregex_token_iterator end_itr;
-    std::string key = param_itr++->str();
+    std::string key = *param_itr++;
     while(param_itr != end_itr) {
         Memo::get(key);
-        key = param_itr++->str();
+        key = *param_itr++;
     }
 }
 
 void handle_delete(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
 {
     std::sregex_token_iterator end_itr;
-    std::string key = param_itr++->str();
+    std::string key = *param_itr++;
     bool noreply = false;
     if (param_itr != end_itr) {
         noreply = true;
@@ -395,12 +409,12 @@ void handle_delete(std::sregex_token_iterator param_itr, char*& response_str, si
 void handle_incr(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
 {
     std::sregex_token_iterator end_itr;
-    std::string key = param_itr++->str();
+    std::string key = *param_itr++;
     bool noreply = false;
     if (param_itr != end_itr) {
         noreply = true;
     }
-    std::string value = cmd_itr++->str();
+    std::string value = *cmd_itr++;
 
     Memo::incr(key, value);
 }
@@ -408,12 +422,12 @@ void handle_incr(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator 
 void handle_decr(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
 {
     std::sregex_token_iterator end_itr;
-    std::string key = param_itr++->str();
+    std::string key = *param_itr++;
     bool noreply = false;
     if (param_itr != end_itr) {
         noreply = true;
     }
-    std::string value = cmd_itr++->str();
+    std::string value = *cmd_itr++;
 
     Memo::decr(key, value);
 }
@@ -426,8 +440,9 @@ void handle_stats(char*& response_str, size_t* response_len)
 void handle_flush_all(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
 {
     std::sregex_token_iterator end_itr;
-    int32_t exptime = atoi(param_itr++->str().c_str());
-    Memo::flush_all(exptime);
+    std::string expiration_time_str = *param_itr++;
+    int32_t expiration_time  = atoi(expiration_time_str.c_str());
+    Memo::flush_all(expiration_time);
 }
 
 void handle_version(char*& response_str, size_t* response_len)
