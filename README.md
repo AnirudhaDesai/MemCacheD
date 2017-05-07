@@ -1,4 +1,21 @@
 Project 3 - Memo (a memcached clone)
+------------------------------------
+
+Building
+--------
+* If you have g++ 4.8 or above, you can use the build.sh build script directly
+* If you want to use a different compiler, you can use CMake. We have added a CMakeLists.txt file in the source
+  which should help
+  
+Running
+-------
+* If you have used the build.sh script, the binary should be available under the out directory. 
+   ./out/memo --lru 2048M 
+* If you have built the project using a different compiler or method, locate the built executable and run:
+   ./<executable> --lru 2048M
+* To run the test suite:
+   python auto_tester.py
+
 
 For this project, you will write a multithreaded server that
 implements the memcached protocol in C++11.  Due date is May 8.
