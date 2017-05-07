@@ -289,7 +289,9 @@ size_t SlabsAlloc::getSizeFromClass(int index) {
 
 
 int SlabsAlloc::getSizeClass(size_t sz) {
-
+    if (sz < 8) {
+        return 0;
+    }
     return (int)(ceil(log2(sz)))-3;
 
 }
