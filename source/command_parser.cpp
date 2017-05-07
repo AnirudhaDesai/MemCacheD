@@ -2,8 +2,6 @@
 
 #include <string>
 #include <regex>
-#include <iterator>
-
 
 #define MAX_CMD_LINES 10
 #define NUM_COMMANDS 15
@@ -351,11 +349,11 @@ void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_
             //printf("Get Result: key=%s, data_size=%u, flags=%u", h->key,h->data_size,h->flags, (char*) (h+1));
             if(response_str == nullptr)
             {
-                response_str = (char*)calloc(1,strlen(RESPONSE_MAP[VALUE].res_str+1));
+                response_str = (char*)calloc(1,strlen(RESPONSE_MAP[VALUE].res_str));
             }
             else
             {
-                response_str = (char*)realloc(response_str,std::strlen(RESPONSE_MAP[VALUE].res_str)+1);
+                response_str = (char*)realloc(response_str,std::strlen(response_str)+std::strlen(RESPONSE_MAP[VALUE].res_str)+1);
 
             }
             std::strcat(response_str,RESPONSE_MAP[VALUE].res_str);
