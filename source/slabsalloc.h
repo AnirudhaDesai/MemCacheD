@@ -44,7 +44,7 @@ class Header {
         Header * next;
 };
 
-struct rusage    //used in stats class below 
+struct r_usage    //used in stats class below 
 {
   uint32_t seconds;
   uint32_t microseconds; 
@@ -62,8 +62,8 @@ public:
    int32_t uptime;
    std::string version;
    int32_t pointer_size;
-   rusage userUsage;
-   rusage systemUsage;
+   r_usage userUsage;
+   r_usage systemUsage;
    uint32_t curr_items = 0;
    uint32_t total_items;
    uint64_t bytes;
