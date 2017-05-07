@@ -21,14 +21,38 @@ namespace  Memo
         }
     }
 
-    Header* get(std::string key)
+    Header* get(std::string key, const char* callerFunction)
     {
+        if (std::strcmp(callerFunction, "handle_get") == 0)
+        {   
+            // Increment stats only if get called by handle_get. Calls from other functions are internal
+            alloc->statsObject.cmd_get++;
+            
+        }
+
         std::unordered_map<std::string,Header*>::const_iterator got = Table.find (key);
         if ( got != Table.end() )
         {
             if (got->second->expiration_timestamp > time(NULL)) {
                 alloc->cacheReplacementUpdates((Header*)got->second);
+                // it is a get hit
+                 if (std::strcmp(callerFunction, "handle_get") == 0)
+                    {   
+                     // Increment stats only if get called by handle_get. Calls from other functions are internal
+                        
+                        alloc->statsObject.get_hits++;
+                    }
                 return got->second;
+            }
+            else
+            {
+                //it is a get miss.
+                if (std::strcmp(callerFunction, "handle_get") == 0)
+                    {   
+                     // Increment stats only if get called by handle_get. Calls from other functions are internal
+                        
+                        alloc->statsObject.get_misses++;
+                    }
             }
         }
         return nullptr;
@@ -40,7 +64,9 @@ namespace  Memo
         Header* h;
         printf("called %s\n",__FUNCTION__);
 
-        h=get(key);
+        //alloc->statsObject.cmd_set++;
+
+        h=get(key, __FUNCTION__);
         if (h == nullptr) {
             return(add(key, flags, expiration_time, size, value));
         }
@@ -57,7 +83,9 @@ namespace  Memo
         char* temp;
         printf("called %s\n",__FUNCTION__);
 
-        h=get(key);
+        alloc->statsObject.cmd_set++;
+
+        h=get(key, __FUNCTION__);
 
         if(h==nullptr)//if value not present in hash table already, allocate memory and update header. 
         {
@@ -86,7 +114,9 @@ namespace  Memo
         char* temp;
         printf("called %s\n",__FUNCTION__);
 
-        h=get(key);
+        alloc->statsObject.cmd_set++;
+
+        h=get(key, __FUNCTION__);
         //printf("%p",h);
 
 
@@ -128,7 +158,9 @@ namespace  Memo
 
         printf("called %s\n",__FUNCTION__);
 
-        h = get(key);
+        alloc->statsObject.cmd_set++;
+
+        h = get(key,__FUNCTION__);
 
         if(h==nullptr)
         {
@@ -170,7 +202,9 @@ namespace  Memo
 
         printf("called %s\n",__FUNCTION__);
 
-        h = get(key);
+        alloc->statsObject.cmd_set++;
+
+        h = get(key,__FUNCTION__);
 
         if(h==nullptr)
         {
@@ -216,17 +250,20 @@ namespace  Memo
         Header* h;
         printf("called %s\n",__FUNCTION__);
 
-        h = get(key);
+        h = get(key,__FUNCTION__);
         char* temp;
         long unsigned int num;
 
         if(h==nullptr)
         {
+            //incr on missing keys. update stats 
+            alloc->statsObject.incr_misses++;
             return NOT_FOUND;
         }
         else
         {
-            
+            //incr hit. update stats 
+            alloc->statsObject.incr_hits++;
             temp = (char*) (h+1);
             printf("value=%s",temp);
             try
@@ -257,16 +294,20 @@ namespace  Memo
         Header* h;
         printf("called %s\n",__FUNCTION__);
 
-        h = get(key);
+        h = get(key,__FUNCTION__);
         char* temp;
         long unsigned int num;
 
         if(h==nullptr)
         {
+            // it is decr miss. update stats
+            alloc->statsObject.decr_misses++;
             return NOT_FOUND;
         }
         else
         {
+            //decr hit. update stats
+            alloc->statsObject.decr_hits++;
             
             temp = (char*) (h+1);
             printf("value=%s",temp);
@@ -297,11 +338,13 @@ namespace  Memo
 
     void stats() {
         // stats code
-        
+
+
     }
 
     void flush_all(int32_t exptime) {
         // expire all objects after exptime
+        alloc->statsObject.cmd_flush++;
     }
 
     void version() {

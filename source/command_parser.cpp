@@ -346,7 +346,8 @@ void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_
     std::string key;
     do {
         key = *(param_itr++);
-        Header* h = Memo::get(key);
+        
+        Header* h = Memo::get(key,__FUNCTION__);
         if (h != NULL)
         {
             printf("Get Result: key=%s, data_size=%u, flags=%u", h->key,h->data_size,h->flags);

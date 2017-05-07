@@ -53,6 +53,10 @@ struct rusage    //used in stats class below
 class Stats
 {
 public:
+  Stats()
+  {
+    ;
+  }
 
    pid_t pid;
    int32_t uptime;
@@ -60,7 +64,7 @@ public:
    int32_t pointer_size;
    rusage userUsage;
    rusage systemUsage;
-   uint32_t curr_items;
+   uint32_t curr_items = 0;
    uint32_t total_items;
    uint64_t bytes;
    uint32_t curr_connections;
@@ -85,8 +89,8 @@ public:
    uint64_t touch_hits; 
    uint64_t touch_misses; 
    uint64_t auth_cmds; 
-   uint64_t  auth_errors; 
-   uint64_t  evictions;
+   uint64_t auth_errors; 
+   uint64_t evictions;
    uint64_t reclaimed;
    uint64_t bytes_read;
    uint64_t bytes_written;
@@ -95,7 +99,7 @@ public:
    uint64_t conn_yields; 
    uint32_t hash_power_level;
    uint64_t hash_bytes;
-   bool hash_is_expanding;
+   bool hash_is_expanding = false;
    uint64_t expired_unfetched;
    uint64_t evicted_unfetched; 
 
@@ -114,6 +118,7 @@ public:
       algorithm(algorithm)
 
   {
+   // statsObject->pid = ::getpid();
    for (auto& f : freedObjects) {
       f = nullptr;
     }
@@ -128,8 +133,9 @@ public:
     }
     TRACE_DEBUG("MAX_ALLOC=",MAX_ALLOC);
 
-    //statsObject->pid = ::getpid();
-   
+
+    statsObject.pid=::getpid();
+       
   }
 
   ~SlabsAlloc()
@@ -165,6 +171,8 @@ public:
   // Return the size class for a given size.
   static int getSizeClass(size_t sz);
 
+  Stats statsObject;
+
 private:
 
   recursive_mutex heapLock;
@@ -182,11 +190,9 @@ private:
   Header * head_AllocatedObjects[NUM_CLASSES];
   Header * tail_AllocatedObjects[NUM_CLASSES];
   Header * freedObjects[NUM_CLASSES];
-  Stats * statsObject;
+  
   
 };
-
-
 
 extern "C" {
   void reportStats();
