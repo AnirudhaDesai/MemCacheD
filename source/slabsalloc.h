@@ -71,8 +71,6 @@ class SlabsAlloc {
         }
         TRACE_DEBUG("MAX_ALLOC=",MAX_ALLOC);
 
-
-
     }
 
         ~SlabsAlloc()
