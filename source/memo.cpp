@@ -33,18 +33,6 @@ namespace  Memo
         return nullptr;
     }
 
-    Header* gets(std::string key)
-    {
-        std::unordered_map<std::string,Header*>::const_iterator got = Table.find (key);
-        if ( got != Table.end() )
-        {
-            if (got->second->expiration_timestamp > time(NULL)) {
-                return got->second;
-            }
-        }
-        return nullptr;
-    }
-
     RESPONSE set(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas=false)
     {
         //printf("called %s\n",__FUNCTION__);
@@ -147,13 +135,14 @@ namespace  Memo
         }
         else if(alloc->getSizeClass(h->data_size)==alloc->getSizeClass(h->data_size + size))
         {
-            temp = (char*) h+1;
+            temp = (char*) (h+1);
             std::strcat(temp,value.c_str());
+            h->data_size = h->data_size + size;
             return STORED;
         }
         else
         {    
-            temp = (char*) h+1;
+            temp = (char*) (h+1);
             std::strcat(temp, value.c_str());
             size = h->data_size + size;
             temp_flags = h->flags;
@@ -188,14 +177,15 @@ namespace  Memo
         }
         else if(alloc->getSizeClass(h->data_size)==alloc->getSizeClass(h->data_size + size))
         {
-            data = (char*) h+1;
+            data = (char*) (h+1);
             std::string temp = value + std::string(data);
             std::strncpy(data, temp.c_str(), std::strlen(temp.c_str()));
+            h->data_size = h->data_size + size;
             return STORED;
         }
         else
         {
-            data = (char*) h+1;
+            data = (char*) (h+1);
             std::string temp = value + std::string(data);
             size = h->data_size + size;
             temp_flags = h->flags;

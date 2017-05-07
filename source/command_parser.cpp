@@ -140,7 +140,7 @@ void parse_command(char* cmd_str, size_t cmd_len, char*& res_str, size_t* res_le
             handle_get(param_itr, res_str, res_len);
             break;
         case GETS:
-            handle_gets(param_itr, res_str, res_len);
+            handle_get(param_itr, res_str, res_len);
             break;
         case DELETE:
             handle_delete(param_itr, res_str, res_len);
@@ -382,16 +382,6 @@ void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_
         }
     } while(param_itr != end_itr);
     *response_len = strlen(response_str);
-}
-
-void handle_gets(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
-{
-    std::sregex_token_iterator end_itr;
-    std::string key = *param_itr++;
-    while(param_itr != end_itr) {
-        Memo::get(key);
-        key = *param_itr++;
-    }
 }
 
 void handle_delete(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
