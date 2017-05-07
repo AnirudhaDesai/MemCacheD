@@ -58,8 +58,6 @@ sock.connect(server_address)
 #TestCacheReplacement(sock)
 #TestExpirationTime(sock)
 
-
-
 f = open("commands.txt")
 
 commands = f.read().split("\n")
