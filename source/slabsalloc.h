@@ -77,6 +77,7 @@ public:
   void * store(size_t sz);
   void remove(void * ptr);
   size_t getSize(void * p);
+  void updateRecentlyUsed(Header* h);
 
   // number of bytes currently allocated  
   size_t bytesAllocated();
@@ -92,8 +93,6 @@ public:
   size_t maxBytesRequested();
 
   ALG_T algorithm;
-
-  void walk(const std::function< void(Header *) >& f); 
 
   // Return maximum size of object for a given size class.
   static size_t getSizeFromClass(int index);
