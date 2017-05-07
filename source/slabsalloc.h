@@ -13,9 +13,10 @@
 #include <time.h>
 #include <random>
 
+#include "Trace.h"
+
 using namespace std;
 
-#define MAX_ALLOC   2*1024*1024*1024
 #define CLASS_LIM   1024  //limit on number of objects per size class
 #define NUM_CLASSES 23
 
@@ -43,8 +44,9 @@ class Header {
 
 class SlabsAlloc {
 public:
-  SlabsAlloc(ALG_T algorithm)
-    : requested (0),
+  SlabsAlloc(ALG_T algorithm, size_t max_heap_size)
+    : MAX_ALLOC(max_heap_size),
+      requested (0),
       allocated (0),
       maxRequested (0),
       maxAllocated (0),
@@ -62,8 +64,7 @@ public:
     for (auto& f : AllocatedCount) {
       f = 0;
     }
-
-    printf("slabsalloc constructor called\n");
+    TRACE_DEBUG("MAX_ALLOC=",MAX_ALLOC);
    
   }
 
@@ -104,14 +105,16 @@ private:
 
   recursive_mutex heapLock;
   
+  size_t MAX_ALLOC;
   size_t allocated;
   size_t requested;
   size_t maxAllocated;
   size_t maxRequested;
-  uint16_t AllocatedCount[NUM_CLASSES];
   uint16_t rndNum;
   std::random_device rd;
   
+  uint16_t AllocatedCount[NUM_CLASSES];
+  recursive_mutex slabLock[NUM_CLASSES];
   Header * head_AllocatedObjects[NUM_CLASSES];
   Header * tail_AllocatedObjects[NUM_CLASSES];
   Header * freedObjects[NUM_CLASSES];
