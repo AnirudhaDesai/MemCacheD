@@ -1,5 +1,4 @@
 #include "slabsalloc.h"
-#include "Trace.h"
 
 void * SlabsAlloc::store(size_t sz) {
 
@@ -22,6 +21,11 @@ void * SlabsAlloc::store(size_t sz) {
      */
     if(sz+allocated >= MAX_ALLOC || AllocatedCount[i]>=CLASS_LIM )
     {
+        if(head_AllocatedObjects[i] == nullptr)
+        {
+            TRACE_ERROR("size bucket is empty, but heap is full. I quit.");
+            return nullptr;
+        }
         // use appropriate cache replacement algorithm
         
         // if LRU, evict from tail

@@ -11,6 +11,7 @@
 #include <getopt.h>
 #include <functional>
 
+#include "Trace.h"
 #include "server.h"
 
 ALG_T cache_replacement_algorithm = LRU;
@@ -24,6 +25,7 @@ int main(int argc, char *argv[])
     int lru_flag = 0;
     int rnd_flag = 0;
     int lndlrd_flag = 0;
+    size_t max_heap_size = 0;
 
     struct option long_options[] =
     {
@@ -53,43 +55,37 @@ int main(int argc, char *argv[])
 
     if (option_index < argc)
     {
-        printf ("non-option ARGV-elements: ");
         while (option_index < argc)
-            printf ("%s ", argv[option_index++]);
-        printf ("\n");
+        {
+            switch(option_index)
+            {
+                case 1:
+                    char* option_str = argv[option_index];
+                    //strcpy(option_str,argv[option_index]);
+                    char* cache_size_str = strtok(option_str,"M");
+                    short cache_size = atoi(cache_size_str);
+                    if(cache_size <= 0)
+                    {
+                        TRACE_ERROR("invalid cache size specified");
+                        return 1;
+                    }
+
+                    max_heap_size = cache_size*1024*1024;
+                    TRACE_DEBUG("cache size(bytes) = ",max_heap_size); 
+                    break;
+            }
+            option_index++;
+        }
     }
 
     std::cout << "cache replacement algorithm :" << cache_replacement_algorithm << std::endl;
 
-    alloc = new SlabsAlloc(cache_replacement_algorithm);
+    alloc = new SlabsAlloc(cache_replacement_algorithm,max_heap_size);
 
     char* cmd_str;
     size_t cmd_len;
 
-    /*Header* obj = (Header*)malloc(sizeof(Header));*/
-    //obj->flags = 1;
-    //Memo::Table.insert(std::make_pair("BLACK", obj));
-
-
-    //while(1)
-    //{
-    // listen on port 
-    //
-    // read command
     initializeServer();
-
-    // cmd_len = 50;
-    // cmd_str = (char*)malloc(cmd_len);
-    // sprintf(cmd_str,"set key 0 900 5\r\nvalue");
-
-    // // parse command
-    // parse_command(cmd_str,cmd_len);
-
-    // free(cmd_str);
-    //}
-    //
-
-    //while(1);
-
+    
     return 0;
 }
