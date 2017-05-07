@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     int lru_flag = 0;
     int rnd_flag = 0;
     int lndlrd_flag = 0;
-    size_t max_heap_size = 0;
+    size_t max_heap_size = 2048*1024*1024;
 
     struct option long_options[] =
     {
