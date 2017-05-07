@@ -1,4 +1,4 @@
-/#include "command_parser.h"
+#include "command_parser.h"
 
 #include <string>
 #include <regex>
