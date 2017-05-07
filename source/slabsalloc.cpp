@@ -191,6 +191,30 @@ void SlabsAlloc::remove(void * ptr) {
    size_t size = getSizeFromClass(getSizeClass(h->allocatedSize));
    return size; 
    }*/
+void SlabsAlloc::updateRecentlyUsed(Header* h)
+{
+    Header* temp;
+    int i = getSizeClass(h->data_size);
+    temp = h;
+
+    if(tail_AllocatedObjects[i]!=temp)
+    {
+
+        if(temp->prev!=nullptr)
+            (temp->prev)->next = temp->next;
+        
+        if(temp->next!=nullptr)
+            (temp->next)->prev = temp->prev;
+
+        if(head_AllocatedObjects[i]==temp)
+            head_AllocatedObjects[i]=head_AllocatedObjects[i]->next;
+
+        tail_AllocatedObjects[i]->next=temp;
+        temp->prev = tail_AllocatedObjects[i];
+        tail_AllocatedObjects[i] = temp;
+        temp->next = nullptr;
+    }
+}
 
 // number of bytes currently allocated  
 size_t SlabsAlloc::bytesAllocated() {
