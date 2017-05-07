@@ -141,48 +141,6 @@ void * SlabsAlloc::store(size_t sz) {
         return tail_AllocatedObjects[i];
     }
 
-    /*
-       else
-       { 
-    /*Try allocating from the heap.*/ 
-    /* void* ptr = SourceHeap::malloc(size+sizeof(Header));
-
-       if(ptr!=nullptr)
-       {
-    /*If space available on Heap, allocate a block from the Heap and assign that to Header pointer.*/
-    /**  h = (Header *) ptr;    
-      }
-      else
-      {
-    /*If heap also exhausts, then we return nullptr*/  
-    /*  heapLock.unlock();
-        return nullptr;
-        }
-        }
-
-    /*update Header with relevant information*/
-    //h->requestedSize = sz;
-    //h->allocatedSize = size;
-
-    /*Update allocated objects statistics*/
-    /*requested += (sz);
-      allocated += size;
-      (size>maxAllocated)? maxAllocated=size:maxAllocated=maxAllocated; 
-      ((sizeof(Header)+sz)>maxRequested)? maxRequested=size: maxRequested=maxRequested;
-
-    /*add the object to allocated list of objects*/
-    /*h->prevObject = allocatedObjects;
-
-      if(allocatedObjects!=nullptr)
-      allocatedObjects->nextObject = h;
-      allocatedObjects = h;
-      h->nextObject = nullptr;
-
-    /*returning the point after header wehre useful data can be stored*/
-    //heapLock.unlock();
-    //return (h+1); 
-
-
 }
 
 
@@ -197,13 +155,10 @@ void SlabsAlloc::remove(void * ptr) {
     h = (Header *)ptr;
 
     int i = getSizeClass(h->data_size);
-    size_t size = getSizeFromClass(i);  
-
+    size_t size = h->data_size+sizeof(Header);
     // acquire the lock for the size class in question
     // (assuming that malloc is thread-safe, which it should be)
     std::lock_guard<std::recursive_mutex> lock(slabLock[i]);
-
-    allocated -= size;
 
     if(h->prev!=nullptr)
         (h->prev)->next = h->next;
@@ -217,13 +172,16 @@ void SlabsAlloc::remove(void * ptr) {
     if(h==tail_AllocatedObjects[i])
         tail_AllocatedObjects[i]=h->prev;
 
+    if(h==head_AllocatedObjects[i])
+        head_AllocatedObjects[i]=h->next;
+
     h->prev = freedObjects[i];
     freedObjects[i] = h;
     h->next= nullptr; 
 
     AllocatedCount[i]--;
+    allocated -= size;
 
-    //allocated -= (h->allocatedSize);
 }
 
 /*
@@ -254,37 +212,6 @@ size_t SlabsAlloc::maxBytesRequested() {
     return maxRequested; 
 }
 
-/*
-   template <class SourceHeap>
-   void SlabsAlloc<SourceHeap>::walk(const std::function< void(Header *) >& f) {
-//TRACE_DEBUG("allocatedObjects : \n");
-
-Header *x;
-x=allocatedObjects;
-
-while(x!=nullptr)
-{
-f(x);
-x=x->prevObject;
-}
-
-Header *y;
-
-for(int i=0;i<Threshold / Base + 15;i++)
-{
-y=freedObjects[i];
-while(y!=nullptr)
-{
-
-f(y);
-y=y->prevObject;
-
-}
-
-}
-heapLock.unlock();
-
-}*/
 
 size_t SlabsAlloc::getSizeFromClass(int index) {
 

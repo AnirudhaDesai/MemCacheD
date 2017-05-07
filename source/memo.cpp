@@ -179,7 +179,7 @@ namespace  Memo
         {
 
             printf("same size class\n");
-            data = (char*) h+1;
+            data = (char*) (h+1);
             std::string temp = value + std::string(data);
             std::strncpy(data, temp.c_str(), std::strlen(temp.c_str()));
             h->data_size = h->data_size + size;
@@ -190,7 +190,7 @@ namespace  Memo
 
 
             printf("different size class\n");
-            data = (char*) h+1;
+            data = (char*) (h+1);
 
             std::string temp = value + std::string(data);
             size = h->data_size + size;

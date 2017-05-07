@@ -1,4 +1,4 @@
-#include "command_parser.h"
+/#include "command_parser.h"
 
 #include <string>
 #include <regex>
@@ -416,7 +416,7 @@ void handle_incr(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator 
 void handle_decr(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
 {
     std::sregex_token_iterator end_itr;
-    std::string key = *param_itr++;
+    std::string key = *(param_itr++);
     bool noreply = false;
     if (param_itr != end_itr) {
         noreply = true;
