@@ -108,10 +108,11 @@ private:
   size_t requested;
   size_t maxAllocated;
   size_t maxRequested;
-  uint16_t AllocatedCount[NUM_CLASSES];
   uint16_t rndNum;
   std::random_device rd;
   
+  uint16_t AllocatedCount[NUM_CLASSES];
+  recursive_mutex slabLock[NUM_CLASSES];
   Header * head_AllocatedObjects[NUM_CLASSES];
   Header * tail_AllocatedObjects[NUM_CLASSES];
   Header * freedObjects[NUM_CLASSES];

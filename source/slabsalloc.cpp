@@ -1,4 +1,5 @@
 #include "slabsalloc.h"
+#include "Trace.h"
 
 void * SlabsAlloc::store(size_t sz) {
 
@@ -7,13 +8,13 @@ void * SlabsAlloc::store(size_t sz) {
     if(sz<=0)
         return nullptr;
 
-    //printf("called %s\n",__FUNCTION__);
     /*size will contain the closest base 16 size that needs to be alocated.*/
     int i = getSizeClass(sz);
     size_t size = getSizeFromClass(i);  
 
-    //heapLock.lock();
-    std::lock_guard<std::recursive_mutex> lock(heapLock);
+    // acquire the lock for the size class in question
+    // (assuming that malloc is thread-safe, which it should be)
+    std::lock_guard<std::recursive_mutex> lock(slabLock[i]);
     
     
     /* If this malloc will push the memory usage over the limit,
@@ -34,11 +35,11 @@ void * SlabsAlloc::store(size_t sz) {
         // else if RANDOM, evict from random location
         else if(algorithm == RANDOM)
         {
-            printf("Entered RANDOM Algorithm\n" );
+            TRACE_DEBUG("Entered RANDOM Algorithm" );
             std::uniform_int_distribution<int> dis(0, AllocatedCount[i]);
             std::mt19937 gen(rd());
             rndNum = dis(gen);
-            printf("The random number generated is : %d\n",rndNum ); 
+            TRACE_DEBUG("The random number generated is : ",rndNum ); 
             Header * tempObject = head_AllocatedObjects[i];
             while(rndNum!=0)
             {
@@ -58,7 +59,7 @@ void * SlabsAlloc::store(size_t sz) {
         else
         {
             // error out 
-            ;
+            
         }
     }
 
@@ -78,7 +79,6 @@ void * SlabsAlloc::store(size_t sz) {
 
         AllocatedCount[i]++;
 
-        //heapLock.unlock();
         return h;
     }
     else if(head_AllocatedObjects[i] == nullptr )
@@ -93,7 +93,6 @@ void * SlabsAlloc::store(size_t sz) {
         }
         else
         {
-            //heapLock.unlock();
             return nullptr;
         }
 
@@ -120,7 +119,6 @@ void * SlabsAlloc::store(size_t sz) {
         }
         else
         {
-            //heapLock.unlock();
             return nullptr;
         }
 
@@ -181,12 +179,8 @@ void * SlabsAlloc::store(size_t sz) {
 
 void SlabsAlloc::remove(void * ptr) {
 
-    //heapLock.lock();
-    std::lock_guard<std::recursive_mutex> lock(heapLock);
-
     if (ptr == NULL)
     {
-        //heapLock.unlock();
         return;
     }
 
@@ -195,6 +189,11 @@ void SlabsAlloc::remove(void * ptr) {
 
     int i = getSizeClass(h->data_size);
     size_t size = getSizeFromClass(i);  
+
+    // acquire the lock for the size class in question
+    // (assuming that malloc is thread-safe, which it should be)
+    std::lock_guard<std::recursive_mutex> lock(slabLock[i]);
+
     allocated -= size;
 
     if(h->prev!=nullptr)
@@ -216,8 +215,6 @@ void SlabsAlloc::remove(void * ptr) {
     AllocatedCount[i]--;
 
     //allocated -= (h->allocatedSize);
-
-    //heapLock.unlock();
 }
 
 /*
@@ -251,8 +248,7 @@ size_t SlabsAlloc::maxBytesRequested() {
 /*
    template <class SourceHeap>
    void SlabsAlloc<SourceHeap>::walk(const std::function< void(Header *) >& f) {
-   heapLock.lock();
-//printf("allocatedObjects : \n");
+//TRACE_DEBUG("allocatedObjects : \n");
 
 Header *x;
 x=allocatedObjects;
@@ -286,7 +282,6 @@ size_t SlabsAlloc::getSizeFromClass(int index) {
     return (size_t)(pow(2,index+3));
 
 }
-
 
 int SlabsAlloc::getSizeClass(size_t sz) {
     if (sz < 8) {
