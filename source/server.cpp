@@ -61,7 +61,6 @@ void *beginConnect(void *args){
 
     long client_socket = (long)args;
     char  buffer[buf_size] = {0};
-    int bytesReceived = 0;
     
     size_t response_length;
 
@@ -84,11 +83,18 @@ void *beginConnect(void *args){
         parse_command(buffer,buf_size, response_str, &response_length);
 
         printf("got response %s, length=%d\n",response_str,response_length);
-        
+
+        if(response_str!=nullptr) {
+            if (std::strcmp(response_str, "QUIT\r\n") == 0) {
+                free(response_str);
+                close(client_socket);
+                break;
+            }
+        }
         send(client_socket, response_str, response_length, 0);
 
         if(response_str!=nullptr)
-        {  
+        {
             free(response_str);
         }
         //action on command

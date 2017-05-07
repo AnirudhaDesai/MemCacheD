@@ -447,4 +447,7 @@ void handle_version(char*& response_str, size_t* response_len)
 void handle_quit(char*& response_str, size_t* response_len)
 {
     // send client a command to quit
+    response_str = (char*)malloc(std::strlen("QUIT\r\n"));
+    std::strcpy(response_str, (char*) "QUIT\r\n");
+    *response_len = std::strlen(response_str);
 }

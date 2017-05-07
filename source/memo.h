@@ -46,9 +46,7 @@ typedef enum
     // deletion 
     INCREMENTED,
     DECREMENTED,
-    DELETED,
-    // touch
-    TOUCHED
+    DELETED
 
 } RESPONSE;
 
