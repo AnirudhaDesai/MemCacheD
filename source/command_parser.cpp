@@ -361,27 +361,27 @@ void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_
 
             }
             std::strcat(response_str,RESPONSE_MAP[VALUE].res_str);
-            response_str = (char*)realloc(response_str,1);
+            response_str = (char*)realloc(response_str,std::strlen(response_str)+1);
             std::strcat(response_str," ");
-            response_str = (char*)std::realloc(response_str, std::strlen(key.c_str()));
+            response_str = (char*)std::realloc(response_str, std::strlen(response_str)+std::strlen(key.c_str()));
             std::strcat(response_str, key.c_str());
-            response_str = (char*)realloc(response_str,1);
+            response_str = (char*)realloc(response_str,std::strlen(response_str)+1);
             std::strcat(response_str," ");
             char flags_str[20];
             sprintf(flags_str,"%u",h->flags);
-            response_str = (char*)realloc(response_str, std::strlen(flags_str));
+            response_str = (char*)realloc(response_str, std::strlen(response_str)+std::strlen(flags_str));
             std::strcat(response_str,flags_str);
-            response_str = (char*)realloc(response_str,1);
+            response_str = (char*)realloc(response_str,std::strlen(response_str)+1);
             std::strcat(response_str," ");
             char data_size_str[20];
             sprintf(data_size_str,"%u",h->data_size);
-            response_str = (char*)realloc(response_str, std::strlen(data_size_str));
+            response_str = (char*)realloc(response_str, std::strlen(response_str)+std::strlen(data_size_str));
             std::strcat(response_str,data_size_str);
-            response_str = (char*)realloc(response_str,4);
+            response_str = (char*)realloc(response_str,std::strlen(response_str)+4);
             std::strcat(response_str,"\r\n");
-            response_str = (char*)realloc(response_str,h->data_size);
+            response_str = (char*)realloc(response_str,std::strlen(response_str)+h->data_size);
             std::strncat(response_str,(char*)(h+1),h->data_size);
-            response_str = (char*)realloc(response_str,4);
+            response_str = (char*)realloc(response_str,std::strlen(response_str)+4);
             std::strcat(response_str,"\r\n");
         }
     } while(param_itr != end_itr);

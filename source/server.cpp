@@ -72,8 +72,10 @@ void *beginConnect(void *args){
         buffer[buf_size] = {0};
         char* response_str=nullptr;
 
+
         memset(buffer, 0, sizeof(buffer));
         printf("*********%s",buffer);
+
         recv(client_socket, buffer, buf_size, 0);
 
         printf("Message from Client %ld is : %s\n",client_socket, buffer);
