@@ -116,11 +116,10 @@ void *beginConnect(void *args){
             response_length = strlen(response_str);
         }
 
-<<<<<<< HEAD
+
         printf("got response %s, length=%d\n",response_str,response_length);
         printf("parse_error%d\n", parse_error);
-=======
->>>>>>> 2c04137633c7b6540f6c72cb59ef60d6c8c17bf5
+
         switch(parse_error)
         {
             case PARSE_ERROR::NONE:
