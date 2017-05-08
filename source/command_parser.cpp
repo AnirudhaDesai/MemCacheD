@@ -3,6 +3,8 @@
 #include <string>
 #include <regex>
 
+#include "Trace.h"
+
 #define MAX_CMD_LINES 10
 #define NUM_COMMANDS 15
 
@@ -75,19 +77,19 @@ COMMAND_STRING_MAP CMD_MAP[NUM_COMMANDS]
     { QUIT, (char*)"quit" },
 };
 
-void parse_command(char* cmd_str, size_t cmd_len, char*& res_str, size_t* res_len)
+PARSE_ERROR parse_command(std::string& cmd, char*& res_str, size_t* res_len)
 {
+    PARSE_ERROR result = PARSE_ERROR::NONE;
 
-    if(cmd_len <=0
-            || cmd_str == nullptr)
+    if(cmd.length() == 0)
     {
-        return;
+        return PARSE_ERROR::QUIT;
     }
 
     std::string response;
     std::regex ws_re("\\s+");
     std::regex end_re("\\\\r\\\\n");
-    std::string cmd = std::string(cmd_str);
+    //std::string cmd = std::string(cmd_str);
     // start by storing all command lines in an array
 //    const const char* cmd_lines[MAX_CMD_LINES];
     std::string command_str;
@@ -139,8 +141,6 @@ void parse_command(char* cmd_str, size_t cmd_len, char*& res_str, size_t* res_le
             break;
             // Retrieval commands
         case GET:
-            handle_get(param_itr, res_str, res_len);
-            break;
         case GETS:
             handle_get(param_itr, res_str, res_len);
             break;
@@ -165,12 +165,13 @@ void parse_command(char* cmd_str, size_t cmd_len, char*& res_str, size_t* res_le
             handle_version(res_str, res_len);
             break;
         case QUIT:
-            handle_quit(res_str, res_len);
-            break;
+            result = PARSE_ERROR::QUIT;
         case NONE:
             // do nothing
             break;
     }
+
+    return result;
 }
 
 void handle_set(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
@@ -346,7 +347,7 @@ void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_
     std::string key;
     do {
         key = *(param_itr++);
-        
+
         Header* h = Memo::get(key,__FUNCTION__);
         if (h != NULL)
         {
@@ -392,7 +393,12 @@ void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_
             strcat(response_str, "\r\n");
         }
     } while(param_itr != end_itr);
-    *response_len = strlen(response_str);
+
+    if(response_str != nullptr)
+    {
+        *response_len = strlen(response_str);
+    }
+
 }
 
 void handle_delete(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
@@ -469,7 +475,7 @@ void handle_decr(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator 
 
 void handle_stats(char*& response_str, size_t* response_len)
 {
-    Memo::stats();
+    Memo::stats(response_str,response_len);
 }
 
 void handle_flush_all(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)

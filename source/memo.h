@@ -5,7 +5,6 @@
 #include <cstdint>
 #include <unordered_map>
 
-
 #include "slabsalloc.h"
 
 typedef enum {
@@ -76,10 +75,10 @@ namespace  Memo
 
     RESPONSE append(std::string key, size_t size, std::string value);
     RESPONSE prepend(std::string key, size_t size, std::string value);
-    void mem_delete(std::string key);
     Header* incr(std::string key, std::string value);
     Header* decr(std::string key, std::string value);
-    void stats();
+    RESPONSE mem_delete(std::string key);
+    void stats(char*& response_str, size_t* response_len);
     void flush_all(int32_t exptime);
     void version(); 
 }

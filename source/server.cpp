@@ -58,48 +58,87 @@ int initializeServer(){
 
 void *beginConnect(void *args){
 
-#define buf_size 256
+#define buf_size 255
 
     Stats::Instance().curr_connections++;
+    Stats::Instance().total_connections++;
+    Stats::Instance().connection_structures++;
 
     long client_socket = (long)args;
     char  buffer[buf_size] = {0};
+    bool need_more_data = false;
     
+    char* response_str=nullptr;
     size_t response_length;
+    ssize_t received_size = 0;
+    PARSE_ERROR parse_error;
+    std::string command;
 
     printf(" On thread : %ld \n", client_socket);
     while(true)
     {
+        response_str = nullptr;
+
         //read from socket
-        buffer[buf_size] = {0};
-        char* response_str=nullptr;
-
-
-        memset(buffer, 0, sizeof(buffer));
-        printf("*********%s",buffer);
-
-        recv(client_socket, buffer, buf_size, 0);
-
-        printf("Message from Client %ld is : %s\n",client_socket, buffer);
-
-        // parse command
-        parse_command(buffer,buf_size, response_str, &response_length);
-
-        printf("got response %s, length=%d\n",response_str,response_length);
-
-        if(response_str!=nullptr) {
-            if (std::strcmp(response_str, "QUIT\r\n") == 0) {
-                free(response_str);
-                close(client_socket);
-                break;
-            }
+        if(!need_more_data)
+        {
+            command = "";
         }
-        send(client_socket, response_str, response_length, 0);
 
+        do
+        {
+            buffer[buf_size] = {0};
+            memset(buffer, 0, buf_size);
+            received_size = recv(client_socket, buffer, buf_size, 0);
+            command += std::string(buffer);
+        }
+        while(received_size == buf_size);
+
+        if(received_size <= 0)
+        {
+            close(client_socket);
+            return nullptr;
+        }
+
+        if(command.length() <= 1024*1024)
+        {
+
+            printf("Command from Client %ld of size %u is : \n",client_socket,command.size(), command.c_str());
+            // parse command
+            parse_error = parse_command(command, response_str, &response_length);
+        }
+        else
+        {
+            printf("Command from Client %ld of size %u is too long",client_socket,command.size());
+            parse_error = PARSE_ERROR::INVALID_COMMAND;
+            response_str = (char*)malloc(strlen("ERROR\r\n")+1);
+            strcpy(response_str,"ERROR\r\n");
+            response_length = strlen(response_str);
+        }
+
+        switch(parse_error)
+        {
+            case PARSE_ERROR::NONE:
+            case PARSE_ERROR::INVALID_COMMAND:
+                printf("sending response %s, length=%d\n",response_str,response_length);
+                send(client_socket, response_str, response_length, 0);
+                break;
+            case PARSE_ERROR::QUIT: 
+                if(response_str!=nullptr)
+                    free(response_str);
+                close(client_socket);
+                return nullptr;
+                break;
+            case PARSE_ERROR::NEED_MORE_DATA:
+                break;
+        }
+            
         if(response_str!=nullptr)
         {
             free(response_str);
         }
-        //action on command
-    }	
+        
+    }
+    //End of this connection with client. Update Stats
+    Stats::Instance().curr_connections--;	
 }

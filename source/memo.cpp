@@ -249,8 +249,23 @@ namespace  Memo
 
     }
 
-    void mem_delete(std::string key) {
+    RESPONSE mem_delete(std::string key) {
         // delete code
+        Header* h;
+        printf("called %s\n",__FUNCTION__);
+
+        h = get(key,__FUNCTION__);
+
+        if(h!=nullptr)
+        {
+            alloc->remove((void*)h);
+            Table.erase({key});
+            return DELETED;
+        }
+        else
+        {       
+            return NOT_FOUND;
+        }
     }
 
     Header* incr(std::string key, std::string value) {
@@ -339,7 +354,7 @@ namespace  Memo
         }
     }
 
-    void stats() {
+    void stats(char*& response_str, size_t* response_len) {
         // stats code
 
 
@@ -347,7 +362,31 @@ namespace  Memo
 
     void flush_all(int32_t exptime) {
         // expire all objects after exptime
+
+        Header* temp;
+        int i;
+
+        for(i=0;i<23;i++)
+        {
+            temp = alloc->getFirstObject(i);
+
+            if(temp!=nullptr)
+            {
+                if(exptime==0)
+                {
+                    update_Expiration_Timestamp(temp,-1);
+                }
+                else
+                {
+                    update_Expiration_Timestamp(temp,exptime);
+                }
+
+            }
+        }
+
+
         Stats::Instance().cmd_flush++;
+
     }
 
     void version() {

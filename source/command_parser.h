@@ -7,7 +7,15 @@
 
 #include "memo.h"
 
-void parse_command(char* cmd_str, size_t cmd_len, char*& res_str, size_t* res_len);
+typedef enum struct PARSE_ERROR
+{
+    NONE=0,
+    NEED_MORE_DATA=1,
+    INVALID_COMMAND=2,
+    QUIT=3
+};
+
+PARSE_ERROR parse_command(std::string&, char*& res_str, size_t* res_len);
 
 
 #endif // __CMD_PARSER_H_
