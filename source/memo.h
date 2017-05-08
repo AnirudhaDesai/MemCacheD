@@ -63,15 +63,15 @@ const auto SecondsIn30Days =  60 * 60 * 24 * 30;
 namespace  Memo
 {
 
-    Header* get(std::string key, const char * callerFunction);
+    Header* get(std::string key, bool isStatsChanged=false);
     
     Header* gets(std::string key);
     
-    RESPONSE set(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas);
+    RESPONSE set(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas=false);
     
-    RESPONSE add(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value);
+    RESPONSE add(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool updateExpirationTime=true);
     
-    RESPONSE replace(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas);
+    RESPONSE replace(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas=false, bool updateExpirationTime=true);
 
     RESPONSE append(std::string key, size_t size, std::string value);
     RESPONSE prepend(std::string key, size_t size, std::string value);

@@ -55,7 +55,7 @@ sock.connect(server_address)
 
 # Test Functions can be called here 
 #TestAddGet(sock)
-#TestCacheReplacement(sock)
+TestCacheReplacement(sock)
 #TestExpirationTime(sock)
 
 f = open("commands.txt")
@@ -85,8 +85,10 @@ for command in commands:
             if amount_received < 256:
                 break
 
-    except(e) :
-        print e
+    except Exception as inst:
+        print(type(inst))    # the exception instance
+        print(inst.args)     # arguments stored in .args
+        print(inst)
 
 
 print sys.stderr, 'closing socket'

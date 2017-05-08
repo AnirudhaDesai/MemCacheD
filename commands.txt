@@ -1,16 +1,16 @@
-add key 0 333 4\r\ndata\r\n
+add key 0 0 4\r\ndata\r\n
 get key\r\n
-replace key 1 250 7\r\nrevalue\r\n
+replace key 1 0 7\r\nrevalue\r\n
 get key\r\n
-add key2 0 333 4\r\ndata\r\n
+add key2 0 0 4\r\ndata\r\n
 get key key2\r\n
 append key2 1\r\ns\r\n
 get key2\r\n
 prepend key2 3\r\nnew\r\n
 get key2\r\n
-add key3 00 222 4\r\nhola\r\n
+add key3 00 0 4\r\nhola\r\n
 get key key2 key3\r\n
-add key5 0 222 1\r\n1\r\n
+add key5 0 0 1\r\n1\r\n
 get key5\r\n
 incr key5 2\r\n
 get key5\r\n

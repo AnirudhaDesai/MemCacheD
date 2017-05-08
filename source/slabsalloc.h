@@ -79,7 +79,7 @@ class SlabsAlloc {
 
         enum { Alignment = 16 };
 
-        void * store(size_t sz);
+        void * store(size_t sz, Header *& evictedObject);
         void remove(void * ptr);
         size_t getSize(void * p);
         void updateRecentlyUsed(Header* h);
