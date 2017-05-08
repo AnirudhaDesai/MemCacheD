@@ -77,7 +77,7 @@ namespace  Memo
 
     RESPONSE append(std::string key, size_t size, std::string value);
     RESPONSE prepend(std::string key, size_t size, std::string value);
-    void mem_delete(std::string key);
+    RESPONSE mem_delete(std::string key);
     RESPONSE incr(std::string key, std::string value);
     RESPONSE decr(std::string key, std::string value);
     void stats(char*& response_str, size_t* response_len);

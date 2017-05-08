@@ -241,8 +241,23 @@ namespace  Memo
 
     }
 
-    void mem_delete(std::string key) {
+    RESPONSE mem_delete(std::string key) {
         // delete code
+        Header* h;
+        printf("called %s\n",__FUNCTION__);
+
+        h = get(key,__FUNCTION__);
+
+        if(h!=nullptr)
+        {
+            alloc->remove((void*)h);
+            Table.erase({key});
+            return DELETED;
+        }
+        else
+        {       
+            return NOT_FOUND;
+        }
     }
 
     RESPONSE incr(std::string key, std::string value) {
