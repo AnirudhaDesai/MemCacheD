@@ -355,24 +355,23 @@ void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_
         {
             printf("Get Result: key=%s, data_size=%u, flags=%u", h->key,h->data_size,h->flags);
             //printf("Get Result: key=%s, data_size=%u, flags=%u", h->key,h->data_size,h->flags, (char*) (h+1));
-            if(response_str == nullptr)
-            {
-                response_str = (char*)calloc(1,strlen(RESPONSE_MAP[VALUE].res_str));
-            }
-            else
-            {
-                response_str = (char*)realloc(response_str,std::strlen(response_str)+std::strlen(RESPONSE_MAP[VALUE].res_str)+1);
+            // if(response_str == nullptr)
+            // {
+            //     response_str = (char*)calloc(1,strlen(RESPONSE_MAP[VALUE].res_str));
+            // }
+            // else
+            // {
+            //     response_str = (char*)realloc(response_str,std::strlen(response_str)+std::strlen(RESPONSE_MAP[VALUE].res_str)+1);
 
-            }
+            // }
             
             oss<<RESPONSE_MAP[VALUE].res_str<<" ";
-            oss<<key.c_str()<<" ";
-            oss<<h->flags<<" ";
-            oss<<h->data_size<<"\\r\\n";
+            oss<<key<<" ";
+            oss<<std::to_string(h->flags)<<" ";
+            oss<<std::to_string(h->data_size)<<"\r\n";
+            oss<<(h+1)<<"\r\n";
 
-            finalGet = oss.str();
-            response_str = (char*)malloc(finalGet.length());
-            strcpy(response_str, finalGet.c_str());
+            
             //*response_len = strlen(response_str);
         
 
@@ -401,15 +400,16 @@ void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_
             // std::strcat(response_str,"\r\n");
         }
         else {
-            response_str = (char*)malloc(strlen(RESPONSE_MAP[NOT_FOUND].res_str) + strlen("\r\n"));
-
-            strcpy(response_str, RESPONSE_MAP[NOT_FOUND].res_str);
-            strcat(response_str, "\r\n");
+            oss<<RESPONSE_MAP[NOT_FOUND].res_str<<"\r\n";
         }
     } while(param_itr != end_itr);
-
+    
+    finalGet = oss.str();
+    response_str = (char*)malloc(finalGet.length());
+    strcpy(response_str, finalGet.c_str());
     if(response_str != nullptr)
     {
+
         *response_len = strlen(response_str);
     }
 
