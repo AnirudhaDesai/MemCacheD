@@ -55,7 +55,7 @@ sock.connect(server_address)
 
 # Test Functions can be called here 
 #TestAddGet(sock)
-#TestCacheReplacement(sock)
+TestCacheReplacement(sock)
 #TestExpirationTime(sock)
 
 f = open("commands.txt")

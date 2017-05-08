@@ -98,6 +98,8 @@ namespace  Memo
     RESPONSE add(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool updateExpirationTime)
     {
         Header* h;
+        Header *evictedObject;
+        evictedObject = NULL;
         char* temp;
         printf("called %s\n",__FUNCTION__);
 
@@ -108,7 +110,12 @@ namespace  Memo
         if(h==nullptr)//if value not present in hash table already, allocate memory and update header. 
         {
             //add header information
-            h = (Header*) alloc->store(size);
+            h = (Header*) alloc->store(size, evictedObject);
+            printf("\n evictedObject : %s\n", evictedObject->key );
+            if(evictedObject!=NULL)
+            {
+                Table.erase({evictedObject->key});
+            }
             std::strncpy(h->key, key.c_str(), 251);
             h->flags = flags;
             if (updateExpirationTime) {
