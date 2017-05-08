@@ -194,8 +194,13 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
             return nullptr;
         }
 
-        tail_AllocatedObjects[i]->next = h;
+        if(head_AllocatedObjects[i]==tail_AllocatedObjects[i])
+            head_AllocatedObjects[i]->next = h;
+        else
+            tail_AllocatedObjects[i]->next = h;
+        
         h->prev = tail_AllocatedObjects[i];
+        h->next = nullptr;
 
         tail_AllocatedObjects[i]=h;
 
@@ -250,7 +255,7 @@ void SlabsAlloc::remove(void * ptr) {
     AllocatedCount[i]--;
     Stats::Instance().curr_items--;
     Stats::Instance().bytes = Stats::Instance().bytes - size;
-    allocated -= size;
+    allocated -= size+sizeof(Header);
 
 }
 
