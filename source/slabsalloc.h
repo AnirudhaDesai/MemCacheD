@@ -40,7 +40,9 @@ class Header {
         unsigned int last_updated_client;
         int64_t cas_unique;
         bool valid;
+
         double landlordCost; //for landlord replacement algorithm
+
 
         Header * prev;
         Header * next;
@@ -80,7 +82,9 @@ class SlabsAlloc {
 
         enum { Alignment = 16 };
 
+
         void * store(size_t sz, Header *& evictedObject);
+
         void remove(void * ptr);
         size_t getSize(void * p);
         void updateRecentlyUsed(Header* h);
@@ -125,7 +129,7 @@ class SlabsAlloc {
         Header * head_AllocatedObjects[NUM_CLASSES];
         Header * tail_AllocatedObjects[NUM_CLASSES];
         Header * freedObjects[NUM_CLASSES];
-
+        //std::unordered_map<std::string, time_t> missTable;
 
 };
 

@@ -9,7 +9,9 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
 
     /*size will contain the closest base 16 size that needs to be alocated.*/
     int i = getSizeClass(sz);
-    size_t size = getSizeFromClass(i);  
+    size_t size = getSizeFromClass(i); 
+
+    printf("store called with size %d",sz); 
 
     // acquire the lock for the size class in question
     // (assuming that malloc is thread-safe, which it should be)
@@ -24,6 +26,7 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
         if(head_AllocatedObjects[i] == nullptr)
         {
             TRACE_ERROR("size bucket is empty, but heap is full. I quit.");
+            printf("\nsize: %u+%lu=%lu\n allocatedcount: %d\n i: %d\n maxalloc:%lu",sz,allocated,sz+allocated,AllocatedCount[i],i,MAX_ALLOC);
             return nullptr;
         }
         // use appropriate cache replacement algorithm
@@ -70,9 +73,49 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
         
         else if(algorithm == LANDLORD)
         {
-            
 
+            printf("Landlord function");
+            Header *temp;
+            bool flag=true;
 
+            printf("Landlord function");
+
+            while(flag)
+            {   
+                
+                temp = head_AllocatedObjects[i];
+                uint16_t delta= temp->landlordCost;
+
+                while((temp=temp->next)!=nullptr)
+                {
+                    if(temp->landlordCost < delta)
+                    {
+                        delta = temp->landlordCost;
+                    }
+
+                }
+                temp = head_AllocatedObjects[i];
+                
+                do
+                {
+                    temp->landlordCost = temp->landlordCost - delta;
+                }while((temp=temp->next)!=nullptr);
+                
+                temp = head_AllocatedObjects[i];
+
+                do
+                {
+                    if(temp->landlordCost<=0)
+                    {
+                        printf("removing %s\n",temp->key);
+                        evictedObject = temp;
+                        remove((void*)temp);
+
+                        flag=false;
+                        break;
+                    }
+                }while((temp=temp->next)!=nullptr);
+            }
 
             Stats::Instance().evictions++;
 
@@ -93,6 +136,7 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
         {
             freedObjects[i]->next = nullptr;
         }
+
         if(tail_AllocatedObjects[i] != nullptr)
             tail_AllocatedObjects[i]->next = h;
         h->prev = tail_AllocatedObjects[i];
@@ -101,9 +145,13 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
         if(head_AllocatedObjects[i]==nullptr)
             head_AllocatedObjects[i] = h;
         
+
         AllocatedCount[i]++;
         Stats::Instance().total_items++;
         Stats::Instance().bytes = Stats::Instance().bytes + size;
+
+        allocated += size+sizeof(Header);
+        printf("allocated:%lu",allocated);
 
         return h;
     }
@@ -152,8 +200,13 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
             return nullptr;
         }
 
-        tail_AllocatedObjects[i]->next = h;
+        if(head_AllocatedObjects[i]==tail_AllocatedObjects[i])
+            head_AllocatedObjects[i]->next = h;
+        else
+            tail_AllocatedObjects[i]->next = h;
+        
         h->prev = tail_AllocatedObjects[i];
+        h->next = nullptr;
 
         tail_AllocatedObjects[i]=h;
 
@@ -166,6 +219,7 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
 
         return tail_AllocatedObjects[i];
     }
+    return nullptr;
 
 }
 
@@ -204,11 +258,12 @@ void SlabsAlloc::remove(void * ptr) {
     h->prev = freedObjects[i];
     freedObjects[i] = h;
     h->next= nullptr; 
+    allocated -= getSizeFromClass(i)+sizeof(Header);
 
     AllocatedCount[i]--;
     Stats::Instance().curr_items--;
     Stats::Instance().bytes = Stats::Instance().bytes - size;
-    allocated -= size;
+    
 
 }
 
@@ -223,7 +278,10 @@ void SlabsAlloc::cacheReplacementUpdates(Header* h)
 {
     if(algorithm == LRU)
     {
+        if(h!=nullptr)
+        {
         updateRecentlyUsed(h);
+        }
     }
     else if(algorithm == RANDOM)
     {
@@ -231,6 +289,7 @@ void SlabsAlloc::cacheReplacementUpdates(Header* h)
     }
     else if (algorithm == LANDLORD)
     {
+        //SlabsAlloc::missTable.insert{Key,time(null)};
         //modify credit of the file
         double cost = difftime(time(NULL), h->insertedTimestamp);
         h->landlordCost = (h->landlordCost + cost)/2;

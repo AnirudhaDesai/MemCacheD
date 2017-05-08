@@ -118,6 +118,9 @@ namespace  Memo
         if(h==nullptr)//if value not present in hash table already, allocate memory and update header. 
         {
             //add header information
+
+            printf("add called\n");
+
             h = (Header*) alloc->store(size, evictedObject);
             printf("\n evictedObject : %s\n", evictedObject->key );
             if(evictedObject!=NULL)
@@ -126,24 +129,34 @@ namespace  Memo
                 Table.erase({evictedObject->key});
                 TableLock.unlock();
             }
-            std::strncpy(h->key, key.c_str(), 251);
-            h->flags = flags;
-            if (updateExpirationTime) {
-                update_Expiration_Timestamp(h, expiration_time);
-            }
-            else {
-                h->expiration_timestamp = expiration_time;
-            }
-            h->data_size = size;
-            temp = (char*) (h+1);
-            std::strncpy(temp,value.c_str(),size+1);
-            h->insertedTimestamp = time(NULL);
+            if(h!=nullptr)
+            {
+                std::strncpy(h->key, key.c_str(), 251);
+                h->flags = flags;
+                if (updateExpirationTime) {
+                    update_Expiration_Timestamp(h, expiration_time);
+                }
+                else {
+                    h->expiration_timestamp = expiration_time;
+                }
+                h->data_size = size;
+                temp = (char*) (h+1);
+                std::strncpy(temp,value.c_str(),size+1);
+                h->insertedTimestamp = time(NULL);
 
-            printf("adding %s\n",key.c_str());
-            TableLock.lock();
-            Table.insert({key,h});
-            TableLock.unlock();
-            return STORED;
+
+                printf("adding %s\n",key.c_str());
+
+                TableLock.lock();
+                Table.insert({key,h});
+                TableLock.unlock();
+                return STORED;
+            }
+            else
+            {
+                return ERROR;
+            }
+
         }
         //need to add key, address to hash table. use temp.  
         //
