@@ -75,13 +75,13 @@ COMMAND_STRING_MAP CMD_MAP[NUM_COMMANDS]
     { QUIT, (char*)"quit" },
 };
 
-void parse_command(char* cmd_str, size_t cmd_len, char*& res_str, size_t* res_len)
+PARSE_ERROR parse_command(char* cmd_str, size_t cmd_len, char*& res_str, size_t* res_len)
 {
 
     if(cmd_len <=0
             || cmd_str == nullptr)
     {
-        return;
+        return PARSE_ERROR::QUIT;
     }
 
     std::string response;
@@ -165,8 +165,7 @@ void parse_command(char* cmd_str, size_t cmd_len, char*& res_str, size_t* res_le
             handle_version(res_str, res_len);
             break;
         case QUIT:
-            handle_quit(res_str, res_len);
-            break;
+            return PARSE_ERROR::QUIT;
         case NONE:
             // do nothing
             break;
@@ -346,7 +345,7 @@ void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_
     std::string key;
     do {
         key = *(param_itr++);
-        
+
         Header* h = Memo::get(key,__FUNCTION__);
         if (h != NULL)
         {
@@ -429,7 +428,7 @@ void handle_decr(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator 
 
 void handle_stats(char*& response_str, size_t* response_len)
 {
-    Memo::stats();
+    Memo::stats(response_str,response_len);
 }
 
 void handle_flush_all(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)

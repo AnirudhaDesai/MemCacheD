@@ -26,7 +26,7 @@ namespace  Memo
         if (std::strcmp(callerFunction, "handle_get") == 0)
         {   
             // Increment stats only if get called by handle_get. Calls from other functions are internal
-            alloc->statsObject.cmd_get++;
+            Stats::Instance().cmd_get++;
             
         }
 
@@ -40,7 +40,7 @@ namespace  Memo
                     {   
                      // Increment stats only if get called by handle_get. Calls from other functions are internal
                         
-                        alloc->statsObject.get_hits++;
+                        Stats::Instance().get_hits++;
                     }
                 return got->second;
             }
@@ -51,7 +51,7 @@ namespace  Memo
                     {   
                      // Increment stats only if get called by handle_get. Calls from other functions are internal
                         
-                        alloc->statsObject.get_misses++;
+                        Stats::Instance().get_misses++;
                     }
             }
         }
@@ -64,7 +64,7 @@ namespace  Memo
         Header* h;
         printf("called %s\n",__FUNCTION__);
 
-        //alloc->statsObject.cmd_set++;
+        //Stats::Instance().cmd_set++;
 
         h=get(key, __FUNCTION__);
         if (h == nullptr) {
@@ -83,7 +83,7 @@ namespace  Memo
         char* temp;
         printf("called %s\n",__FUNCTION__);
 
-        alloc->statsObject.cmd_set++;
+        Stats::Instance().cmd_set++;
 
         h=get(key, __FUNCTION__);
 
@@ -114,7 +114,7 @@ namespace  Memo
         char* temp;
         printf("called %s\n",__FUNCTION__);
 
-        alloc->statsObject.cmd_set++;
+        Stats::Instance().cmd_set++;
 
         h=get(key, __FUNCTION__);
         //printf("%p",h);
@@ -158,7 +158,7 @@ namespace  Memo
 
         printf("called %s\n",__FUNCTION__);
 
-        alloc->statsObject.cmd_set++;
+        Stats::Instance().cmd_set++;
 
         h = get(key,__FUNCTION__);
 
@@ -202,7 +202,7 @@ namespace  Memo
 
         printf("called %s\n",__FUNCTION__);
 
-        alloc->statsObject.cmd_set++;
+        Stats::Instance().cmd_set++;
 
         h = get(key,__FUNCTION__);
 
@@ -257,13 +257,13 @@ namespace  Memo
         if(h==nullptr)
         {
             //incr on missing keys. update stats 
-            alloc->statsObject.incr_misses++;
+            Stats::Instance().incr_misses++;
             return NOT_FOUND;
         }
         else
         {
             //incr hit. update stats 
-            alloc->statsObject.incr_hits++;
+            Stats::Instance().incr_hits++;
             temp = (char*) (h+1);
             printf("value=%s",temp);
             try
@@ -301,13 +301,13 @@ namespace  Memo
         if(h==nullptr)
         {
             // it is decr miss. update stats
-            alloc->statsObject.decr_misses++;
+            Stats::Instance().decr_misses++;
             return NOT_FOUND;
         }
         else
         {
             //decr hit. update stats
-            alloc->statsObject.decr_hits++;
+            Stats::Instance().decr_hits++;
             
             temp = (char*) (h+1);
             printf("value=%s",temp);
@@ -336,7 +336,7 @@ namespace  Memo
         return ERROR;
     }
 
-    void stats() {
+    void stats(char*& response_str, size_t* response_len) {
         // stats code
 
 
@@ -344,6 +344,7 @@ namespace  Memo
 
     void flush_all(int32_t exptime) {
         // expire all objects after exptime
+
         Header* temp;
         int i;
 
@@ -365,7 +366,9 @@ namespace  Memo
             }
         }
 
-        alloc->statsObject.cmd_flush++;
+
+        Stats::Instance().cmd_flush++;
+
     }
 
     void version() {

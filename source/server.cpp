@@ -1,4 +1,5 @@
 #include "server.h"
+#include "stats.h"
 
 int initializeServer(){
     long  server_socket, client_socket;
@@ -59,44 +60,62 @@ void *beginConnect(void *args){
 
 #define buf_size 256
 
+    Stats::Instance().curr_connections++;
+    Stats::Instance().total_connections++;
+    Stats::Instance().connection_structures++;
     long client_socket = (long)args;
     char  buffer[buf_size] = {0};
     
+    char* response_str=nullptr;
     size_t response_length;
+    ssize_t received_size = 0;
+    PARSE_ERROR parse_error;
 
     printf(" On thread : %ld \n", client_socket);
     while(true)
     {
         //read from socket
         buffer[buf_size] = {0};
-        char* response_str=nullptr;
-
-
         memset(buffer, 0, sizeof(buffer));
-        printf("*********%s",buffer);
+        response_str = nullptr;
 
-        recv(client_socket, buffer, buf_size, 0);
+        received_size = recv(client_socket, buffer, buf_size, 0);
 
-        printf("Message from Client %ld is : %s\n",client_socket, buffer);
+        if(received_size <= 0)
+        {
+            close(client_socket);
+            printf("closing connection with client %ld\n",client_socket);
+            break;
+        }
+
+        printf("Message from Client %ld of size %u is : %s\n",client_socket,received_size, buffer);
 
         // parse command
-        parse_command(buffer,buf_size, response_str, &response_length);
+        parse_error = parse_command(buffer,buf_size, response_str, &response_length);
 
         printf("got response %s, length=%d\n",response_str,response_length);
-
-        if(response_str!=nullptr) {
-            if (std::strcmp(response_str, "QUIT\r\n") == 0) {
-                free(response_str);
-                close(client_socket);
+        switch(parse_error)
+        {
+            case PARSE_ERROR::NONE:
                 break;
-            }
+            case PARSE_ERROR::QUIT: 
+                if(response_str!=nullptr)
+                    free(response_str);
+                close(client_socket);
+                return nullptr;
+                break;
+            case PARSE_ERROR::NEED_MORE_DATA:
+                break;
         }
+            
         send(client_socket, response_str, response_length, 0);
 
         if(response_str!=nullptr)
         {
             free(response_str);
         }
-        //action on command
-    }	
+        
+    }
+    //End of this connection with client. Update Stats
+    Stats::Instance().curr_connections--;	
 }
