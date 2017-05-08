@@ -9,7 +9,9 @@ void * SlabsAlloc::store(size_t sz) {
 
     /*size will contain the closest base 16 size that needs to be alocated.*/
     int i = getSizeClass(sz);
-    size_t size = getSizeFromClass(i);  
+    size_t size = getSizeFromClass(i); 
+
+    printf("store called with size %d",sz); 
 
     // acquire the lock for the size class in question
     // (assuming that malloc is thread-safe, which it should be)
@@ -19,7 +21,7 @@ void * SlabsAlloc::store(size_t sz) {
     /* If this malloc will push the memory usage over the limit OR exceeds the class limit,
      * perform an eviction before storing
      */
-    if(sz+allocated >= MAX_ALLOC || AllocatedCount[i]>=CLASS_LIM )
+    if(sz+allocated >= MAX_ALLOC || AllocatedCount[i]>=4 )
     {
         if(head_AllocatedObjects[i] == nullptr)
         {
@@ -76,13 +78,13 @@ void * SlabsAlloc::store(size_t sz) {
             {   
                 
                 temp = head_AllocatedObjects[i];
-                double delta= temp->landlordCost/temp->data_size;
+                uint16_t delta= temp->landlordCost;
 
                 while((temp=temp->next)!=nullptr)
                 {
-                    if(temp->landlordCost/temp->data_size < delta)
+                    if(temp->landlordCost < delta)
                     {
-                        delta = temp->landlordCost/temp->data_size;
+                        delta = temp->landlordCost;
                     }
 
                 }
@@ -90,7 +92,7 @@ void * SlabsAlloc::store(size_t sz) {
                 
                 do
                 {
-                    temp->landlordCost = temp->landlordCost - delta * temp->data_size;
+                    temp->landlordCost = temp->landlordCost - delta;
                 }while((temp=temp->next)!=nullptr);
                 
                 temp = head_AllocatedObjects[i];
@@ -99,6 +101,7 @@ void * SlabsAlloc::store(size_t sz) {
                 {
                     if(temp->landlordCost<=0)
                     {
+                        printf("removing %s\n",temp->key);
                         remove((void*)temp);
                         flag=false;
                         break;
@@ -125,9 +128,16 @@ void * SlabsAlloc::store(size_t sz) {
             freedObjects[i]->next = nullptr;
         }
 
+        if(tail_AllocatedObjects[i]!=nullptr)
+            tail_AllocatedObjects[i]->next=h;
+
         h->prev = tail_AllocatedObjects[i];
         h->next = nullptr;
         tail_AllocatedObjects[i]=h;
+        
+        if(head_AllocatedObjects[i]==nullptr)
+            head_AllocatedObjects[i]=h;
+
 
         AllocatedCount[i]++;
         Stats::Instance().total_items++;

@@ -108,6 +108,7 @@ namespace  Memo
         if(h==nullptr)//if value not present in hash table already, allocate memory and update header. 
         {
             //add header information
+            printf("add called\n");
             h = (Header*) alloc->store(size);
             std::strncpy(h->key, key.c_str(), 251);
             h->flags = flags;
