@@ -34,6 +34,8 @@ void * SlabsAlloc::store(size_t sz) {
             
             printf("Entered LRU Cache Replacement\n");
             printf("Object being removed %s\n",head_AllocatedObjects[i]->key );
+
+            Stats::Instance().evictions++;
              
             remove((void *) head_AllocatedObjects[i]);
 
@@ -56,6 +58,7 @@ void * SlabsAlloc::store(size_t sz) {
             }
             printf("Object being removed %s\n",tempObject->key );
 
+            Stats::Instance().evictions++;
             remove((void *)tempObject);  
 
         }
@@ -64,6 +67,7 @@ void * SlabsAlloc::store(size_t sz) {
         else if(algorithm == LANDLORD)
         {
 
+            Stats::Instance().evictions++;
 
         }
         else

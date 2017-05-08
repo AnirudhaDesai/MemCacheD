@@ -336,7 +336,7 @@ namespace  Memo
         return ERROR;
     }
 
-    void stats() {
+    void stats(char*& response_str, size_t* response_len) {
         // stats code
 
 
