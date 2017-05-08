@@ -202,10 +202,10 @@ void handle_set(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator p
         *response_len = 0;
         return;
     }
-    response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n"));
+    response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n")+1);
     strcpy(response_str, RESPONSE_MAP[res].res_str);
     strcat(response_str, "\r\n");
-    *response_len = strlen(response_str);
+    *response_len = strlen(response_str+1);
 
 
 }
@@ -238,7 +238,7 @@ void handle_add(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator p
         *response_len = 0;
         return;
     }
-    response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n"));
+    response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n")+1);
 
     strcpy(response_str,RESPONSE_MAP[res].res_str);
     strcat(response_str,"\r\n");
@@ -271,7 +271,7 @@ void handle_replace(std::sregex_token_iterator cmd_itr, std::sregex_token_iterat
         *response_len = 0;
         return;
     }
-    response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n"));
+    response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n")+1);
 
     strcpy(response_str, RESPONSE_MAP[res].res_str);
     strcat(response_str, "\r\n");
@@ -299,7 +299,7 @@ void handle_append(std::sregex_token_iterator cmd_itr, std::sregex_token_iterato
         *response_len = 0;
         return;
     }
-    response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n"));
+    response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n")+1);
 
     strcpy(response_str, RESPONSE_MAP[res].res_str);
     strcat(response_str, "\r\n");
@@ -329,7 +329,7 @@ void handle_prepend(std::sregex_token_iterator cmd_itr, std::sregex_token_iterat
         *response_len = 0;
         return;
     }
-    response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n"));
+    response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n")+1);
 
     strcpy(response_str, RESPONSE_MAP[res].res_str);
     strcat(response_str, "\r\n");
@@ -384,7 +384,7 @@ void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_
             oss<<RESPONSE_MAP[NOT_FOUND].res_str<<"\r\n";
         }
     } while(param_itr != end_itr);
-    response_str = (char*)malloc(oss.str().length());
+    response_str = (char*)malloc(oss.str().length()+1);
     strcpy(response_str, oss.str().c_str());
     *response_len = strlen(response_str);
 }
@@ -404,8 +404,8 @@ void handle_delete(std::sregex_token_iterator param_itr, char*& response_str, si
         *response_len = 0;
         return;
     }
-    response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n"));
-    strcpy(response_str, RESPONSE_MAP[res].res_str);
+    response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n")+1);
+    strcpy(response_str, RESPONSE_MAP[res].res_str+1);
     strcat(response_str, "\r\n");
     *response_len = strlen(response_str);
 }
@@ -431,7 +431,7 @@ void handle_incr(std::sregex_token_iterator param_itr, char*& response_str, size
     }
     if (h == NULL)
     {
-        response_str = (char*)malloc(strlen(RESPONSE_MAP[NOT_FOUND].res_str) + strlen("\r\n"));
+        response_str = (char*)malloc(strlen(RESPONSE_MAP[NOT_FOUND].res_str) + strlen("\r\n")+1);
         strcpy(response_str, RESPONSE_MAP[NOT_FOUND].res_str);
         strcat(response_str, "\r\n");
         *response_len = strlen(response_str);
@@ -466,7 +466,7 @@ void handle_decr(std::sregex_token_iterator param_itr, char*& response_str, size
     }
     if (h == NULL)
     {
-        response_str = (char*)malloc(strlen(RESPONSE_MAP[NOT_FOUND].res_str) + strlen("\r\n"));
+        response_str = (char*)malloc(strlen(RESPONSE_MAP[NOT_FOUND].res_str) + strlen("\r\n")+1);
         strcpy(response_str, RESPONSE_MAP[NOT_FOUND].res_str);
         strcat(response_str, "\r\n");
         *response_len = strlen(response_str);
@@ -503,7 +503,7 @@ void handle_flush_all(std::sregex_token_iterator param_itr, char*& response_str,
         *response_len = 0;
         return;
     }
-    response_str = (char*)malloc(strlen(RESPONSE_MAP[OK].res_str) + strlen("\r\n"));
+    response_str = (char*)malloc(strlen(RESPONSE_MAP[OK].res_str) + strlen("\r\n"+1));
     strcpy(response_str, RESPONSE_MAP[OK].res_str);
     strcat(response_str, "\r\n");
     *response_len = strlen(response_str);
@@ -511,7 +511,7 @@ void handle_flush_all(std::sregex_token_iterator param_itr, char*& response_str,
 
 void handle_version(char*& response_str, size_t* response_len)
 {
-    response_str = (char*)malloc(strlen("1.0.0") + strlen("\r\n"));
+    response_str = (char*)malloc(strlen("1.0.0") + strlen("\r\n")+1);
     strcpy(response_str, "1.0.0");
     strcat(response_str, "\r\n");
     *response_len = strlen(response_str);
