@@ -58,46 +58,75 @@ int initializeServer(){
 
 void *beginConnect(void *args){
 
-#define buf_size 256
+#define buf_size 255
 
     Stats::Instance().curr_connections++;
     Stats::Instance().total_connections++;
     Stats::Instance().connection_structures++;
+
     long client_socket = (long)args;
     char  buffer[buf_size] = {0};
+    bool need_more_data = false;
     
     char* response_str=nullptr;
     size_t response_length;
     ssize_t received_size = 0;
     PARSE_ERROR parse_error;
+    std::string command;
 
     printf(" On thread : %ld \n", client_socket);
     while(true)
     {
-        //read from socket
-        buffer[buf_size] = {0};
-        memset(buffer, 0, sizeof(buffer));
         response_str = nullptr;
 
-        received_size = recv(client_socket, buffer, buf_size, 0);
+        //read from socket
+        if(!need_more_data)
+        {
+            command = "";
+        }
+
+        do
+        {
+            buffer[buf_size] = {0};
+            memset(buffer, 0, buf_size);
+            received_size = recv(client_socket, buffer, buf_size, 0);
+            command += std::string(buffer);
+        }
+        while(received_size == buf_size);
 
         if(received_size <= 0)
         {
             close(client_socket);
-            printf("closing connection with client %ld\n",client_socket);
-            break;
+            return nullptr;
         }
 
-        printf("Message from Client %ld of size %u is : %s\n",client_socket,received_size, buffer);
+        if(command.length() <= 1024*1024)
+        {
 
-        // parse command
-        parse_error = parse_command(buffer,buf_size, response_str, &response_length);
+            printf("Command from Client %ld of size %u is : \n",client_socket,command.size(), command.c_str());
+            // parse command
+            parse_error = parse_command(command, response_str, &response_length);
+        }
+        else
+        {
+            printf("Command from Client %ld of size %u is too long",client_socket,command.size());
+            parse_error = PARSE_ERROR::INVALID_COMMAND;
+            response_str = (char*)malloc(strlen("ERROR\r\n")+1);
+            strcpy(response_str,"ERROR\r\n");
+            response_length = strlen(response_str);
+        }
 
+<<<<<<< HEAD
         printf("got response %s, length=%d\n",response_str,response_length);
         printf("parse_error%d\n", parse_error);
+=======
+>>>>>>> 2c04137633c7b6540f6c72cb59ef60d6c8c17bf5
         switch(parse_error)
         {
             case PARSE_ERROR::NONE:
+            case PARSE_ERROR::INVALID_COMMAND:
+                printf("sending response %s, length=%d\n",response_str,response_length);
+                send(client_socket, response_str, response_length, 0);
                 break;
             case PARSE_ERROR::QUIT: 
                 if(response_str!=nullptr)
@@ -109,8 +138,6 @@ void *beginConnect(void *args){
                 break;
         }
             
-        send(client_socket, response_str, response_length, 0);
-
         if(response_str!=nullptr)
         {
             free(response_str);

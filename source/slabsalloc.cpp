@@ -283,3 +283,8 @@ int SlabsAlloc::getSizeClass(size_t sz) {
     return (int)(ceil(log2(sz)))-3;
 
 }
+
+Header* SlabsAlloc::getFirstObject(int i)
+{
+    return head_AllocatedObjects[i];
+}
