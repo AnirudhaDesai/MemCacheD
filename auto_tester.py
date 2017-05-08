@@ -43,6 +43,7 @@ class HappyPath(unittest.TestCase):
         valid_result = "STORED\r\n"
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
+    
 
     def test_get(self):
         message = "get addkey\\r\\n"
@@ -59,6 +60,18 @@ class HappyPath(unittest.TestCase):
     def test_expiration_time_get(self):
         message = "get expkey\\r\\n"
         test_result = sendMessage(message)
+        self.assertTrue(test_result)
+
+
+    def test_cache_replacement(self):
+        for i in range(1027):
+            message = "add repKey%s 012 3000 11\\r\\nADD MESSAGE\\r\\n"%i
+            test_result = sendMessage(message)
+            self.assertTrue(test_result)
+    def test_stats(self):
+        message = "stats\\r\\n"
+        test_result = sendMessage(message)
+        # print "got result:",test_result
         self.assertTrue(test_result)
 
 #     def test_cache_replacement(self):
@@ -86,6 +99,7 @@ class HappyPath(unittest.TestCase):
         valid_result = "STORED\r\n"
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
+
 
 
 if __name__ == '__main__':
