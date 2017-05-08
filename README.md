@@ -11,7 +11,7 @@ Running
 -------
 * If you have used the build.sh script, the binary should be available under the out directory. Run:
   
-  ./out/memo --lru 2048M 
+  ./out/memo 2048M -lru  
   
 * If you have built the project using a different compiler or method, locate the built executable and run:
 
