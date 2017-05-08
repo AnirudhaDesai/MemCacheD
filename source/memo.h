@@ -40,6 +40,7 @@ typedef enum
     STORED,
     EXISTS,
     NOT_FOUND,
+    NOT_STORED,
     // retrieval command responses
     VALUE,
     END,

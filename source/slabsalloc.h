@@ -13,6 +13,7 @@
 #include <time.h>
 #include <random>
 #include <unistd.h>
+#include <thread>
 
 #include "stats.h"
 #include "Trace.h"
@@ -37,7 +38,7 @@ class Header {
         time_t expiration_timestamp;
         time_t last_updated_timestamp;
         time_t insertedTimestamp;
-        unsigned int last_updated_client;
+        std::thread::id last_updated_client;
         int64_t cas_unique;
         bool valid;
 

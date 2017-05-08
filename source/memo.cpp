@@ -4,6 +4,7 @@
 #include <limits.h>
 #include <exception>
 #include <mutex>
+#include <thread>
 
 #include "memo.h"
 
@@ -94,9 +95,14 @@ namespace  Memo
 
         h=get(key);
         if (h == nullptr) {
+            if(cas)
+            {
+                return NOT_FOUND;
+            }
             return(add(key, flags, expiration_time, size, value));
         }
         else {
+
             return(replace(key, flags, expiration_time, size, value, cas));
         }
 
@@ -144,6 +150,10 @@ namespace  Memo
                 std::strncpy(temp,value.c_str(),size+1);
                 h->insertedTimestamp = time(NULL);
 
+                std::thread::id this_id = std::this_thread::get_id();
+                h->last_updated_client = this_id;
+                printf("\nThread id: %d\n",h->last_updated_client);
+
 
                 printf("adding %s\n",key.c_str());
 
@@ -154,7 +164,7 @@ namespace  Memo
             }
             else
             {
-                return ERROR;
+                return NOT_STORED;
             }
 
         }
@@ -173,7 +183,13 @@ namespace  Memo
 
         h=get(key);
         //printf("%p",h);
-
+        if(cas)
+        {
+            if (h->last_updated_client != std::this_thread::get_id())
+            {
+                return EXISTS;
+            }
+        }
 
         if(h!=nullptr)
         {
