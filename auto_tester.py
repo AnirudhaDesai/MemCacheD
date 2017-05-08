@@ -3,11 +3,14 @@ import sys
 import unittest
 from time import sleep
 
+one_meg_data = "X"*(1024*1024)
+almost_one_meg_data = "X"*(1024*1024-41)
+
    
 def sendMessage(message):
     global sock
     try:
-        print 'sending "%s"' % message
+        # print 'sending "%s"' % message
         sock.sendall(message)
 
         # Look for the response
@@ -76,6 +79,13 @@ class HappyPath(unittest.TestCase):
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
+    def test_add_one_meg(self):
+        message = "add onemegvalues 012 3000 1048542\\r\\n"+almost_one_meg_data+"\\r\\n"
+        # print len(message)
+        # assert(len(message)==1024*1024)
+        valid_result = "STORED\r\n"
+        test_result = sendMessage(message)
+        self.assertEqual(test_result, valid_result)
 
 
 if __name__ == '__main__':

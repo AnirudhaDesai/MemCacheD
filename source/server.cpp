@@ -87,7 +87,7 @@ void *beginConnect(void *args){
 
         do
         {
-            buffer[buf_size] = {0};
+            //buffer[buf_size] = {0};
             memset(buffer, 0, sizeof(buffer));
             received_size = recv(client_socket, buffer, buf_size, 0);
             command += std::string(buffer);
@@ -100,10 +100,21 @@ void *beginConnect(void *args){
             return nullptr;
         }
 
-        printf("Message from Client %ld of size %u is : %s\n",client_socket,command.size(), command.c_str());
+        if(command.length() <= 1024*1024)
+        {
 
-        // parse command
-        parse_error = parse_command(command, response_str, &response_length);
+            printf("Command from Client %ld of size %u is : %s\n",client_socket,command.size(), command.c_str());
+            // parse command
+            parse_error = parse_command(command, response_str, &response_length);
+        }
+        else
+        {
+            printf("Command from Client %ld of size %u is too long",client_socket,command.size());
+            parse_error = PARSE_ERROR::INVALID_COMMAND;
+            response_str = (char*)malloc(strlen("ERROR\r\n")+1);
+            strcpy(response_str,"ERROR\r\n");
+            response_length = strlen(response_str);
+        }
 
         switch(parse_error)
         {
