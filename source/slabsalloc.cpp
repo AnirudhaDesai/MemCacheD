@@ -66,7 +66,42 @@ void * SlabsAlloc::store(size_t sz) {
         
         else if(algorithm == LANDLORD)
         {
+            printf("Landlord function");
+            Header *temp;
 
+            printf("Landlord function");
+
+            while(true)
+            {   
+                
+                temp = head_AllocatedObjects[i];
+                uint16_t delta= temp->landlordCost/temp->data_size;
+
+                while((temp=temp->next)!=nullptr)
+                {
+                    if(temp->landlordCost/temp->data_size < delta)
+                    {
+                        delta = temp->landlordCost/temp->data_size;
+                    }
+
+                }
+                temp = head_AllocatedObjects[i];
+                
+                do
+                {
+                    temp->landlordCost = temp->landlordCost - delta * temp->data_size;
+                }while((temp=temp->next)!=nullptr);
+                
+                temp = head_AllocatedObjects[i];
+
+                do
+                {
+                    if(temp->landlordCost<=0)
+                    {
+                        remove((void*)temp);
+                    }
+                }while((temp=temp->next)!=nullptr);
+            }
             Stats::Instance().evictions++;
 
         }
@@ -213,7 +248,10 @@ void SlabsAlloc::cacheReplacementUpdates(Header* h)
 {
     if(algorithm == LRU)
     {
+        if(h!=nullptr)
+        {
         updateRecentlyUsed(h);
+        }
     }
     else if(algorithm == RANDOM)
     {
@@ -221,6 +259,7 @@ void SlabsAlloc::cacheReplacementUpdates(Header* h)
     }
     else if (algorithm == LANDLORD)
     {
+        //SlabsAlloc::missTable.insert{Key,time(null)};
         //modify credit of the file
     }
 }

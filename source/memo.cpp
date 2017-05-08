@@ -115,6 +115,8 @@ namespace  Memo
 
             printf("adding %s\n",key.c_str());
 
+            h->landlordCost=50;
+
             Table.insert({key,h});
             return STORED;
         }
