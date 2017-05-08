@@ -77,11 +77,7 @@ class HappyPath(unittest.TestCase):
             message = "add repKey%s 012 3000 11\\r\\nADD MESSAGE\\r\\n"%i
             test_result = sendMessage(message)
             self.assertTrue(test_result)
-<<<<<<< HEAD
-            
-=======
-    
->>>>>>> e0d9f53dc9766ef98dcd7cfe0e3157e377022844
+
     def test_stats(self):
         message = "stats\\r\\n"
         test_result = sendMessage(message)
