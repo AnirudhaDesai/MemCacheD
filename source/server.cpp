@@ -94,6 +94,7 @@ void *beginConnect(void *args){
         parse_error = parse_command(buffer,buf_size, response_str, &response_length);
 
         printf("got response %s, length=%d\n",response_str,response_length);
+        printf("parse_error%d\n", parse_error);
         switch(parse_error)
         {
             case PARSE_ERROR::NONE:

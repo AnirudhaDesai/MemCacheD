@@ -338,7 +338,8 @@ namespace  Memo
 
     void stats(char*& response_str, size_t* response_len) {
         // stats code
-
+        printf("Called Stats function \n" );
+        Stats::Instance().printStats(response_str,response_len);
 
     }
 

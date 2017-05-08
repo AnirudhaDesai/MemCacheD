@@ -39,6 +39,7 @@ class HappyPath(unittest.TestCase):
         test_result = sendMessage(message)
         # print "got result:",test_result
         self.assertEqual(test_result, valid_result)
+    
 
     def test_get(self):
         message = "get addkey\\r\\n"
@@ -62,6 +63,11 @@ class HappyPath(unittest.TestCase):
             message = "add repKey%s 012 3000 11\\r\\nADD MESSAGE\\r\\n"%i
             test_result = sendMessage(message)
             self.assertTrue(test_result)
+    def test_stats(self):
+        message = "stats\\r\\n"
+        test_result = sendMessage(message)
+        # print "got result:",test_result
+        self.assertTrue(test_result)
 
 if __name__ == '__main__':
     global sock

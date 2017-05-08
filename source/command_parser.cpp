@@ -428,7 +428,7 @@ void handle_decr(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator 
 
 void handle_stats(char*& response_str, size_t* response_len)
 {
-    Memo::stats(response_str,response_len);
+    Memo::stats(&response_str);
 }
 
 void handle_flush_all(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
