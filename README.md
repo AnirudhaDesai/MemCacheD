@@ -15,7 +15,7 @@ Running
   
 * If you have built the project using a different compiler or method, locate the built executable and run:
 
-   ./[executable] --lru 2048M
+   ./[executable] 2048M -lru
    
 * To run the test suite:
    
