@@ -149,6 +149,7 @@ public:
   size_t getSize(void * p);
   void updateRecentlyUsed(Header* h);
   void cacheReplacementUpdates(Header* h);
+  Header* getFirstObject(int i);
 
   // number of bytes currently allocated  
   size_t bytesAllocated();

@@ -344,6 +344,27 @@ namespace  Memo
 
     void flush_all(int32_t exptime) {
         // expire all objects after exptime
+        Header* temp;
+        int i;
+
+        for(i=0;i<23;i++)
+        {
+            temp = alloc->getFirstObject(i);
+
+            if(temp!=nullptr)
+            {
+                if(exptime==0)
+                {
+                    update_Expiration_Timestamp(temp,-1);
+                }
+                else
+                {
+                    update_Expiration_Timestamp(temp,exptime);
+                }
+
+            }
+        }
+
         alloc->statsObject.cmd_flush++;
     }
 
