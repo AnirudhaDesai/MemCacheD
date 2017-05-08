@@ -66,6 +66,7 @@ void *beginConnect(void *args){
     char  buffer[buf_size] = {0};
     
     size_t response_length;
+    ssize_t received_size = 0;
 
     printf(" On thread : %ld \n", client_socket);
     while(true)
@@ -74,13 +75,19 @@ void *beginConnect(void *args){
         buffer[buf_size] = {0};
         char* response_str=nullptr;
 
-
         memset(buffer, 0, sizeof(buffer));
         printf("*********%s",buffer);
 
-        recv(client_socket, buffer, buf_size, 0);
+        received_size = recv(client_socket, buffer, buf_size, 0);
 
-        printf("Message from Client %ld is : %s\n",client_socket, buffer);
+        if(received_size <= 0)
+        {
+            close(client_socket);
+            printf("closing connection with client %ld\n",client_socket);
+            break;
+        }
+
+        printf("Message from Client %ld of size %u is : %s\n",client_socket,received_size, buffer);
 
         // parse command
         parse_command(buffer,buf_size, response_str, &response_length);
