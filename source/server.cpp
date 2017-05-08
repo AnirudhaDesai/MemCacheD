@@ -58,7 +58,7 @@ int initializeServer(){
 
 void *beginConnect(void *args){
 
-#define buf_size 256
+#define buf_size 255
 
     Stats::Instance().curr_connections++;
     Stats::Instance().total_connections++;
@@ -87,8 +87,8 @@ void *beginConnect(void *args){
 
         do
         {
-            //buffer[buf_size] = {0};
-            memset(buffer, 0, sizeof(buffer));
+            buffer[buf_size] = {0};
+            memset(buffer, 0, buf_size);
             received_size = recv(client_socket, buffer, buf_size, 0);
             command += std::string(buffer);
         }
@@ -103,7 +103,7 @@ void *beginConnect(void *args){
         if(command.length() <= 1024*1024)
         {
 
-            printf("Command from Client %ld of size %u is : %s\n",client_socket,command.size(), command.c_str());
+            printf("Command from Client %ld of size %u is : \n",client_socket,command.size(), command.c_str());
             // parse command
             parse_error = parse_command(command, response_str, &response_length);
         }
