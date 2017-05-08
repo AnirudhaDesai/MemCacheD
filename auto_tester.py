@@ -11,14 +11,16 @@ def sendMessage(message):
         sock.sendall(message)
 
         # Look for the response
-        amount_received = 0
+        total_length_received = 0
         data_received = ""
 
         while True: 
-            data_received += sock.recv(256)
-            amount_received += len(data_received)
-            # print data_received
-            if amount_received < 256:
+            data = sock.recv(256)
+            data_received+=data
+            length_received = len(data)
+            total_length_received += length_received
+            print length_received,data
+            if length_received < 256:
                 break
 
     except:
@@ -37,7 +39,6 @@ class HappyPath(unittest.TestCase):
         message = "add addkey 012 3000 11\\r\\nADD MESSAGE\\r\\n"
         valid_result = "STORED\r\n"
         test_result = sendMessage(message)
-        # print "got result:",test_result
         self.assertEqual(test_result, valid_result)
 
     def test_get(self):
@@ -57,11 +58,25 @@ class HappyPath(unittest.TestCase):
         test_result = sendMessage(message)
         self.assertTrue(test_result)
 
-    def test_cache_replacement(self):
-        for i in range(1027):
-            message = "add repKey%s 012 3000 11\\r\\nADD MESSAGE\\r\\n"%i
-            test_result = sendMessage(message)
-            self.assertTrue(test_result)
+#     def test_cache_replacement(self):
+        # for i in range(1027):
+            # message = "add repKey%s 012 3000 11\\r\\nADD MESSAGE\\r\\n"%i
+            # test_result = sendMessage(message)
+#             self.assertTrue(test_result)
+
+    def test_add_long(self):       
+        message = "add longvalue 012 3000 500\\r\\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\\r\\n"
+        valid_result = "STORED\r\n"
+        test_result = sendMessage(message)
+        self.assertEqual(test_result, valid_result)
+
+    def test_get_long(self):
+        message = "get longvalue\\r\\n"
+        valid_result = "VALUE longvalue 12 500\r\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\r\n" 
+        test_result = sendMessage(message)
+        self.assertEqual(test_result, valid_result)
+
+
 
 if __name__ == '__main__':
     global sock

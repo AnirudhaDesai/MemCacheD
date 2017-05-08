@@ -5,7 +5,6 @@
 #include <cstdint>
 #include <unordered_map>
 
-
 #include "slabsalloc.h"
 
 typedef enum {

@@ -63,8 +63,10 @@ void *beginConnect(void *args){
     Stats::Instance().curr_connections++;
     Stats::Instance().total_connections++;
     Stats::Instance().connection_structures++;
+
     long client_socket = (long)args;
     char  buffer[buf_size] = {0};
+    bool need_more_data = false;
     
     char* response_str=nullptr;
     size_t response_length;
@@ -75,9 +77,13 @@ void *beginConnect(void *args){
     printf(" On thread : %ld \n", client_socket);
     while(true)
     {
-        //read from socket
         response_str = nullptr;
-        command = "";
+
+        //read from socket
+        if(!need_more_data)
+        {
+            command = "";
+        }
 
         do
         {
@@ -99,10 +105,12 @@ void *beginConnect(void *args){
         // parse command
         parse_error = parse_command(command, response_str, &response_length);
 
-        printf("got response %s, length=%d\n",response_str,response_length);
         switch(parse_error)
         {
             case PARSE_ERROR::NONE:
+            case PARSE_ERROR::INVALID_COMMAND:
+                printf("sending response %s, length=%d\n",response_str,response_length);
+                send(client_socket, response_str, response_length, 0);
                 break;
             case PARSE_ERROR::QUIT: 
                 if(response_str!=nullptr)
@@ -114,8 +122,6 @@ void *beginConnect(void *args){
                 break;
         }
             
-        send(client_socket, response_str, response_length, 0);
-
         if(response_str!=nullptr)
         {
             free(response_str);

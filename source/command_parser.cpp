@@ -79,6 +79,7 @@ COMMAND_STRING_MAP CMD_MAP[NUM_COMMANDS]
 
 PARSE_ERROR parse_command(std::string& cmd, char*& res_str, size_t* res_len)
 {
+    PARSE_ERROR result = PARSE_ERROR::NONE;
 
     if(cmd.length() == 0)
     {
@@ -140,8 +141,6 @@ PARSE_ERROR parse_command(std::string& cmd, char*& res_str, size_t* res_len)
             break;
             // Retrieval commands
         case GET:
-            handle_get(param_itr, res_str, res_len);
-            break;
         case GETS:
             handle_get(param_itr, res_str, res_len);
             break;
@@ -166,11 +165,13 @@ PARSE_ERROR parse_command(std::string& cmd, char*& res_str, size_t* res_len)
             handle_version(res_str, res_len);
             break;
         case QUIT:
-            return PARSE_ERROR::QUIT;
+            result = PARSE_ERROR::QUIT;
         case NONE:
             // do nothing
             break;
     }
+
+    return result;
 }
 
 void handle_set(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
@@ -386,7 +387,12 @@ void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_
             std::strcat(response_str,"\r\n");
         }
     } while(param_itr != end_itr);
-    *response_len = strlen(response_str);
+
+    if(response_str != nullptr)
+    {
+        *response_len = strlen(response_str);
+    }
+
 }
 
 void handle_delete(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)

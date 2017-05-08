@@ -11,7 +11,8 @@ typedef enum struct PARSE_ERROR
 {
     NONE=0,
     NEED_MORE_DATA=1,
-    QUIT=2
+    INVALID_COMMAND=2,
+    QUIT=3
 };
 
 PARSE_ERROR parse_command(std::string&, char*& res_str, size_t* res_len);
