@@ -53,6 +53,12 @@ namespace  Memo
                 }
                 return got->second;
             }
+            else
+            {
+                Table.erase({key});
+                printf("Key expired");
+                return nullptr;
+            }
         }
         else
         {

@@ -272,15 +272,15 @@ size_t SlabsAlloc::maxBytesRequested() {
 
 size_t SlabsAlloc::getSizeFromClass(int index) {
 
-    return (size_t)(pow(2,index+3));
+    return (size_t)(pow(2,index));
 
 }
 
 int SlabsAlloc::getSizeClass(size_t sz) {
-    if (sz < 8) {
+    if (sz < 1) {
         return 0;
     }
-    return (int)(ceil(log2(sz)))-3;
+    return (int)(ceil(log2(sz)));
 
 }
 
