@@ -43,10 +43,9 @@ typedef enum
     // retrieval command responses
     VALUE,
     END,
-    // deletion 
-    INCREMENTED,
-    DECREMENTED,
-    DELETED
+    // deletion
+    DELETED,
+    OK
 
 } RESPONSE;
 
@@ -65,8 +64,6 @@ namespace  Memo
 
     Header* get(std::string key, bool isStatsChanged=false);
     
-    Header* gets(std::string key);
-    
     RESPONSE set(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas=false);
     
     RESPONSE add(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool updateExpirationTime=true);
@@ -80,7 +77,6 @@ namespace  Memo
     RESPONSE mem_delete(std::string key);
     void stats(char*& response_str, size_t* response_len);
     void flush_all(int32_t exptime);
-    void version(); 
 }
 
 
