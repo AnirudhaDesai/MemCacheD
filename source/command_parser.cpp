@@ -32,7 +32,7 @@ RESPONSE_STRING_MAP RESPONSE_MAP[NUM_RESPONSES]
     // deletion
     // incr/decr
     {DELETED,(char*)"DELETED"},
-    {NOT_FOUND,(char*)"NOT_FOUND"}
+    {OK,(char*)"OK"}
 };
 
 
@@ -197,8 +197,12 @@ void handle_set(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator p
 
     RESPONSE res = Memo::set(key, flags, expiration_time, size, value, false);
 
+    if (res != ERROR && noreply) {
+        response_str = nullptr;
+        *response_len = 0;
+        return;
+    }
     response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n"));
-
     strcpy(response_str, RESPONSE_MAP[res].res_str);
     strcat(response_str, "\r\n");
     *response_len = strlen(response_str);
@@ -229,6 +233,11 @@ void handle_add(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator p
 
     RESPONSE res = Memo::add(key, flags, expiration_time, size, value);
 
+    if (res != ERROR && noreply) {
+        response_str = nullptr;
+        *response_len = 0;
+        return;
+    }
     response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n"));
 
     strcpy(response_str,RESPONSE_MAP[res].res_str);
@@ -257,7 +266,11 @@ void handle_replace(std::sregex_token_iterator cmd_itr, std::sregex_token_iterat
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
     RESPONSE res = Memo::replace(key, flags, expiration_time, size, value, false);
-
+    if (res != ERROR && noreply) {
+        response_str = nullptr;
+        *response_len = 0;
+        return;
+    }
     response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n"));
 
     strcpy(response_str, RESPONSE_MAP[res].res_str);
@@ -281,7 +294,11 @@ void handle_append(std::sregex_token_iterator cmd_itr, std::sregex_token_iterato
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
     RESPONSE res = Memo::append(key, size, value);
-
+    if (res != ERROR && noreply) {
+        response_str = nullptr;
+        *response_len = 0;
+        return;
+    }
     response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n"));
 
     strcpy(response_str, RESPONSE_MAP[res].res_str);
@@ -307,7 +324,11 @@ void handle_prepend(std::sregex_token_iterator cmd_itr, std::sregex_token_iterat
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
     RESPONSE res = Memo::prepend(key, size, value);
-
+    if (res != ERROR && noreply) {
+        response_str = nullptr;
+        *response_len = 0;
+        return;
+    }
     response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n"));
 
     strcpy(response_str, RESPONSE_MAP[res].res_str);
@@ -377,7 +398,16 @@ void handle_delete(std::sregex_token_iterator param_itr, char*& response_str, si
         noreply = true;
     }
 
-    Memo::mem_delete(key);
+    RESPONSE res = Memo::mem_delete(key);
+    if (res != ERROR && noreply) {
+        response_str = nullptr;
+        *response_len = 0;
+        return;
+    }
+    response_str = (char*)malloc(strlen(RESPONSE_MAP[res].res_str) + strlen("\r\n"));
+    strcpy(response_str, RESPONSE_MAP[res].res_str);
+    strcat(response_str, "\r\n");
+    *response_len = strlen(response_str);
 }
 
 void handle_incr(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
@@ -394,6 +424,11 @@ void handle_incr(std::sregex_token_iterator param_itr, char*& response_str, size
     }
 
     Header* h = Memo::incr(key, value);
+    if (noreply) {
+        response_str = nullptr;
+        *response_len = 0;
+        return;
+    }
     if (h == NULL)
     {
         response_str = (char*)malloc(strlen(RESPONSE_MAP[NOT_FOUND].res_str) + strlen("\r\n"));
@@ -424,6 +459,11 @@ void handle_decr(std::sregex_token_iterator param_itr, char*& response_str, size
     }
 
     Header* h = Memo::decr(key, value);
+    if (noreply) {
+        response_str = nullptr;
+        *response_len = 0;
+        return;
+    }
     if (h == NULL)
     {
         response_str = (char*)malloc(strlen(RESPONSE_MAP[NOT_FOUND].res_str) + strlen("\r\n"));
@@ -448,12 +488,31 @@ void handle_stats(char*& response_str, size_t* response_len)
 void handle_flush_all(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
 {
     std::sregex_token_iterator end_itr;
-    std::string expiration_time_str = *param_itr++;
-    int32_t expiration_time  = atoi(expiration_time_str.c_str());
+    int32_t expiration_time = 0;
+    if (param_itr != end_itr) {
+        std::string expiration_time_str = *param_itr++;
+        expiration_time  = atoi(expiration_time_str.c_str());
+    }
+    bool noreply = false;
+    if (param_itr != end_itr) {
+        noreply = true;
+    }
     Memo::flush_all(expiration_time);
+    if (noreply) {
+        response_str = nullptr;
+        *response_len = 0;
+        return;
+    }
+    response_str = (char*)malloc(strlen(RESPONSE_MAP[OK].res_str) + strlen("\r\n"));
+    strcpy(response_str, RESPONSE_MAP[OK].res_str);
+    strcat(response_str, "\r\n");
+    *response_len = strlen(response_str);
 }
 
 void handle_version(char*& response_str, size_t* response_len)
 {
-    Memo::version();
+    response_str = (char*)malloc(strlen("1.0.0") + strlen("\r\n"));
+    strcpy(response_str, "1.0.0");
+    strcat(response_str, "\r\n");
+    *response_len = strlen(response_str);
 }
