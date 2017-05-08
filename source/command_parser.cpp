@@ -364,7 +364,7 @@ void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_
         }
     } while(param_itr != end_itr);
     
-    finalGet = oss.str();
+    finalGet = std::string(oss.str());
     response_str = (char*)malloc(finalGet.length());
     strcpy(response_str, finalGet.c_str());
     *response_len = strlen(response_str);
