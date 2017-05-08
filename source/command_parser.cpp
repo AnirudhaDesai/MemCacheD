@@ -3,6 +3,8 @@
 #include <string>
 #include <regex>
 
+#include "Trace.h"
+
 #define MAX_CMD_LINES 10
 #define NUM_COMMANDS 15
 
@@ -75,11 +77,10 @@ COMMAND_STRING_MAP CMD_MAP[NUM_COMMANDS]
     { QUIT, (char*)"quit" },
 };
 
-PARSE_ERROR parse_command(char* cmd_str, size_t cmd_len, char*& res_str, size_t* res_len)
+PARSE_ERROR parse_command(std::string& cmd, char*& res_str, size_t* res_len)
 {
 
-    if(cmd_len <=0
-            || cmd_str == nullptr)
+    if(cmd.length() == 0)
     {
         return PARSE_ERROR::QUIT;
     }
@@ -87,7 +88,7 @@ PARSE_ERROR parse_command(char* cmd_str, size_t cmd_len, char*& res_str, size_t*
     std::string response;
     std::regex ws_re("\\s+");
     std::regex end_re("\\\\r\\\\n");
-    std::string cmd = std::string(cmd_str);
+    //std::string cmd = std::string(cmd_str);
     // start by storing all command lines in an array
 //    const const char* cmd_lines[MAX_CMD_LINES];
     std::string command_str;

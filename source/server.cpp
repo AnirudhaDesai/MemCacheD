@@ -69,28 +69,34 @@ void *beginConnect(void *args){
     size_t response_length;
     ssize_t received_size = 0;
     PARSE_ERROR parse_error;
+    std::string command;
 
     printf(" On thread : %ld \n", client_socket);
     while(true)
     {
         //read from socket
-        buffer[buf_size] = {0};
-        memset(buffer, 0, sizeof(buffer));
         response_str = nullptr;
+        command = "";
 
-        received_size = recv(client_socket, buffer, buf_size, 0);
+        do
+        {
+            buffer[buf_size] = {0};
+            memset(buffer, 0, sizeof(buffer));
+            received_size = recv(client_socket, buffer, buf_size, 0);
+            command += std::string(buffer);
+        }
+        while(received_size == buf_size);
 
         if(received_size <= 0)
         {
             close(client_socket);
-            printf("closing connection with client %ld\n",client_socket);
-            break;
+            return nullptr;
         }
 
-        printf("Message from Client %ld of size %u is : %s\n",client_socket,received_size, buffer);
+        printf("Message from Client %ld of size %u is : %s\n",client_socket,command.size(), command.c_str());
 
         // parse command
-        parse_error = parse_command(buffer,buf_size, response_str, &response_length);
+        parse_error = parse_command(command, response_str, &response_length);
 
         printf("got response %s, length=%d\n",response_str,response_length);
         switch(parse_error)
