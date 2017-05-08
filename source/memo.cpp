@@ -127,6 +127,7 @@ namespace  Memo
             h->data_size = size;
             temp = (char*) (h+1);
             std::strncpy(temp,value.c_str(),size+1);
+            h->insertedTimestamp = time(NULL);
 
             printf("adding %s\n",key.c_str());
 
