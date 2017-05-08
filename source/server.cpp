@@ -51,7 +51,7 @@ int initializeServer(){
         if (Error != 0)
             printf("Error creating thread\n");
     }
-    pthread_exit(NULL);
+   // pthread_exit(NULL);
     return 0;
 
 }
@@ -130,6 +130,7 @@ void *beginConnect(void *args){
             case PARSE_ERROR::QUIT: 
                 if(response_str!=nullptr)
                     free(response_str);
+                Stats::Instance().curr_connections--;
                 close(client_socket);
                 return nullptr;
                 break;
@@ -144,5 +145,6 @@ void *beginConnect(void *args){
         
     }
     //End of this connection with client. Update Stats
+    printf("\nEnd of thread\n");
     Stats::Instance().curr_connections--;	
 }

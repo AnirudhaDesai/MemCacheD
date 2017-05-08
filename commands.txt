@@ -9,7 +9,6 @@ get key2\r\n
 prepend key2 3\r\nnew\r\n
 get key2\r\n
 add key3 00 0 4\r\nhola\r\n
-get key key2 key3\r\n
 add key5 0 0 1\r\n1\r\n
 get key5\r\n
 incr key5 2\r\n
@@ -17,4 +16,3 @@ get key5\r\n
 decr key5 3\r\n
 get key5\r\n
 quit
-

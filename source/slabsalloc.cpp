@@ -1,6 +1,6 @@
 #include "slabsalloc.h"
 
-void * SlabsAlloc::store(size_t sz) {
+void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
 
     Header *h;
 
@@ -38,6 +38,9 @@ void * SlabsAlloc::store(size_t sz) {
             printf("Object being removed %s\n",head_AllocatedObjects[i]->key );
 
             Stats::Instance().evictions++;
+
+            evictedObject = head_AllocatedObjects[i];
+            //printf("\nevictedObject in slabsalloc : %p\n", evictedObject );
              
             remove((void *) head_AllocatedObjects[i]);
 
@@ -61,6 +64,7 @@ void * SlabsAlloc::store(size_t sz) {
             printf("Object being removed %s\n",tempObject->key );
 
             Stats::Instance().evictions++;
+            evictedObject = tempObject;
             remove((void *)tempObject);  
 
         }
@@ -68,6 +72,7 @@ void * SlabsAlloc::store(size_t sz) {
         
         else if(algorithm == LANDLORD)
         {
+
             printf("Landlord function");
             Header *temp;
             bool flag=true;
@@ -108,6 +113,7 @@ void * SlabsAlloc::store(size_t sz) {
                     }
                 }while((temp=temp->next)!=nullptr);
             }
+
             Stats::Instance().evictions++;
 
         }
@@ -128,16 +134,14 @@ void * SlabsAlloc::store(size_t sz) {
             freedObjects[i]->next = nullptr;
         }
 
-        if(tail_AllocatedObjects[i]!=nullptr)
-            tail_AllocatedObjects[i]->next=h;
-
+        if(tail_AllocatedObjects[i] != nullptr)
+            tail_AllocatedObjects[i]->next = h;
         h->prev = tail_AllocatedObjects[i];
         h->next = nullptr;
         tail_AllocatedObjects[i]=h;
-        
         if(head_AllocatedObjects[i]==nullptr)
-            head_AllocatedObjects[i]=h;
-
+            head_AllocatedObjects[i] = h;
+        
 
         AllocatedCount[i]++;
         Stats::Instance().total_items++;
@@ -274,6 +278,9 @@ void SlabsAlloc::cacheReplacementUpdates(Header* h)
     {
         //SlabsAlloc::missTable.insert{Key,time(null)};
         //modify credit of the file
+        double cost = difftime(time(NULL), h->insertedTimestamp);
+        h->landlordCost = (h->landlordCost + cost)/2;
+        
     }
 }
 void SlabsAlloc::updateRecentlyUsed(Header* h)
@@ -300,6 +307,7 @@ void SlabsAlloc::updateRecentlyUsed(Header* h)
         temp->next = nullptr;
     }
 }
+
 
 // number of bytes currently allocated  
 size_t SlabsAlloc::bytesAllocated() {

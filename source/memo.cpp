@@ -34,9 +34,9 @@ namespace  Memo
         return false;
     }
 
-    Header* get(std::string key, const char* callerFunction)
+    Header* get(std::string key, bool isStatsChanged)
     {
-        if (std::strcmp(callerFunction, "handle_get") == 0)
+        if (isStatsChanged)
         {   
             // Increment stats only if get called by handle_get. Calls from other functions are internal
             Stats::Instance().cmd_get++;
@@ -49,7 +49,7 @@ namespace  Memo
             if (validExpirationTime(got->second)) {
                 alloc->cacheReplacementUpdates((Header *) got->second);
                 // it is a get hit
-                if (std::strcmp(callerFunction, "handle_get") == 0) {
+                if (isStatsChanged) {
                     // Increment stats only if get called by handle_get. Calls from other functions are internal
 
                     Stats::Instance().get_hits++;
@@ -66,7 +66,7 @@ namespace  Memo
         else
         {
             //it is a get miss.
-            if (std::strcmp(callerFunction, "handle_get") == 0)
+            if (isStatsChanged)
             {
                 // Increment stats only if get called by handle_get. Calls from other functions are internal
 
@@ -84,7 +84,7 @@ namespace  Memo
 
         //Stats::Instance().cmd_set++;
 
-        h=get(key, __FUNCTION__);
+        h=get(key);
         if (h == nullptr) {
             return(add(key, flags, expiration_time, size, value));
         }
@@ -98,18 +98,28 @@ namespace  Memo
     RESPONSE add(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool updateExpirationTime)
     {
         Header* h;
+        Header *evictedObject;
+        evictedObject = NULL;
         char* temp;
         printf("called %s\n",__FUNCTION__);
 
         Stats::Instance().cmd_set++;
 
-        h=get(key, __FUNCTION__);
+        h=get(key);
 
         if(h==nullptr)//if value not present in hash table already, allocate memory and update header. 
         {
             //add header information
+
             printf("add called\n");
-            h = (Header*) alloc->store(size);
+
+            h = (Header*) alloc->store(size, evictedObject);
+            printf("\n evictedObject : %s\n", evictedObject->key );
+            if(evictedObject!=NULL)
+            {
+                Table.erase({evictedObject->key});
+            }
+
             std::strncpy(h->key, key.c_str(), 251);
             h->flags = flags;
             if (updateExpirationTime) {
@@ -121,6 +131,7 @@ namespace  Memo
             h->data_size = size;
             temp = (char*) (h+1);
             std::strncpy(temp,value.c_str(),size+1);
+            h->insertedTimestamp = time(NULL);
 
             printf("adding %s\n",key.c_str());
 
@@ -142,7 +153,7 @@ namespace  Memo
 
         Stats::Instance().cmd_set++;
 
-        h=get(key, __FUNCTION__);
+        h=get(key);
         //printf("%p",h);
 
 
@@ -191,7 +202,7 @@ namespace  Memo
 
         Stats::Instance().cmd_set++;
 
-        h = get(key,__FUNCTION__);
+        h = get(key);
 
         if(h==nullptr)
         {
@@ -234,7 +245,7 @@ namespace  Memo
 
         Stats::Instance().cmd_set++;
 
-        h = get(key,__FUNCTION__);
+        h = get(key);
 
         if(h==nullptr)
         {
@@ -276,7 +287,7 @@ namespace  Memo
         Header* h;
         printf("called %s\n",__FUNCTION__);
 
-        h = get(key,__FUNCTION__);
+        h = get(key);
 
         if(h!=nullptr)
         {
@@ -295,7 +306,7 @@ namespace  Memo
         Header* h;
         printf("called %s\n",__FUNCTION__);
 
-        h = get(key,__FUNCTION__);
+        h = get(key);
         char* temp;
         long unsigned int num;
 
@@ -323,9 +334,9 @@ namespace  Memo
             printf("incremented:%lu",num);
 
             std::string num_str = std::to_string(num);
-            RESPONSE res = replace(key, h->flags, h->expiration_time, std::strlen(num_str.c_str()), num_str);
+            RESPONSE res = replace(key, h->flags, h->expiration_time, std::strlen(num_str.c_str()), num_str, false, false);
             if (res == STORED) {
-                return get(key, __FUNCTION__);
+                return get(key);
             }
             return nullptr;
         }
@@ -335,7 +346,7 @@ namespace  Memo
         Header* h;
         printf("called %s\n",__FUNCTION__);
 
-        h = get(key,__FUNCTION__);
+        h = get(key);
         char* temp;
         long unsigned int num;
 
@@ -370,9 +381,9 @@ namespace  Memo
             printf("decreamented:%lu",num);
 
             std::string num_str = std::to_string(num);
-            RESPONSE res = replace(key, h->flags, h->expiration_time, std::strlen(num_str.c_str()), num_str);
+            RESPONSE res = replace(key, h->flags, h->expiration_time, std::strlen(num_str.c_str()), num_str, false, false);
             if (res == STORED) {
-                return get(key, __FUNCTION__);
+                return get(key);
             }
             return nullptr;
 
@@ -392,7 +403,7 @@ namespace  Memo
         Header* temp;
         int i;
 
-        for(i=0;i<23;i++)
+        for(i=0;i<NUM_CLASSES;i++)
         {
             temp = alloc->getFirstObject(i);
 

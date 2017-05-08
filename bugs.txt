@@ -5,7 +5,8 @@ MEMO
 
 
 COMMAND PARSER
-
+1. Passing "012" to flags saves it as 12. Is this correct?
 
 CACHE REPLACEMENT ALGORITHMS
+
 

@@ -36,11 +36,13 @@ class Header {
         int32_t expiration_time;
         time_t expiration_timestamp;
         time_t last_updated_timestamp;
+        time_t insertedTimestamp;
         unsigned int last_updated_client;
         int64_t cas_unique;
         bool valid;
-        uint16_t landlordCost;
-        time_t lastMissTime; //for landlord replacement algorithm
+
+        double landlordCost; //for landlord replacement algorithm
+
 
         Header * prev;
         Header * next;
@@ -81,7 +83,8 @@ class SlabsAlloc {
         enum { Alignment = 16 };
 
 
-        void * store(size_t sz);
+        void * store(size_t sz, Header *& evictedObject);
+
         void remove(void * ptr);
         size_t getSize(void * p);
         void updateRecentlyUsed(Header* h);
