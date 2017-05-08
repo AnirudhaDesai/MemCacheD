@@ -21,7 +21,7 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
     /* If this malloc will push the memory usage over the limit OR exceeds the class limit,
      * perform an eviction before storing
      */
-    if(sz+allocated >= MAX_ALLOC || AllocatedCount[i]>=4 )
+    if(sz+allocated >= MAX_ALLOC || AllocatedCount[i]>=CLASS_LIM )
     {
         if(head_AllocatedObjects[i] == nullptr)
         {
