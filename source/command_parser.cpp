@@ -343,7 +343,6 @@ void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_
     *response_len = 0;
     std::sregex_token_iterator end_itr;
     std::ostringstream  oss;
-    std::string finalGet;
     std::string key;
     do {
         key = *(param_itr++);
@@ -357,16 +356,15 @@ void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_
             oss<<key<<" ";
             oss<<std::to_string(h->flags)<<" ";
             oss<<std::to_string(h->data_size)<<"\r\n";
-            oss<<(char*)(h+1)<<"\r\n";
+            std::string data = std::string((char*) (h+1));
+            oss<<data<<"\r\n";
         }
         else {
             oss<<RESPONSE_MAP[NOT_FOUND].res_str<<"\r\n";
         }
     } while(param_itr != end_itr);
-    
-    finalGet = std::string(oss.str());
-    response_str = (char*)malloc(finalGet.length());
-    strcpy(response_str, finalGet.c_str());
+    response_str = (char*)malloc(oss.str().length());
+    strcpy(response_str, oss.str().c_str());
     *response_len = strlen(response_str);
 }
 
