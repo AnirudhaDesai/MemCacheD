@@ -1,6 +1,6 @@
 #include "slabsalloc.h"
 
-void * SlabsAlloc::store(size_t sz) {
+void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
 
     Header *h;
 
@@ -36,6 +36,9 @@ void * SlabsAlloc::store(size_t sz) {
             printf("Object being removed %s\n",head_AllocatedObjects[i]->key );
 
             Stats::Instance().evictions++;
+
+            evictedObject = head_AllocatedObjects[i];
+            //printf("\nevictedObject in slabsalloc : %p\n", evictedObject );
              
             remove((void *) head_AllocatedObjects[i]);
 
@@ -59,6 +62,7 @@ void * SlabsAlloc::store(size_t sz) {
             printf("Object being removed %s\n",tempObject->key );
 
             Stats::Instance().evictions++;
+            evictedObject = tempObject;
             remove((void *)tempObject);  
 
         }

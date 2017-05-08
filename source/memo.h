@@ -63,7 +63,7 @@ const auto SecondsIn30Days =  60 * 60 * 24 * 30;
 namespace  Memo
 {
 
-    Header* get(std::string key, const char * callerFunction);
+    Header* get(std::string key, bool isStatsChanged=false);
     
     Header* gets(std::string key);
     
