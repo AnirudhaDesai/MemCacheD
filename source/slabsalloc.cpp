@@ -68,14 +68,15 @@ void * SlabsAlloc::store(size_t sz) {
         {
             printf("Landlord function");
             Header *temp;
+            bool flag=true;
 
             printf("Landlord function");
 
-            while(true)
+            while(flag)
             {   
                 
                 temp = head_AllocatedObjects[i];
-                uint16_t delta= temp->landlordCost/temp->data_size;
+                double delta= temp->landlordCost/temp->data_size;
 
                 while((temp=temp->next)!=nullptr)
                 {
@@ -99,6 +100,8 @@ void * SlabsAlloc::store(size_t sz) {
                     if(temp->landlordCost<=0)
                     {
                         remove((void*)temp);
+                        flag=false;
+                        break;
                     }
                 }while((temp=temp->next)!=nullptr);
             }
