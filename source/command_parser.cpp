@@ -46,8 +46,8 @@ void handle_cas(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator p
 void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
 void handle_gets(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
 void handle_delete(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
-void handle_incr(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
-void handle_decr(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
+void handle_incr(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
+void handle_decr(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
 void handle_stats(char*& response_str, size_t* response_len);
 void handle_flush_all(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
 void handle_version(char*& response_str, size_t* response_len);
@@ -149,10 +149,10 @@ PARSE_ERROR parse_command(std::string& cmd, char*& res_str, size_t* res_len)
             handle_delete(param_itr, res_str, res_len);
             break;
         case INCR:
-            handle_incr(cmd_itr, param_itr, res_str, res_len);
+            handle_incr(param_itr, res_str, res_len);
             break;
         case DECR:
-            handle_decr(cmd_itr, param_itr, res_str, res_len);
+            handle_decr(param_itr, res_str, res_len);
             break;
             // Stats commands
         case STATS:
@@ -354,50 +354,12 @@ void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_
         if (h != NULL)
         {
             printf("Get Result: key=%s, data_size=%u, flags=%u", h->key,h->data_size,h->flags);
-            //printf("Get Result: key=%s, data_size=%u, flags=%u", h->key,h->data_size,h->flags, (char*) (h+1));
-            // if(response_str == nullptr)
-            // {
-            //     response_str = (char*)calloc(1,strlen(RESPONSE_MAP[VALUE].res_str));
-            // }
-            // else
-            // {
-            //     response_str = (char*)realloc(response_str,std::strlen(response_str)+std::strlen(RESPONSE_MAP[VALUE].res_str)+1);
-
-            // }
             
             oss<<RESPONSE_MAP[VALUE].res_str<<" ";
             oss<<key<<" ";
             oss<<std::to_string(h->flags)<<" ";
             oss<<std::to_string(h->data_size)<<"\r\n";
-            oss<<(h+1)<<"\r\n";
-
-            
-            //*response_len = strlen(response_str);
-        
-
-            // std::strcat(response_str,RESPONSE_MAP[VALUE].res_str);
-            // response_str = (char*)realloc(response_str,std::strlen(response_str)+1);
-            // std::strcat(response_str," ");
-            // response_str = (char*)std::realloc(response_str, std::strlen(response_str)+std::strlen(key.c_str()));
-            // std::strcat(response_str, key.c_str());
-            // response_str = (char*)realloc(response_str,std::strlen(response_str)+1);
-            // std::strcat(response_str," ");
-            // char flags_str[20];
-            // sprintf(flags_str,"%u",h->flags);
-            // response_str = (char*)realloc(response_str, std::strlen(response_str)+std::strlen(flags_str));
-            // std::strcat(response_str,flags_str);
-            // response_str = (char*)realloc(response_str,std::strlen(response_str)+1);
-            // std::strcat(response_str," ");
-            // char data_size_str[20];
-            // sprintf(data_size_str,"%u",h->data_size);
-            // response_str = (char*)realloc(response_str, std::strlen(response_str)+std::strlen(data_size_str));
-            // std::strcat(response_str,data_size_str);
-            // response_str = (char*)realloc(response_str,std::strlen(response_str)+4);
-            // std::strcat(response_str,"\r\n");
-            // response_str = (char*)realloc(response_str,std::strlen(response_str)+h->data_size);
-            // std::strncat(response_str,(char*)(h+1),h->data_size);
-            // response_str = (char*)realloc(response_str,std::strlen(response_str)+4);
-            // std::strcat(response_str,"\r\n");
+            oss<<(char*)(h+1)<<"\r\n";
         }
         else {
             oss<<RESPONSE_MAP[NOT_FOUND].res_str<<"\r\n";
@@ -407,12 +369,7 @@ void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_
     finalGet = oss.str();
     response_str = (char*)malloc(finalGet.length());
     strcpy(response_str, finalGet.c_str());
-    if(response_str != nullptr)
-    {
-
-        *response_len = strlen(response_str);
-    }
-
+    *response_len = strlen(response_str);
 }
 
 void handle_delete(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
@@ -427,7 +384,7 @@ void handle_delete(std::sregex_token_iterator param_itr, char*& response_str, si
     Memo::mem_delete(key);
 }
 
-void handle_incr(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
+void handle_incr(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
 {
     std::sregex_token_iterator end_itr;
     std::string key = *(param_itr++);
@@ -449,15 +406,15 @@ void handle_incr(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator 
         *response_len = strlen(response_str);
     }
     else {
-        response_str = (char*)malloc(h->data_size + strlen("\r\n"));
+        response_str = (char*)malloc(h->data_size+ 1 + strlen("\r\n"));
         char* data = (char*) (h+1);
-        strncpy(response_str, data, h->data_size);
+        strncpy(response_str, data, h->data_size+1);
         strcat(response_str, "\r\n");
         *response_len = strlen(response_str);
     }
 }
 
-void handle_decr(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
+void handle_decr(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
 {
     std::sregex_token_iterator end_itr;
     std::string key = *(param_itr++);
@@ -479,9 +436,9 @@ void handle_decr(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator 
         *response_len = strlen(response_str);
     }
     else {
-        response_str = (char*)malloc(h->data_size + strlen("\r\n"));
+        response_str = (char*)malloc(h->data_size + 1 + strlen("\r\n"));
         char* data = (char*) (h+1);
-        strncpy(response_str, data, h->data_size);
+        strncpy(response_str, data, h->data_size + 1);
         strcat(response_str, "\r\n");
         *response_len = strlen(response_str);
     }
@@ -503,12 +460,4 @@ void handle_flush_all(std::sregex_token_iterator param_itr, char*& response_str,
 void handle_version(char*& response_str, size_t* response_len)
 {
     Memo::version();
-}
-
-void handle_quit(char*& response_str, size_t* response_len)
-{
-    // send client a command to quit
-    response_str = (char*)malloc(std::strlen("QUIT\r\n"));
-    std::strcpy(response_str, (char*) "QUIT\r\n");
-    *response_len = std::strlen(response_str);
 }
