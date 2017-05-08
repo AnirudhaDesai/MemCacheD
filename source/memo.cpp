@@ -46,6 +46,8 @@ namespace  Memo
             
         }
 
+        TableLock.lock();
+
         std::unordered_map<std::string,Header*>::const_iterator got = Table.find (key);
         if ( got != Table.end() )
         {
@@ -57,12 +59,14 @@ namespace  Memo
 
                     Stats::Instance().get_hits++;
                 }
+                TableLock.unlock();
                 return got->second;
             }
             else
             {
                 Table.erase({key});
                 printf("Key expired");
+                TableLock.unlock();
                 return nullptr;
             }
         }
@@ -76,6 +80,7 @@ namespace  Memo
                 Stats::Instance().get_misses++;
             }
         }
+        TableLock.unlock();
         return nullptr;
     }
 
@@ -119,8 +124,10 @@ namespace  Memo
             h = (Header*) alloc->store(size, evictedObject);
             printf("\n evictedObject : %s\n", evictedObject->key );
             if(evictedObject!=NULL)
-            {
+            {   
+                TableLock.lock();
                 Table.erase({evictedObject->key});
+                TableLock.unlock();
             }
             if(h!=nullptr)
             {
@@ -137,16 +144,19 @@ namespace  Memo
                 std::strncpy(temp,value.c_str(),size+1);
                 h->insertedTimestamp = time(NULL);
 
+
                 printf("adding %s\n",key.c_str());
 
-
+                TableLock.lock();
                 Table.insert({key,h});
+                TableLock.unlock();
                 return STORED;
             }
             else
             {
                 return ERROR;
             }
+
         }
         //need to add key, address to hash table. use temp.  
         //
@@ -188,7 +198,9 @@ namespace  Memo
             else
             {   printf("different size");
                 alloc->remove((void*)h);
+                TableLock.lock();
                 Table.erase({key});
+                TableLock.unlock();
                 return(add(std::string(key),flags,expiration_time,size,std::string(value),updateExpirationTime));
             }
         }
@@ -232,7 +244,9 @@ namespace  Memo
             temp_expiration_time = h->expiration_time;
 
             alloc->remove((void*)h);
+            TableLock.lock();
             Table.erase({key});
+            TableLock.unlock();
 
 
             return(add(key,temp_flags,temp_expiration_time,size,std::string(temp)));
@@ -282,7 +296,9 @@ namespace  Memo
             temp_expiration_time = h->expiration_time;
 
             alloc->remove((void*)h);
+            TableLock.lock();
             Table.erase({key});
+            TableLock.unlock();
 
             return(add(key,temp_flags,temp_expiration_time,size,temp));
 
@@ -300,7 +316,9 @@ namespace  Memo
         if(h!=nullptr)
         {
             alloc->remove((void*)h);
+            TableLock.lock();
             Table.erase({key});
+            TableLock.unlock();
             return DELETED;
         }
         else
