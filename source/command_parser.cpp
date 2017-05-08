@@ -75,13 +75,13 @@ COMMAND_STRING_MAP CMD_MAP[NUM_COMMANDS]
     { QUIT, (char*)"quit" },
 };
 
-void parse_command(char* cmd_str, size_t cmd_len, char*& res_str, size_t* res_len)
+PARSE_ERROR parse_command(char* cmd_str, size_t cmd_len, char*& res_str, size_t* res_len)
 {
 
     if(cmd_len <=0
             || cmd_str == nullptr)
     {
-        return;
+        return PARSE_ERROR::QUIT;
     }
 
     std::string response;
@@ -165,8 +165,7 @@ void parse_command(char* cmd_str, size_t cmd_len, char*& res_str, size_t* res_le
             handle_version(res_str, res_len);
             break;
         case QUIT:
-            handle_quit(res_str, res_len);
-            break;
+            return PARSE_ERROR::QUIT;
         case NONE:
             // do nothing
             break;
