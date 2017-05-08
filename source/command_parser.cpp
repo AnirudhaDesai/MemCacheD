@@ -346,7 +346,7 @@ void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_
     std::string key;
     do {
         key = *(param_itr++);
-        
+
         Header* h = Memo::get(key,__FUNCTION__);
         if (h != NULL)
         {
@@ -429,7 +429,7 @@ void handle_decr(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator 
 
 void handle_stats(char*& response_str, size_t* response_len)
 {
-    Memo::stats();
+    Memo::stats(response_str,response_len);
 }
 
 void handle_flush_all(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)

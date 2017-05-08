@@ -81,7 +81,7 @@ namespace  Memo
     void mem_delete(std::string key);
     RESPONSE incr(std::string key, std::string value);
     RESPONSE decr(std::string key, std::string value);
-    void stats();
+    void stats(char*& response_str, size_t* response_len);
     void flush_all(int32_t exptime);
     void version(); 
 }

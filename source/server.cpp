@@ -61,7 +61,8 @@ void *beginConnect(void *args){
 #define buf_size 256
 
     Stats::Instance().curr_connections++;
-
+    Stats::Instance().total_connections++;
+    Stats::Instance().connection_structures++;
     long client_socket = (long)args;
     char  buffer[buf_size] = {0};
     
@@ -119,6 +120,8 @@ void *beginConnect(void *args){
         {
             free(response_str);
         }
-        //action on command
-    }	
+        
+    }
+    //End of this connection with client. Update Stats
+    Stats::Instance().curr_connections--;	
 }
