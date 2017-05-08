@@ -439,8 +439,4 @@ namespace  Memo
 
     }
 
-    void version() {
-        // version code
-    }
-
 }
