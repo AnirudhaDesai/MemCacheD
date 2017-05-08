@@ -26,6 +26,7 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
         if(head_AllocatedObjects[i] == nullptr)
         {
             TRACE_ERROR("size bucket is empty, but heap is full. I quit.");
+            printf("\nsize: %u+%lu=%lu\n allocatedcount: %d\n i: %d\n maxalloc:%lu",sz,allocated,sz+allocated,AllocatedCount[i],i,MAX_ALLOC);
             return nullptr;
         }
         // use appropriate cache replacement algorithm
@@ -107,7 +108,9 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
                     if(temp->landlordCost<=0)
                     {
                         printf("removing %s\n",temp->key);
+                        evictedObject = temp;
                         remove((void*)temp);
+
                         flag=false;
                         break;
                     }
@@ -146,6 +149,9 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
         AllocatedCount[i]++;
         Stats::Instance().total_items++;
         Stats::Instance().bytes = Stats::Instance().bytes + size;
+
+        allocated += size+sizeof(Header);
+        printf("allocated:%lu",allocated);
 
         return h;
     }
@@ -213,6 +219,7 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
 
         return tail_AllocatedObjects[i];
     }
+    return nullptr;
 
 }
 
@@ -251,11 +258,12 @@ void SlabsAlloc::remove(void * ptr) {
     h->prev = freedObjects[i];
     freedObjects[i] = h;
     h->next= nullptr; 
+    allocated -= getSizeFromClass(i)+sizeof(Header);
 
     AllocatedCount[i]--;
     Stats::Instance().curr_items--;
     Stats::Instance().bytes = Stats::Instance().bytes - size;
-    allocated -= size+sizeof(Header);
+    
 
 }
 

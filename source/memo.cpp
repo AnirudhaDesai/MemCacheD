@@ -122,25 +122,31 @@ namespace  Memo
             {
                 Table.erase({evictedObject->key});
             }
+            if(h!=nullptr)
+            {
+                std::strncpy(h->key, key.c_str(), 251);
+                h->flags = flags;
+                if (updateExpirationTime) {
+                    update_Expiration_Timestamp(h, expiration_time);
+                }
+                else {
+                    h->expiration_timestamp = expiration_time;
+                }
+                h->data_size = size;
+                temp = (char*) (h+1);
+                std::strncpy(temp,value.c_str(),size+1);
+                h->insertedTimestamp = time(NULL);
 
-            std::strncpy(h->key, key.c_str(), 251);
-            h->flags = flags;
-            if (updateExpirationTime) {
-                update_Expiration_Timestamp(h, expiration_time);
+                printf("adding %s\n",key.c_str());
+
+
+                Table.insert({key,h});
+                return STORED;
             }
-            else {
-                h->expiration_timestamp = expiration_time;
+            else
+            {
+                return ERROR;
             }
-            h->data_size = size;
-            temp = (char*) (h+1);
-            std::strncpy(temp,value.c_str(),size+1);
-            h->insertedTimestamp = time(NULL);
-
-            printf("adding %s\n",key.c_str());
-
-
-            Table.insert({key,h});
-            return STORED;
         }
         //need to add key, address to hash table. use temp.  
         //
