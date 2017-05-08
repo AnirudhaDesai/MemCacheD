@@ -13,12 +13,22 @@ namespace  Memo
 
     void update_Expiration_Timestamp(Header* h, int32_t expiration_time)
     {
-        if (expiration_time >  SecondsIn30Days) {
+        if (expiration_time < 0) {
+            h->expiration_timestamp = std::numeric_limits<time_t>::min();
+        }
+        else if (expiration_time >  SecondsIn30Days) {
             h->expiration_timestamp = expiration_time;
         }
         else {
             h->expiration_timestamp = time(NULL) + expiration_time;
         }
+    }
+
+    bool validExpirationTime(Header* h) {
+        if (h->expiration_timestamp == 0 || h->expiration_timestamp >= time(NULL)) {
+            return true;
+        }
+        return false;
     }
 
     Header* get(std::string key, const char* callerFunction)
@@ -33,26 +43,25 @@ namespace  Memo
         std::unordered_map<std::string,Header*>::const_iterator got = Table.find (key);
         if ( got != Table.end() )
         {
-            if (got->second->expiration_timestamp > time(NULL)) {
-                alloc->cacheReplacementUpdates((Header*)got->second);
+            if (validExpirationTime(got->second)) {
+                alloc->cacheReplacementUpdates((Header *) got->second);
                 // it is a get hit
-                 if (std::strcmp(callerFunction, "handle_get") == 0)
-                    {   
-                     // Increment stats only if get called by handle_get. Calls from other functions are internal
-                        
-                        Stats::Instance().get_hits++;
-                    }
+                if (std::strcmp(callerFunction, "handle_get") == 0) {
+                    // Increment stats only if get called by handle_get. Calls from other functions are internal
+
+                    Stats::Instance().get_hits++;
+                }
                 return got->second;
             }
-            else
+        }
+        else
+        {
+            //it is a get miss.
+            if (std::strcmp(callerFunction, "handle_get") == 0)
             {
-                //it is a get miss.
-                if (std::strcmp(callerFunction, "handle_get") == 0)
-                    {   
-                     // Increment stats only if get called by handle_get. Calls from other functions are internal
-                        
-                        Stats::Instance().get_misses++;
-                    }
+                // Increment stats only if get called by handle_get. Calls from other functions are internal
+
+                Stats::Instance().get_misses++;
             }
         }
         return nullptr;
@@ -96,7 +105,7 @@ namespace  Memo
             update_Expiration_Timestamp(h, expiration_time);
             h->data_size = size;
             temp = (char*) (h+1);
-            std::strncpy(temp,value.c_str(),size);
+            std::strncpy(temp,value.c_str(),size+1);
 
             printf("adding %s\n",key.c_str());
 
@@ -122,7 +131,7 @@ namespace  Memo
 
         if(h!=nullptr)
         {
-            if(alloc->getSizeClass(h->data_size)==alloc->getSizeClass(h->data_size + size))
+            if(alloc->getSizeClass(h->data_size)==alloc->getSizeClass(size))
             {   
                 h->flags = flags;
                 update_Expiration_Timestamp(h, expiration_time);
@@ -130,7 +139,7 @@ namespace  Memo
 
                 temp = (char*) (h+1);
                 printf("%s",temp);
-                std::strncpy(temp,value.c_str(),size);
+                std::strncpy(temp,value.c_str(),size+1);
                 printf(": replaced with : %s",temp);
 
                 return STORED;
@@ -169,14 +178,14 @@ namespace  Memo
         else if(alloc->getSizeClass(h->data_size)==alloc->getSizeClass(h->data_size + size))
         {
             temp = (char*) (h+1);
-            std::strcat(temp,value.c_str());
+            std::strncat(temp,value.c_str(), size+1);
             h->data_size = h->data_size + size;
             return STORED;
         }
         else
         {    
             temp = (char*) (h+1);
-            std::strcat(temp, value.c_str());
+            std::strncat(temp, value.c_str(), size+1);
             size = h->data_size + size;
             temp_flags = h->flags;
             temp_expiration_time = h->expiration_time;
@@ -196,7 +205,6 @@ namespace  Memo
     RESPONSE prepend(std::string key, size_t size, std::string value) {
         Header* h;
         char* data;
-        char* temp_key;
         int16_t temp_flags;
         int32_t temp_expiration_time;
 
@@ -216,7 +224,7 @@ namespace  Memo
             printf("same size class\n");
             data = (char*) (h+1);
             std::string temp = value + std::string(data);
-            std::strncpy(data, temp.c_str(), std::strlen(temp.c_str()));
+            std::strncpy(data, temp.c_str(), std::strlen(temp.c_str())+1);
             h->data_size = h->data_size + size;
             return STORED;
         }
@@ -245,7 +253,7 @@ namespace  Memo
         // delete code
     }
 
-    RESPONSE incr(std::string key, std::string value) {
+    Header* incr(std::string key, std::string value) {
         
         Header* h;
         printf("called %s\n",__FUNCTION__);
@@ -258,7 +266,7 @@ namespace  Memo
         {
             //incr on missing keys. update stats 
             Stats::Instance().incr_misses++;
-            return NOT_FOUND;
+            return nullptr;
         }
         else
         {
@@ -272,25 +280,21 @@ namespace  Memo
             }
             catch(std::exception& e)
             {
-                return ERROR;
+                return nullptr;
             }
-            if(num==LONG_MAX || num==LONG_MIN)
-            {
-                return ERROR;
-            }
-
-            else num++;
+            num += std::strtol(value.c_str(), NULL,10);
             printf("incremented:%lu",num);
 
-            sprintf(temp,"%lu",num);
-            printf("temp:%s",temp);//To DO: check if this is reflecting in the object?
-
-            return STORED;
-
+            std::string num_str = std::to_string(num);
+            RESPONSE res = replace(key, h->flags, h->expiration_time, std::strlen(num_str.c_str()), num_str);
+            if (res == STORED) {
+                return get(key, __FUNCTION__);
+            }
+            return nullptr;
         }
     }
 
-    RESPONSE decr(std::string key, std::string value) {
+    Header* decr(std::string key, std::string value) {
         Header* h;
         printf("called %s\n",__FUNCTION__);
 
@@ -302,7 +306,7 @@ namespace  Memo
         {
             // it is decr miss. update stats
             Stats::Instance().decr_misses++;
-            return NOT_FOUND;
+            return nullptr;
         }
         else
         {
@@ -313,27 +317,26 @@ namespace  Memo
             printf("value=%s",temp);
             try
             {
-                num = strtol(temp, NULL,10);
+                num = std::strtol(temp, NULL,10);
             }
             catch(std::exception& e)
             {
-                return ERROR;
+                return nullptr;
             }
-            if(num==LONG_MAX || num==LONG_MIN)
-            {
-                return ERROR;
+            num -= strtol(value.c_str(), NULL,10);
+            if (num < 0) {
+                num = 0;
             }
+            printf("decreamented:%lu",num);
 
-            else num--;
-            printf("decremented:%lu",num);
-
-            sprintf(temp,"%lu",num);
-            printf("temp:%s",temp);//To DO: check if this is reflecting in the object?
-
-            return STORED;
+            std::string num_str = std::to_string(num);
+            RESPONSE res = replace(key, h->flags, h->expiration_time, std::strlen(num_str.c_str()), num_str);
+            if (res == STORED) {
+                return get(key, __FUNCTION__);
+            }
+            return nullptr;
 
         }
-        return ERROR;
     }
 
     void stats() {

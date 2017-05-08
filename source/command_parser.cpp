@@ -385,6 +385,12 @@ void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_
             response_str = (char*)realloc(response_str,std::strlen(response_str)+4);
             std::strcat(response_str,"\r\n");
         }
+        else {
+            response_str = (char*)malloc(strlen(RESPONSE_MAP[NOT_FOUND].res_str) + strlen("\r\n"));
+
+            strcpy(response_str, RESPONSE_MAP[NOT_FOUND].res_str);
+            strcat(response_str, "\r\n");
+        }
     } while(param_itr != end_itr);
     *response_len = strlen(response_str);
 }
@@ -405,26 +411,60 @@ void handle_incr(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator 
 {
     std::sregex_token_iterator end_itr;
     std::string key = *(param_itr++);
+    std::string value;
+    if (param_itr != end_itr) {
+        value = *(param_itr++);
+    }
     bool noreply = false;
     if (param_itr != end_itr) {
         noreply = true;
     }
-    std::string value = *cmd_itr++;
 
-    Memo::incr(key, value);
+    Header* h = Memo::incr(key, value);
+    if (h == NULL)
+    {
+        response_str = (char*)malloc(strlen(RESPONSE_MAP[NOT_FOUND].res_str) + strlen("\r\n"));
+        strcpy(response_str, RESPONSE_MAP[NOT_FOUND].res_str);
+        strcat(response_str, "\r\n");
+        *response_len = strlen(response_str);
+    }
+    else {
+        response_str = (char*)malloc(h->data_size + strlen("\r\n"));
+        char* data = (char*) (h+1);
+        strncpy(response_str, data, h->data_size);
+        strcat(response_str, "\r\n");
+        *response_len = strlen(response_str);
+    }
 }
 
 void handle_decr(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
 {
     std::sregex_token_iterator end_itr;
     std::string key = *(param_itr++);
+    std::string value;
+    if (param_itr != end_itr) {
+        value = *(param_itr++);
+    }
     bool noreply = false;
     if (param_itr != end_itr) {
         noreply = true;
     }
-    std::string value = *cmd_itr++;
 
-    Memo::decr(key, value);
+    Header* h = Memo::decr(key, value);
+    if (h == NULL)
+    {
+        response_str = (char*)malloc(strlen(RESPONSE_MAP[NOT_FOUND].res_str) + strlen("\r\n"));
+        strcpy(response_str, RESPONSE_MAP[NOT_FOUND].res_str);
+        strcat(response_str, "\r\n");
+        *response_len = strlen(response_str);
+    }
+    else {
+        response_str = (char*)malloc(h->data_size + strlen("\r\n"));
+        char* data = (char*) (h+1);
+        strncpy(response_str, data, h->data_size);
+        strcat(response_str, "\r\n");
+        *response_len = strlen(response_str);
+    }
 }
 
 void handle_stats(char*& response_str, size_t* response_len)

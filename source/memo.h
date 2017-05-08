@@ -51,8 +51,6 @@ typedef enum
 
 } RESPONSE;
 
-
-const auto HeapSize = 2* 1024UL * 1024 * 1024;
 const auto SecondsIn30Days =  60 * 60 * 24 * 30;
 
 /*class HeapType : public SlabsAlloc {};*/
@@ -79,8 +77,8 @@ namespace  Memo
     RESPONSE append(std::string key, size_t size, std::string value);
     RESPONSE prepend(std::string key, size_t size, std::string value);
     void mem_delete(std::string key);
-    RESPONSE incr(std::string key, std::string value);
-    RESPONSE decr(std::string key, std::string value);
+    Header* incr(std::string key, std::string value);
+    Header* decr(std::string key, std::string value);
     void stats();
     void flush_all(int32_t exptime);
     void version(); 
