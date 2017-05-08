@@ -16,6 +16,9 @@ namespace  Memo
         if (expiration_time < 0) {
             h->expiration_timestamp = std::numeric_limits<time_t>::min();
         }
+        else if (expiration_time == 0){
+            h->expiration_timestamp = 0;
+        }
         else if (expiration_time >  SecondsIn30Days) {
             h->expiration_timestamp = expiration_time;
         }
@@ -73,7 +76,7 @@ namespace  Memo
         return nullptr;
     }
 
-    RESPONSE set(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas=false)
+    RESPONSE set(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas)
     {
         //printf("called %s\n",__FUNCTION__);
         Header* h;
@@ -92,7 +95,7 @@ namespace  Memo
         
     }
 
-    RESPONSE add(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value)
+    RESPONSE add(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool updateExpirationTime)
     {
         Header* h;
         char* temp;
@@ -108,7 +111,12 @@ namespace  Memo
             h = (Header*) alloc->store(size);
             std::strncpy(h->key, key.c_str(), 251);
             h->flags = flags;
-            update_Expiration_Timestamp(h, expiration_time);
+            if (updateExpirationTime) {
+                update_Expiration_Timestamp(h, expiration_time);
+            }
+            else {
+                h->expiration_timestamp = expiration_time;
+            }
             h->data_size = size;
             temp = (char*) (h+1);
             std::strncpy(temp,value.c_str(),size+1);
@@ -123,7 +131,7 @@ namespace  Memo
         return ERROR;
     }
 
-    RESPONSE replace(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas=false)
+    RESPONSE replace(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas, bool updateExpirationTime)
     {
         Header* h;
         char* temp;
@@ -140,7 +148,12 @@ namespace  Memo
             if(alloc->getSizeClass(h->data_size)==alloc->getSizeClass(size))
             {   
                 h->flags = flags;
-                update_Expiration_Timestamp(h, expiration_time);
+                if (updateExpirationTime) {
+                    update_Expiration_Timestamp(h, expiration_time);
+                }
+                else {
+                    h->expiration_timestamp = expiration_time;
+                }
                 h->data_size = size;
 
                 temp = (char*) (h+1);
@@ -154,7 +167,7 @@ namespace  Memo
             {   printf("different size");
                 alloc->remove((void*)h);
                 Table.erase({key});
-                return(add(std::string(key),flags,expiration_time,size,std::string(value)));
+                return(add(std::string(key),flags,expiration_time,size,std::string(value),updateExpirationTime));
             }
         }
         else
@@ -344,9 +357,12 @@ namespace  Memo
             {
                 return nullptr;
             }
-            num -= strtol(value.c_str(), NULL,10);
-            if (num < 0) {
+            int64_t signed_num = (int64_t )num - strtol(value.c_str(), NULL,10);
+            if (signed_num < 0) {
                 num = 0;
+            }
+            else {
+                num -= strtol(value.c_str(), NULL,10);
             }
             printf("decreamented:%lu",num);
 
