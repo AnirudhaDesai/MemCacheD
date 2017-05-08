@@ -339,8 +339,6 @@ void handle_cas(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator p
 
 void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
 {
-
-    char* single_response_str = nullptr;
     response_str = nullptr;
     *response_len = 0;
     std::sregex_token_iterator end_itr;

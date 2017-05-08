@@ -130,6 +130,7 @@ namespace  Memo
             h->data_size = size;
             temp = (char*) (h+1);
             std::strncpy(temp,value.c_str(),size+1);
+            h->insertedTimestamp = time(NULL);
 
             printf("adding %s\n",key.c_str());
 
@@ -330,7 +331,7 @@ namespace  Memo
             printf("incremented:%lu",num);
 
             std::string num_str = std::to_string(num);
-            RESPONSE res = replace(key, h->flags, h->expiration_time, std::strlen(num_str.c_str()), num_str);
+            RESPONSE res = replace(key, h->flags, h->expiration_time, std::strlen(num_str.c_str()), num_str, false, false);
             if (res == STORED) {
                 return get(key);
             }
@@ -377,7 +378,7 @@ namespace  Memo
             printf("decreamented:%lu",num);
 
             std::string num_str = std::to_string(num);
-            RESPONSE res = replace(key, h->flags, h->expiration_time, std::strlen(num_str.c_str()), num_str);
+            RESPONSE res = replace(key, h->flags, h->expiration_time, std::strlen(num_str.c_str()), num_str, false, false);
             if (res == STORED) {
                 return get(key);
             }

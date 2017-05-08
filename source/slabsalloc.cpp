@@ -70,6 +70,9 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
         
         else if(algorithm == LANDLORD)
         {
+            
+
+
 
             Stats::Instance().evictions++;
 
@@ -90,11 +93,14 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
         {
             freedObjects[i]->next = nullptr;
         }
-
+        if(tail_AllocatedObjects[i] != nullptr)
+            tail_AllocatedObjects[i]->next = h;
         h->prev = tail_AllocatedObjects[i];
         h->next = nullptr;
         tail_AllocatedObjects[i]=h;
-
+        if(head_AllocatedObjects[i]==nullptr)
+            head_AllocatedObjects[i] = h;
+        
         AllocatedCount[i]++;
         Stats::Instance().total_items++;
         Stats::Instance().bytes = Stats::Instance().bytes + size;
@@ -226,6 +232,9 @@ void SlabsAlloc::cacheReplacementUpdates(Header* h)
     else if (algorithm == LANDLORD)
     {
         //modify credit of the file
+        double cost = difftime(time(NULL), h->insertedTimestamp);
+        h->landlordCost = (h->landlordCost + cost)/2;
+        
     }
 }
 void SlabsAlloc::updateRecentlyUsed(Header* h)
@@ -252,6 +261,7 @@ void SlabsAlloc::updateRecentlyUsed(Header* h)
         temp->next = nullptr;
     }
 }
+
 
 // number of bytes currently allocated  
 size_t SlabsAlloc::bytesAllocated() {

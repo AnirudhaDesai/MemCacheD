@@ -29,7 +29,7 @@ def TestAddGet(sock):
     message = "add addkey 012 3000 11\\r\\nADD MESSAGE\\r\\n"
     sendMessage(message,sock)
     sleep(8)
-    message = "get addkey"
+    message = "get addkey\\r\\n"
     sendMessage(message,sock)
 
 def TestExpirationTime(sock):

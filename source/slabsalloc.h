@@ -36,10 +36,11 @@ class Header {
         int32_t expiration_time;
         time_t expiration_timestamp;
         time_t last_updated_timestamp;
+        time_t insertedTimestamp;
         unsigned int last_updated_client;
         int64_t cas_unique;
         bool valid;
-        uint16_t landlordCost; //for landlord replacement algorithm
+        double landlordCost; //for landlord replacement algorithm
 
         Header * prev;
         Header * next;
