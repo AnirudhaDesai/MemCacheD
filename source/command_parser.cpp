@@ -96,7 +96,7 @@ PARSE_ERROR parse_command(std::string& cmd, char*& res_str, size_t* res_len)
     std::string command_str;
     //cmd_lines[0] = strtok(cmd_str, "\\r\\n");
     std::sregex_token_iterator cmd_itr = std::sregex_token_iterator(cmd.begin(), cmd.end(), end_re, -1);
-    printf("setting key=%s\n",cmd_itr->str().c_str());
+    //printf("setting key=%s\n",cmd_itr->str().c_str());
     command_str = *cmd_itr++;
     std::sregex_token_iterator end_itr;
 

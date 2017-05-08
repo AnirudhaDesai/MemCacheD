@@ -1,15 +1,18 @@
-#include "memo.h"
 #include <cstring>
 #include "time.h"
 #include <stdlib.h>
 #include <limits.h>
 #include <exception>
+#include <mutex>
+
+#include "memo.h"
 
 SlabsAlloc* alloc;
 
 namespace  Memo
 {
     std::unordered_map<std::string, Header*> Table;
+    recursive_mutex TableLock;
 
     void update_Expiration_Timestamp(Header* h, int32_t expiration_time)
     {

@@ -90,6 +90,7 @@ void *beginConnect(void *args){
             buffer[buf_size] = {0};
             memset(buffer, 0, buf_size);
             received_size = recv(client_socket, buffer, buf_size, 0);
+            printf("received %u\n bytes",received_size);
             command += std::string(buffer);
         }
         while(received_size == buf_size);
