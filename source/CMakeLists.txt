@@ -10,6 +10,3 @@ set(SOURCES main.cpp slabsalloc.cpp command_parser.cpp server.cpp memo.cpp)
 add_executable(memo ${SOURCES})
 target_link_libraries(memo pthread)
 
-set (SOURCES Client.cpp)
-add_executable(client ${SOURCES})
-

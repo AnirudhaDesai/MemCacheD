@@ -1,11 +1,3 @@
-#include <cstring>
-#include "time.h"
-#include <stdlib.h>
-#include <limits.h>
-#include <exception>
-#include <mutex>
-#include <thread>
-
 #include "memo.h"
 
 SlabsAlloc* alloc;
@@ -162,15 +154,8 @@ namespace  Memo
                 TableLock.unlock();
                 return STORED;
             }
-            else
-            {
-                return NOT_STORED;
-            }
-
         }
-        //need to add key, address to hash table. use temp.  
-        //
-        return ERROR;
+        return NOT_STORED;
     }
 
     RESPONSE replace(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas, bool updateExpirationTime)
@@ -222,7 +207,7 @@ namespace  Memo
         }
         else
         {
-            return NOT_FOUND;
+            return NOT_STORED;
         }
     }
 
@@ -242,7 +227,7 @@ namespace  Memo
 
         if(h==nullptr)
         {
-            return NOT_FOUND;
+            return NOT_STORED;
         }
         else if(alloc->getSizeClass(h->data_size)==alloc->getSizeClass(h->data_size + size))
         {
@@ -251,26 +236,18 @@ namespace  Memo
             h->data_size = h->data_size + size;
             return STORED;
         }
-        else
-        {    
-            temp = (char*) (h+1);
-            std::strncat(temp, value.c_str(), size+1);
+        else {
+            temp = (char *) (h + 1);
+            std::strncat(temp, value.c_str(), size + 1);
             size = h->data_size + size;
             temp_flags = h->flags;
             temp_expiration_time = h->expiration_time;
-
-            alloc->remove((void*)h);
+            alloc->remove((void *) h);
             TableLock.lock();
             Table.erase({key});
             TableLock.unlock();
-
-
-            return(add(key,temp_flags,temp_expiration_time,size,std::string(temp)));
-
-          
+            return (add(key, temp_flags, temp_expiration_time, size, std::string(temp)));
         }
-
-
     }
 
     RESPONSE prepend(std::string key, size_t size, std::string value) {
@@ -287,7 +264,7 @@ namespace  Memo
 
         if(h==nullptr)
         {
-            return NOT_FOUND;
+            return NOT_STORED;
         }
         else if(alloc->getSizeClass(h->data_size)==alloc->getSizeClass(h->data_size + size))
         {

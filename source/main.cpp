@@ -2,7 +2,7 @@
  * 630 Systems Assignment 4
  * Memo - A Data Caching Service
  * Team : Team Awesome
- * Members : Vikram Anirudha Vinithra Shruthi
+ * Members : Vikram Anirudha Vinitra Shruthi
  *
  */
 
