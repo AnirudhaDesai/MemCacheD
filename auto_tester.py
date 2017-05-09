@@ -67,7 +67,7 @@ class HappyPath(unittest.TestCase):
 
     def test_004_delete_existing_key(self):
         message = "delete addkey \\r\\n"
-        valid_result = "STORED\r\n"
+        valid_result = "DELETED\r\n"
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
