@@ -351,6 +351,9 @@ if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(InvalidCommand)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
+    suite = unittest.TestLoader().loadTestsFromTestCase(LandlordCacheReplacement)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+    
     suite = unittest.TestLoader().loadTestsFromTestCase(IncrementDecrement)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
@@ -360,8 +363,7 @@ if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(AppendPrepend)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
-    suite = unittest.TestLoader().loadTestsFromTestCase(LandlordCacheReplacement)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+
 
     print 'closing socket'
     sock.close()
