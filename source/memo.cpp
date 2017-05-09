@@ -143,6 +143,7 @@ namespace  Memo
 
                 std::thread::id this_id = std::this_thread::get_id();
                 h->last_updated_client = this_id;
+                h->landlordCost = 0;
 
                 TRACE_DEBUG("Thread id: ",h->last_updated_client);
 

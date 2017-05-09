@@ -118,14 +118,16 @@ class LandlordCacheReplacement(unittest.TestCase):
         for i in range(1024):
             message = "add lrdrepKey%s 012 3000 11\\r\\nADD MESSAGE\\r\\n"%i
             test_result = sendMessage(message)
-            sleep(0.1)
+            #sleep(0.1)
         for i in range(3,1024):
             message = "get lrdrepKey%s\\r\\n"%i
+            sleep(0.1)
             test_result = sendMessage(message)
         for i in range(1024,1027):
             message = "add lrdrepKey%s 012 3000 11\\r\\nADD MESSAGE\\r\\n"%i
             test_result = sendMessage(message)
         message = "get lrdrepKey0 lrdrepKey1 lrdrepKey2\\r\\n"
+        test_result = sendMessage(message)
         valid_result = "END\r\n"
         self.assertEqual(test_result,valid_result)
 
@@ -283,8 +285,8 @@ if __name__ == '__main__':
     # unittest.TextTestRunner(verbosity=2).run(suite)
 
 
-    # suite = unittest.TestLoader().loadTestsFromTestCase(LandlordCacheReplacement)
-    # unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(LandlordCacheReplacement)
+    unittest.TextTestRunner(verbosity=2).run(suite)
 
 #     suite = unittest.TestLoader().loadTestsFromTestCase(InvalidCommand)
     # unittest.TextTestRunner(verbosity=2).run(suite)
