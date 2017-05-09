@@ -10,7 +10,7 @@ almost_one_meg_data = "X"*(1024*1024-41)
 def sendMessage(message,noreply=False):
     global sock
     try:
-        print "sending {} bytes".format(len(message))
+        # print "sending {} bytes".format(len(message))
         sock.sendall(message)
 
         if noreply==True:
@@ -41,20 +41,43 @@ class HappyPath(unittest.TestCase):
     def setUp(self):
         pass
 
-    def test_add(self):       
+    def test_000_add_new_key(self):       
         message = "add addkey 012 3000 11\\r\\nADD MESSAGE\\r\\n"
         valid_result = "STORED\r\n"
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
     
-
-    def test_get(self):
+    def test_001_get_existing_key(self):
         message = "get addkey\\r\\n"
         valid_result = "VALUE addkey 12 11\r\nADD MESSAGE\r\n" 
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
-    def test_expiration_time_add_positive(self):
+    def test_002_add_existing_key(self):
+        message = "add addkey 012 3000 11\\r\\nADD MESSAGE\\r\\n"
+        valid_result = "NOT_STORED\r\n"
+        test_result = sendMessage(message)
+        self.assertEqual(test_result, valid_result)
+
+    def test_003_set_existing_key(self):
+        message = "set addkey 012 3000 11\\r\\nADD MESSAGE\\r\\n"
+        valid_result = "STORED\r\n"
+        test_result = sendMessage(message)
+        self.assertEqual(test_result, valid_result)
+
+    def test_004_delete_existing_key(self):
+        message = "delete addkey \\r\\n"
+        valid_result = "STORED\r\n"
+        test_result = sendMessage(message)
+        self.assertEqual(test_result, valid_result)
+
+    def test_005_delete_deleted_key(self):
+        message = "delete addkey \\r\\n"
+        valid_result = "NOT_FOUND\r\n"
+        test_result = sendMessage(message)
+        self.assertEqual(test_result, valid_result)
+
+    def test_006_expiration_time_add_positive(self):
         
         message = "add expkey 012 5 11\\r\\nEXP MESSAGE\\r\\n"
         test_result = sendMessage(message)
@@ -65,7 +88,7 @@ class HappyPath(unittest.TestCase):
         self.assertEqual(test_result, valid_result)
     
     
-    def test_expiration_time_add_negative(self):
+    def test_007_expiration_time_add_negative(self):
         
         message = "add expkey 012 5 11\\r\\nEXP MESSAGE\\r\\n"
         test_result = sendMessage(message)
@@ -78,7 +101,7 @@ class HappyPath(unittest.TestCase):
 
 class CacheReplacement(unittest.TestCase):
 
-    def test_cache_replacement(self):
+    def test_000_cache_replacement(self):
         for i in range(1027):
             message = "add repKey%s 012 3000 11\\r\\nADD MESSAGE\\r\\n"%i
             test_result = sendMessage(message)
@@ -87,7 +110,7 @@ class CacheReplacement(unittest.TestCase):
 
 class Stats(unittest.TestCase):
 
-    def test_stats(self):
+    def test_000_stats(self):
         message = "stats\\r\\n"
         test_result = sendMessage(message)
         # print "got result:",test_result
@@ -96,19 +119,19 @@ class Stats(unittest.TestCase):
 
 class LargeData(unittest.TestCase):
 
-    def test_add_long(self):       
+    def test_000_add_long(self):       
         message = "add longvalue 012 3000 500\\r\\n"+"X"*500+"\\r\\n"
         valid_result = "STORED\r\n"
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
-    def test_get_long(self):
+    def test_001_get_long(self):
         message = "get longvalue\\r\\n"
         valid_result = "VALUE longvalue 12 500\r\n"+"X"*500+"\r\n" 
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
-    def test_add_one_meg(self):
+    def test_002_add_one_meg(self):
         message = "add onemegvalues 012 3000 1048542\\r\\n"+almost_one_meg_data+"\\r\\n"
         # print len(message)
         # assert(len(message)==1024*1024)
@@ -119,31 +142,43 @@ class LargeData(unittest.TestCase):
 
 class InvalidCommand(unittest.TestCase):
 
-    def test_invalid_get(self):
+    def test_000_invalid_get(self):
         message = "ger key 012 3000 5\\r\\nvalue\\r\\n"
         valid_result = "ERROR\r\n"
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
+
+
+# class MultipleClients(unittest.TestCase):
+
+    # def test_multiple_clients(self):
+        
 
 if __name__ == '__main__':
     global sock
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_address = ('localhost', 9005)
 
+
     print 'connecting to %s port %s' % server_address
     sock.connect(server_address)
 
-    # unittest.main()
+    unittest.TestLoader.sortTestMethodsUsing = None
+
     suite = unittest.TestLoader().loadTestsFromTestCase(HappyPath)
     unittest.TextTestRunner(verbosity=2).run(suite)
-    suite = unittest.TestLoader().loadTestsFromTestCase(LargeData)
-    unittest.TextTestRunner(verbosity=2).run(suite)
-    suite = unittest.TestLoader().loadTestsFromTestCase(Stats)
-    unittest.TextTestRunner(verbosity=2).run(suite)
-    suite = unittest.TestLoader().loadTestsFromTestCase(CacheReplacement)
-    unittest.TextTestRunner(verbosity=2).run(suite)
-    suite = unittest.TestLoader().loadTestsFromTestCase(InvalidCommand)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+
+    # suite = unittest.TestLoader().loadTestsFromTestCase(LargeData)
+    # unittest.TextTestRunner(verbosity=2).run(suite)
+
+    # suite = unittest.TestLoader().loadTestsFromTestCase(Stats)
+    # unittest.TextTestRunner(verbosity=2).run(suite)
+
+    # suite = unittest.TestLoader().loadTestsFromTestCase(CacheReplacement)
+    # unittest.TextTestRunner(verbosity=2).run(suite)
+
+    # suite = unittest.TestLoader().loadTestsFromTestCase(InvalidCommand)
+    # unittest.TextTestRunner(verbosity=2).run(suite)
 
     print 'closing socket'
     sock.close()
