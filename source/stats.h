@@ -2,7 +2,7 @@
 #define _STATS_H_
 #include <sstream>
 #include <cstring>
-
+#include "string_constants.h"
 
 typedef struct r_usage    //used in stats class below 
 {
@@ -118,6 +118,7 @@ class Stats
         oss<<stat<<"cmd_flush: "<<cmd_flush<<"\n";
         oss<<stat<<"expired_unfetched: "<<expired_unfetched<<"\n";
         oss<<stat<<"evicted_unfetched: "<<evicted_unfetched<<"\n";
+        oss<<RESPONSE_MAP[END].res_str<<"\r\n";
         finalOutput = oss.str();
         size_t stats_string_size = finalOutput.length()+1;
         response_str = (char*)malloc(stats_string_size);

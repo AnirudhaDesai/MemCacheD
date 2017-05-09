@@ -49,7 +49,7 @@ class HappyPath(unittest.TestCase):
     
     def test_001_get_existing_key(self):
         message = "get addkey\\r\\n"
-        valid_result = "VALUE addkey 12 11\r\nADD MESSAGE\r\n" 
+        valid_result = "VALUE addkey 12 11\r\nADD MESSAGE\r\nEND\r\n" 
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
@@ -84,7 +84,7 @@ class HappyPath(unittest.TestCase):
         
         message = "get expkey\\r\\n"
         test_result = sendMessage(message)
-        valid_result = "VALUE expkey 12 11\r\nEXP MESSAGE\r\n"
+        valid_result = "VALUE expkey 12 11\r\nEXP MESSAGE\r\nEND\r\n"
         self.assertEqual(test_result, valid_result)
     
     
@@ -95,7 +95,7 @@ class HappyPath(unittest.TestCase):
         sleep(8)
         message = "get expkey\\r\\n"
         test_result = sendMessage(message)
-        valid_result = "NOT_FOUND\r\n"
+        valid_result = "END\r\n"
         self.assertEqual(test_result, valid_result)
 
 
@@ -127,7 +127,7 @@ class LargeData(unittest.TestCase):
 
     def test_001_get_long(self):
         message = "get longvalue\\r\\n"
-        valid_result = "VALUE longvalue 12 500\r\n"+"X"*500+"\r\n" 
+        valid_result = "VALUE longvalue 12 500\r\n"+"X"*500+"\r\nEND\r\n" 
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
@@ -140,6 +140,28 @@ class LargeData(unittest.TestCase):
         self.assertEqual(test_result, valid_result)
 
 
+class AppendPrepend(unittest.TestCase):
+
+    def test_000_append(self):
+        message = "add appkey 12 5 11\\r\\nAPP MESSAGE\\r\\n"
+        test_result = sendMessage(message)
+        message = "append appkey 1\\r\\nS\\r\\n"
+        test_result = sendMessage(message)
+        message = "get appkey\\r\\n"
+        test_result = sendMessage(message)
+        valid_result = "VALUE appkey 12 12\r\nAPP MESSAGES\r\nEND\r\n"
+        self.assertEqual(test_result, valid_result)
+
+    def test__001_prepend(self):
+        message = "add prepkey 12 5 11\\r\\nAPP MESSAGE\\r\\n"
+        test_result = sendMessage(message)
+        message = "prepend prepkey 1\\r\\nS\\r\\n"
+        test_result = sendMessage(message)
+        message = "get prepkey\\r\\n"
+        test_result = sendMessage(message)
+        valid_result = "VALUE prepkey 12 12\r\nSAPP MESSAGE\r\nEND\r\n"
+        self.assertEqual(test_result, valid_result)        
+
 class InvalidCommand(unittest.TestCase):
 
     def test_000_invalid_get(self):
@@ -148,11 +170,6 @@ class InvalidCommand(unittest.TestCase):
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
-
-# class MultipleClients(unittest.TestCase):
-
-    # def test_multiple_clients(self):
-        
 
 if __name__ == '__main__':
     global sock
@@ -179,6 +196,11 @@ if __name__ == '__main__':
 
     # suite = unittest.TestLoader().loadTestsFromTestCase(InvalidCommand)
     # unittest.TextTestRunner(verbosity=2).run(suite)
+
+    suite = unittest.TestLoader().loadTestsFromTestCase(AppendPrepend)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+
+
 
     print 'closing socket'
     sock.close()

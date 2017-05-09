@@ -1,5 +1,4 @@
 #include "server.h"
-#include "stats.h"
 
 int initializeServer(){
     long  server_socket, client_socket;

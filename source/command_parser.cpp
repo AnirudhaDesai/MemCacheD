@@ -1,42 +1,5 @@
 #include "command_parser.h"
 
-#include <string>
-#include <regex>
-#include <sstream>
-
-#include "Trace.h"
-
-#define MAX_CMD_LINES 10
-#define NUM_COMMANDS 15
-
-#define NUM_RESPONSES 10
-struct RESPONSE_STRING_MAP
-{
-    RESPONSE rsp;
-    char* res_str;
-};
-
-RESPONSE_STRING_MAP RESPONSE_MAP[NUM_RESPONSES]
-{
-    // error strings
-    {ERROR,(char*)"ERROR"},
-    {CLIENT_ERROR,(char*)"CLIENT_ERROR"},
-    {SERVER_ERROR,(char*)"SERVER_ERROR"},
-    // storage command responses
-    {STORED,(char*)"STORED"},
-    {EXISTS,(char*)"EXISTS"},
-    {NOT_FOUND,(char*)"NOT_FOUND"},
-    // retrieval command responses
-    {VALUE,(char*)"VALUE"},
-    {END,(char*)"END"},
-    // deletion
-    // incr/decr
-    {DELETED,(char*)"DELETED"},
-    {OK,(char*)"OK"}
-};
-
-
-
 void handle_set(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
 void handle_add(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
 void handle_replace(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
@@ -44,7 +7,6 @@ void handle_append(std::sregex_token_iterator cmd_itr, std::sregex_token_iterato
 void handle_prepend(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
 void handle_cas(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
 void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
-void handle_gets(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
 void handle_delete(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
 void handle_incr(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
 void handle_decr(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
@@ -52,31 +14,6 @@ void handle_stats(char*& response_str, size_t* response_len);
 void handle_flush_all(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
 void handle_version(char*& response_str, size_t* response_len);
 void handle_invalid_command(char*& response_str, size_t* response_len);
-
-struct COMMAND_STRING_MAP
-{
-    COMMAND cmd;
-    char* cmd_str;
-};
-
-COMMAND_STRING_MAP CMD_MAP[NUM_COMMANDS]
-{
-    { SET, (char*)"set" },
-    { ADD, (char*)"add" },
-    { REPLACE, (char*)"replace" },
-    { APPEND, (char*)"append" },
-    { PREPEND, (char*)"prepend" },
-    { CAS, (char*)"cas" },
-    { GET, (char*)"get" },
-    { GETS, (char*)"gets" },
-    { DELETE, (char*)"delete" },
-    { INCR, (char*)"incr" },
-    { DECR, (char*)"decr" },
-    { STATS, (char*)"stats" },
-    { FLUSH_ALL, (char*)"flush_all" },
-    { VERSION, (char*)"version" },
-    { QUIT, (char*)"quit" },
-};
 
 PARSE_ERROR parse_command(std::string& cmd, char*& res_str, size_t* res_len)
 {
@@ -198,7 +135,7 @@ void handle_set(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator p
 
     RESPONSE res = Memo::set(key, flags, expiration_time, size, value, false);
 
-    if (res != ERROR && noreply) {
+    if (noreply) {
         response_str = nullptr;
         *response_len = 0;
         return;
@@ -207,8 +144,6 @@ void handle_set(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator p
     strcpy(response_str, RESPONSE_MAP[res].res_str);
     strcat(response_str, "\r\n");
     *response_len = strlen(response_str+1);
-
-
 }
 
 void handle_add(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len)
@@ -234,7 +169,7 @@ void handle_add(std::sregex_token_iterator cmd_itr, std::sregex_token_iterator p
 
     RESPONSE res = Memo::add(key, flags, expiration_time, size, value);
 
-    if (res != ERROR && noreply) {
+    if (noreply) {
         response_str = nullptr;
         *response_len = 0;
         return;
@@ -267,7 +202,7 @@ void handle_replace(std::sregex_token_iterator cmd_itr, std::sregex_token_iterat
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
     RESPONSE res = Memo::replace(key, flags, expiration_time, size, value, false);
-    if (res != ERROR && noreply) {
+    if (noreply) {
         response_str = nullptr;
         *response_len = 0;
         return;
@@ -295,7 +230,7 @@ void handle_append(std::sregex_token_iterator cmd_itr, std::sregex_token_iterato
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
     RESPONSE res = Memo::append(key, size, value);
-    if (res != ERROR && noreply) {
+    if (noreply) {
         response_str = nullptr;
         *response_len = 0;
         return;
@@ -325,7 +260,7 @@ void handle_prepend(std::sregex_token_iterator cmd_itr, std::sregex_token_iterat
     //printf("setting key=%s,flags=%d,exptime=%s,bytes=%s\n",key,flags,exptime,bytes);
 
     RESPONSE res = Memo::prepend(key, size, value);
-    if (res != ERROR && noreply) {
+    if (noreply) {
         response_str = nullptr;
         *response_len = 0;
         return;
@@ -381,10 +316,8 @@ void handle_get(std::sregex_token_iterator param_itr, char*& response_str, size_
             std::string data = std::string((char*) (h+1));
             oss<<data<<"\r\n";
         }
-        else {
-            oss<<RESPONSE_MAP[NOT_FOUND].res_str<<"\r\n";
-        }
     } while(param_itr != end_itr);
+    oss<<RESPONSE_MAP[END].res_str<<"\r\n";
     response_str = (char*)malloc(oss.str().length()+1);
     strcpy(response_str, oss.str().c_str());
     *response_len = strlen(response_str);
@@ -400,7 +333,7 @@ void handle_delete(std::sregex_token_iterator param_itr, char*& response_str, si
     }
 
     RESPONSE res = Memo::mem_delete(key);
-    if (res != ERROR && noreply) {
+    if (noreply) {
         response_str = nullptr;
         *response_len = 0;
         return;
@@ -512,7 +445,7 @@ void handle_flush_all(std::sregex_token_iterator param_itr, char*& response_str,
 
 void handle_version(char*& response_str, size_t* response_len)
 {
-    response_str = (char*)malloc(strlen("1.0.0") + strlen("\r\n")+1);
+    response_str = (char*)malloc(strlen(RESPONSE_MAP[VERSION].res_str) + strlen(MEM_VERSION) +strlen("\r\n")+1);
     strcpy(response_str, "1.0.0");
     strcat(response_str, "\r\n");
     *response_len = strlen(response_str);
