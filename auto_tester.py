@@ -134,10 +134,14 @@ if __name__ == '__main__':
     sock.connect(server_address)
 
     # unittest.main()
-    # suite = unittest.TestLoader().loadTestsFromTestCase(HappyPath)
+    suite = unittest.TestLoader().loadTestsFromTestCase(HappyPath)
+    unittest.TextTestRunner(verbosity=2).run(suite)
     # suite = unittest.TestLoader().loadTestsFromTestCase(LargeData)
-    # suite = unittest.TestLoader().loadTestsFromTestCase(Stats)
-    # suite = unittest.TestLoader().loadTestsFromTestCase(CacheReplacement)
+    # unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(Stats)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(CacheReplacement)
+    unittest.TextTestRunner(verbosity=2).run(suite)
     suite = unittest.TestLoader().loadTestsFromTestCase(InvalidCommand)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
