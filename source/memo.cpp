@@ -120,7 +120,6 @@ namespace  Memo
             TRACE_DEBUG("add called");
 
             h = (Header*) alloc->store(size, evictedObject);
-            TRACE_DEBUG("evictedObject : ", evictedObject->key );
             if(evictedObject!=NULL)
             {   
                 TableLock.lock();
