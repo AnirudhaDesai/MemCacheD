@@ -38,46 +38,49 @@ def sendMessage(message,noreply=False):
 
 class HappyPath(unittest.TestCase):
 
-    def setUp(self):
-        pass
-
-    def test_000_add_new_key(self):       
+    def test_000_version(self):
+        message = "version\r\n"
+        valid_result = "VERSION 1.0.0\r\n"
+        test_result = sendMessage(message)
+        self.assertEqual(test_result, valid_result)
+ 
+    def test_001_add_new_key(self):       
         message = "add addkey 012 3000 11\\r\\nADD MESSAGE\\r\\n"
         valid_result = "STORED\r\n"
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
     
-    def test_001_get_existing_key(self):
+    def test_002_get_existing_key(self):
         message = "get addkey\\r\\n"
         valid_result = "VALUE addkey 12 11\r\nADD MESSAGE\r\nEND\r\n" 
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
-    def test_002_add_existing_key(self):
+    def test_003_add_existing_key(self):
         message = "add addkey 012 3000 11\\r\\nADD MESSAGE\\r\\n"
         valid_result = "NOT_STORED\r\n"
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
-    def test_003_set_existing_key(self):
+    def test_004_set_existing_key(self):
         message = "set addkey 012 3000 11\\r\\nADD MESSAGE\\r\\n"
         valid_result = "STORED\r\n"
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
-    def test_004_delete_existing_key(self):
+    def test_005_delete_existing_key(self):
         message = "delete addkey \\r\\n"
         valid_result = "DELETED\r\n"
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
-    def test_005_delete_deleted_key(self):
+    def test_006_delete_deleted_key(self):
         message = "delete addkey \\r\\n"
         valid_result = "NOT_FOUND\r\n"
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
-    def test_006_expiration_time_add_positive(self):
+    def test_007_expiration_time_add_positive(self):
         
         message = "add expkey 012 5 11\\r\\nEXP MESSAGE\\r\\n"
         test_result = sendMessage(message)
@@ -87,7 +90,7 @@ class HappyPath(unittest.TestCase):
         valid_result = "VALUE expkey 12 11\r\nEXP MESSAGE\r\nEND\r\n"
         self.assertEqual(test_result, valid_result)
     
-    def test_007_expiration_time_add_negative(self):
+    def test_008_expiration_time_add_negative(self):
         
         message = "add expkey 012 5 11\\r\\nEXP MESSAGE\\r\\n"
         test_result = sendMessage(message)
@@ -270,8 +273,8 @@ if __name__ == '__main__':
 
     unittest.TestLoader.sortTestMethodsUsing = None
 
-#     suite = unittest.TestLoader().loadTestsFromTestCase(HappyPath)
-    # unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(HappyPath)
+    unittest.TextTestRunner(verbosity=2).run(suite)
 
     # suite = unittest.TestLoader().loadTestsFromTestCase(LargeData)
     # unittest.TextTestRunner(verbosity=2).run(suite)
@@ -286,11 +289,11 @@ if __name__ == '__main__':
     # suite = unittest.TestLoader().loadTestsFromTestCase(LandlordCacheReplacement)
     # unittest.TextTestRunner(verbosity=2).run(suite)
 
-#     suite = unittest.TestLoader().loadTestsFromTestCase(InvalidCommand)
+    # suite = unittest.TestLoader().loadTestsFromTestCase(InvalidCommand)
     # unittest.TextTestRunner(verbosity=2).run(suite)
 
-    suite = unittest.TestLoader().loadTestsFromTestCase(IncrementDecrement)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    # suite = unittest.TestLoader().loadTestsFromTestCase(IncrementDecrement)
+    # unittest.TextTestRunner(verbosity=2).run(suite)
 
     # suite = unittest.TestLoader().loadTestsFromTestCase(AppendPrepend)
     # unittest.TextTestRunner(verbosity=2).run(suite)

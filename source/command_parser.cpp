@@ -445,8 +445,10 @@ void handle_flush_all(std::sregex_token_iterator param_itr, char*& response_str,
 
 void handle_version(char*& response_str, size_t* response_len)
 {
-    response_str = (char*)malloc(strlen(RESPONSE_MAP[VERSION].res_str) + strlen(MEM_VERSION) +strlen("\r\n")+1);
-    strcpy(response_str, "1.0.0");
+    response_str = (char*)malloc(strlen(RESPONSE_MAP[VERSION_STR].res_str) + strlen(MEM_VERSION) +strlen("\r\n")+2);
+    strcpy(response_str, RESPONSE_MAP[VERSION_STR].res_str);
+    strcat(response_str, " ");
+    strcat(response_str, "1.0.0");
     strcat(response_str, "\r\n");
     *response_len = strlen(response_str);
 }
