@@ -308,7 +308,7 @@ class MultipleClients(unittest.TestCase):
 
         for i in xrange(2000):
             message = "add {}_{} 012 3000 5\\r\\nvalue\\r\\n".format(thread_name,i)
-            print "sending",message
+            # print "sending",message
             valid_result = "STORED\r\n"
             test_result = self.sendMessage(message,sock)
             self.assertEqual(test_result, valid_result)
@@ -317,17 +317,18 @@ class MultipleClients(unittest.TestCase):
 
         t1 = threading.Thread(name='Thread1', target=self.add_key, args=("Thread1",0))
         t2 = threading.Thread(name='Thread2', target=self.add_key, args=("Thread2",0.001))
-        # t3 = threading.Thread(name='Thread3', target=self.add_key, args=("Thread3",0.002))
+        t3 = threading.Thread(name='Thread3', target=self.add_key, args=("Thread3",0.002))
+        t4 = threading.Thread(name='Thread4', target=self.add_key, args=("Thread4",0.003))
 
         t1.start()
         t2.start()
-        # t3.start()
+        t3.start()
+        t4.start()
 
         t1.join()
-        print "t1 joined"
         t2.join()
-        print "t2 joined"
-        # t3.join()
+        t3.join()
+        t4.join()
 
 
 if __name__ == '__main__':
