@@ -73,11 +73,9 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
         else if(algorithm == LANDLORD)
         {
 
-            printf("Landlord function");
+           
             Header *temp;
             bool flag=true;
-
-            printf("Landlord function");
 
             while(flag)
             {   
@@ -109,7 +107,6 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
                 {
                     if(temp->landlordCost<=0)
                     {
-                        printf("removing %s\n",temp->key);
                         evictedObject = temp;
                         remove((void*)temp);
 
@@ -122,11 +119,7 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
             Stats::Instance().evictions++;
 
         }
-        else
-        {
-            // error out 
-            
-        }
+       
     }
 
     // Check in freedObjects 
