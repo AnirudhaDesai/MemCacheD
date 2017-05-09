@@ -7,11 +7,14 @@ one_meg_data = "X"*(1024*1024)
 almost_one_meg_data = "X"*(1024*1024-41)
 
    
-def sendMessage(message):
+def sendMessage(message,noreply=False):
     global sock
     try:
-        # print 'sending "%s"' % message
+        print "sending {} bytes".format(len(message))
         sock.sendall(message)
+
+        if noreply==True:
+            return True
 
         # Look for the response
         total_length_received = 0
@@ -22,14 +25,14 @@ def sendMessage(message):
             data_received+=data
             length_received = len(data)
             total_length_received += length_received
-            print length_received,data
+            # print length_received,data
             if length_received < 256:
                 break
 
     except:
         return False
 
-    print "received: ",data_received
+    # print "received: ",data_received
 
     return data_received
 
@@ -47,7 +50,7 @@ class HappyPath(unittest.TestCase):
 
     def test_get(self):
         message = "get addkey\\r\\n"
-        valid_result = "VALUE addkey 12 11\r\nADD MESSAGE\r\n" 
+        valid_result = "VALUE addkey 12 11\r\nADD MESSAGE\r\nEND\r\n" 
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
@@ -58,7 +61,7 @@ class HappyPath(unittest.TestCase):
         
         message = "get expkey\\r\\n"
         test_result = sendMessage(message)
-        valid_result = "VALUE expkey 12 11\r\nEXP MESSAGE\r\n"
+        valid_result = "VALUE expkey 12 11\r\nEXP MESSAGE\r\nEND\r\n"
         self.assertEqual(test_result, valid_result)
     
     
@@ -69,8 +72,11 @@ class HappyPath(unittest.TestCase):
         sleep(8)
         message = "get expkey\\r\\n"
         test_result = sendMessage(message)
-        valid_result = "NOT_FOUND\r\n"
+        valid_result = "END\r\n"
         self.assertEqual(test_result, valid_result)
+
+
+class CacheReplacement(unittest.TestCase):
 
     def test_cache_replacement(self):
         for i in range(1027):
@@ -78,21 +84,27 @@ class HappyPath(unittest.TestCase):
             test_result = sendMessage(message)
             self.assertTrue(test_result)
 
+
+class Stats(unittest.TestCase):
+
     def test_stats(self):
         message = "stats\\r\\n"
         test_result = sendMessage(message)
         # print "got result:",test_result
         self.assertTrue(test_result)
 
+
+class LargeData(unittest.TestCase):
+
     def test_add_long(self):       
-        message = "add longvalue 012 3000 500\\r\\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\\r\\n"
+        message = "add longvalue 012 3000 500\\r\\n"+"X"*500+"\\r\\n"
         valid_result = "STORED\r\n"
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
     def test_get_long(self):
         message = "get longvalue\\r\\n"
-        valid_result = "VALUE longvalue 12 500\r\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\r\n" 
+        valid_result = "VALUE longvalue 12 500\r\n"+"X"*500+"\r\nEND\r\n" 
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
@@ -124,6 +136,15 @@ class HappyPath(unittest.TestCase):
         valid_result = "VALUE prepkey 12 12\r\nSAPP MESSAGE\r\nEND\r\n"
         self.assertEqual(test_result, valid_result)        
 
+class InvalidCommand(unittest.TestCase):
+
+    def test_invalid_get(self):
+        message = "ger key 012 3000 5\\r\\nvalue\\r\\n"
+        valid_result = "ERROR\r\n"
+        test_result = sendMessage(message)
+        self.assertEqual(test_result, valid_result)
+
+
 if __name__ == '__main__':
     global sock
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -132,7 +153,17 @@ if __name__ == '__main__':
     print 'connecting to %s port %s' % server_address
     sock.connect(server_address)
 
-    unittest.main()
+    # unittest.main()
+    suite = unittest.TestLoader().loadTestsFromTestCase(HappyPath)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(LargeData)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(Stats)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(CacheReplacement)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(InvalidCommand)
+    unittest.TextTestRunner(verbosity=2).run(suite)
 
     print 'closing socket'
     sock.close()

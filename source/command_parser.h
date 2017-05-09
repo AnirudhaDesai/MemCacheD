@@ -4,8 +4,11 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
-
+#include <string>
+#include <regex>
+#include <sstream>
 #include "memo.h"
+#include "Trace.h"
 
 typedef enum struct PARSE_ERROR
 {

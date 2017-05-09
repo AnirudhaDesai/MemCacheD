@@ -1,11 +1,3 @@
-#include <cstring>
-#include "time.h"
-#include <stdlib.h>
-#include <limits.h>
-#include <exception>
-#include <mutex>
-#include <thread>
-
 #include "memo.h"
 
 SlabsAlloc* alloc;
@@ -60,13 +52,14 @@ namespace  Memo
 
                     Stats::Instance().get_hits++;
                 }
+
                 TableLock.unlock();
                 return got->second;
             }
             else
             {
                 Table.erase({key});
-                printf("Key expired");
+                TRACE_DEBUG("Key expired");
                 TableLock.unlock();
                 return nullptr;
             }
@@ -87,9 +80,8 @@ namespace  Memo
 
     RESPONSE set(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas)
     {
-        //printf("called %s\n",__FUNCTION__);
         Header* h;
-        printf("called %s\n",__FUNCTION__);
+        TRACE_DEBUG("called ",__FUNCTION__);
 
         //Stats::Instance().cmd_set++;
 
@@ -115,7 +107,7 @@ namespace  Memo
         Header *evictedObject;
         evictedObject = NULL;
         char* temp;
-        printf("called %s\n",__FUNCTION__);
+        TRACE_DEBUG("called ",__FUNCTION__);
 
         Stats::Instance().cmd_set++;
 
@@ -125,10 +117,10 @@ namespace  Memo
         {
             //add header information
 
-            printf("add called\n");
+            TRACE_DEBUG("add called");
 
             h = (Header*) alloc->store(size, evictedObject);
-            printf("\n evictedObject : %s\n", evictedObject->key );
+            TRACE_DEBUG("evictedObject : ", evictedObject->key );
             if(evictedObject!=NULL)
             {   
                 TableLock.lock();
@@ -152,37 +144,30 @@ namespace  Memo
 
                 std::thread::id this_id = std::this_thread::get_id();
                 h->last_updated_client = this_id;
-                printf("\nThread id: %d\n",h->last_updated_client);
 
+                TRACE_DEBUG("Thread id: ",h->last_updated_client);
 
-                printf("adding %s\n",key.c_str());
+                TRACE_DEBUG("adding ",key.c_str());
 
                 TableLock.lock();
                 Table.insert({key,h});
                 TableLock.unlock();
                 return STORED;
             }
-            else
-            {
-                return NOT_STORED;
-            }
-
         }
-        //need to add key, address to hash table. use temp.  
-        //
-        return ERROR;
+        return NOT_STORED;
     }
 
     RESPONSE replace(std::string key, uint16_t flags, int32_t expiration_time, size_t size, std::string value, bool cas, bool updateExpirationTime)
     {
         Header* h;
         char* temp;
-        printf("called %s\n",__FUNCTION__);
+        TRACE_DEBUG("called ",__FUNCTION__);
 
         Stats::Instance().cmd_set++;
 
         h=get(key);
-        //printf("%p",h);
+        //TRACE_DEBUG("%p",h);
         if(cas)
         {
             if (h->last_updated_client != std::this_thread::get_id())
@@ -203,16 +188,16 @@ namespace  Memo
                     h->expiration_timestamp = expiration_time;
                 }
                 h->data_size = size;
-
                 temp = (char*) (h+1);
-                printf("%s",temp);
+                TRACE_DEBUG(temp);
                 std::strncpy(temp,value.c_str(),size+1);
-                printf(": replaced with : %s",temp);
+                TRACE_DEBUG(": replaced with :",temp);
+                h->last_updated_client = std::this_thread::get_id();
 
                 return STORED;
             }
             else
-            {   printf("different size");
+            {   TRACE_DEBUG("different size");
                 alloc->remove((void*)h);
                 TableLock.lock();
                 Table.erase({key});
@@ -222,7 +207,7 @@ namespace  Memo
         }
         else
         {
-            return NOT_FOUND;
+            return NOT_STORED;
         }
     }
 
@@ -230,11 +215,10 @@ namespace  Memo
 
         Header* h;
         char* temp;
-        char* temp_key;
         int16_t temp_flags;
         int32_t temp_expiration_time; 
 
-        printf("called %s\n",__FUNCTION__);
+        TRACE_DEBUG("called ",__FUNCTION__);
 
         Stats::Instance().cmd_set++;
 
@@ -242,35 +226,28 @@ namespace  Memo
 
         if(h==nullptr)
         {
-            return NOT_FOUND;
+            return NOT_STORED;
         }
         else if(alloc->getSizeClass(h->data_size)==alloc->getSizeClass(h->data_size + size))
         {
             temp = (char*) (h+1);
             std::strncat(temp,value.c_str(), size+1);
             h->data_size = h->data_size + size;
+            h->last_updated_client = std::this_thread::get_id();
             return STORED;
         }
-        else
-        {    
-            temp = (char*) (h+1);
-            std::strncat(temp, value.c_str(), size+1);
+        else {
+            temp = (char *) (h + 1);
+            std::strncat(temp, value.c_str(), size + 1);
             size = h->data_size + size;
             temp_flags = h->flags;
             temp_expiration_time = h->expiration_time;
-
-            alloc->remove((void*)h);
+            alloc->remove((void *) h);
             TableLock.lock();
             Table.erase({key});
             TableLock.unlock();
-
-
-            return(add(key,temp_flags,temp_expiration_time,size,std::string(temp)));
-
-          
+            return (add(key, temp_flags, temp_expiration_time, size, std::string(temp)));
         }
-
-
     }
 
     RESPONSE prepend(std::string key, size_t size, std::string value) {
@@ -279,7 +256,7 @@ namespace  Memo
         int16_t temp_flags;
         int32_t temp_expiration_time;
 
-        printf("called %s\n",__FUNCTION__);
+        TRACE_DEBUG("called ",__FUNCTION__);
 
         Stats::Instance().cmd_set++;
 
@@ -287,23 +264,24 @@ namespace  Memo
 
         if(h==nullptr)
         {
-            return NOT_FOUND;
+            return NOT_STORED;
         }
         else if(alloc->getSizeClass(h->data_size)==alloc->getSizeClass(h->data_size + size))
         {
 
-            printf("same size class\n");
+            TRACE_DEBUG("same size class");
             data = (char*) (h+1);
             std::string temp = value + std::string(data);
             std::strncpy(data, temp.c_str(), std::strlen(temp.c_str())+1);
             h->data_size = h->data_size + size;
+            h->last_updated_client = std::this_thread::get_id();
             return STORED;
         }
         else
         {
 
 
-            printf("different size class\n");
+            TRACE_DEBUG("different size class");
             data = (char*) (h+1);
 
             std::string temp = value + std::string(data);
@@ -325,7 +303,7 @@ namespace  Memo
     RESPONSE mem_delete(std::string key) {
         // delete code
         Header* h;
-        printf("called %s\n",__FUNCTION__);
+        TRACE_DEBUG("called ",__FUNCTION__);
 
         h = get(key);
 
@@ -346,7 +324,7 @@ namespace  Memo
     Header* incr(std::string key, std::string value) {
         
         Header* h;
-        printf("called %s\n",__FUNCTION__);
+        TRACE_DEBUG("called ",__FUNCTION__);
 
         h = get(key);
         char* temp;
@@ -363,7 +341,7 @@ namespace  Memo
             //incr hit. update stats 
             Stats::Instance().incr_hits++;
             temp = (char*) (h+1);
-            printf("value=%s",temp);
+            TRACE_DEBUG("value=",temp);
             try
             {
                 num = strtol(temp, NULL,10);
@@ -373,7 +351,7 @@ namespace  Memo
                 return nullptr;
             }
             num += std::strtol(value.c_str(), NULL,10);
-            printf("incremented:%lu",num);
+            TRACE_DEBUG("incremented:",num);
 
             std::string num_str = std::to_string(num);
             RESPONSE res = replace(key, h->flags, h->expiration_time, std::strlen(num_str.c_str()), num_str, false, false);
@@ -386,7 +364,7 @@ namespace  Memo
 
     Header* decr(std::string key, std::string value) {
         Header* h;
-        printf("called %s\n",__FUNCTION__);
+        TRACE_DEBUG("called ",__FUNCTION__);
 
         h = get(key);
         char* temp;
@@ -404,7 +382,7 @@ namespace  Memo
             Stats::Instance().decr_hits++;
             
             temp = (char*) (h+1);
-            printf("value=%s",temp);
+            TRACE_DEBUG("value=",temp);
             try
             {
                 num = std::strtol(temp, NULL,10);
@@ -420,7 +398,7 @@ namespace  Memo
             else {
                 num -= strtol(value.c_str(), NULL,10);
             }
-            printf("decreamented:%lu",num);
+            TRACE_DEBUG("decremented:",num);
 
             std::string num_str = std::to_string(num);
             RESPONSE res = replace(key, h->flags, h->expiration_time, std::strlen(num_str.c_str()), num_str, false, false);
@@ -434,7 +412,7 @@ namespace  Memo
 
     void stats(char*& response_str, size_t* response_len) {
         // stats code
-        printf("Called Stats function \n" );
+        TRACE_DEBUG("Called Stats function " );
         Stats::Instance().printStats(response_str,response_len);
 
     }

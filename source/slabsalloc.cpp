@@ -1,5 +1,6 @@
 #include "slabsalloc.h"
 
+//allocates memore and stores the object. Also handles eviction incase the class is full.
 void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
 
     Header *h;
@@ -26,12 +27,11 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
         if(head_AllocatedObjects[i] == nullptr)
         {
             TRACE_ERROR("size bucket is empty, but heap is full. I quit.");
-            //printf("\nsize: %u+%lu=%lu\n allocatedcount: %d\n i: %d\n maxalloc:%lu",sz,allocated,sz+allocated,AllocatedCount[i],i,MAX_ALLOC);
             return nullptr;
         }
         // use appropriate cache replacement algorithm
         
-        // if LRU, evict from tail
+        // if LRU, evict from Head (Which points to the oldest object according to our ordering)
         if (algorithm == LRU)
         {
             
@@ -41,7 +41,6 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
             Stats::Instance().evictions++;
 
             evictedObject = head_AllocatedObjects[i];
-            //printf("\nevictedObject in slabsalloc : %p\n", evictedObject );
              
             remove((void *) head_AllocatedObjects[i]);
 
@@ -69,8 +68,8 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
             remove((void *)tempObject);  
 
         }
-        // else if LANDLORD, evict based on least credit
         
+        // else if LANDLORD, reduce credit and evict based on least credit
         else if(algorithm == LANDLORD)
         {
 
@@ -127,7 +126,7 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
         }
     }
 
-    /* Check in freedObjects */
+    // Check in freedObjects 
     if(freedObjects[i]!=nullptr)
     {
         h = freedObjects[i];
@@ -155,6 +154,7 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
 
         return h;
     }
+    //If this is the first object to be allocated in that size class.
     else if(head_AllocatedObjects[i] == nullptr )
     {
         size_t size_to_malloc = size+sizeof(Header);
@@ -185,6 +185,7 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
         return tail_AllocatedObjects[i];
 
     }
+    //If freedobjects are not available, allocate using malloc. 
     else
     {
         size_t size_to_malloc = size+sizeof(Header);
@@ -223,7 +224,7 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
 
 }
 
-
+//remove objects and add to freed objects
 void SlabsAlloc::remove(void * ptr) {
 
     if (ptr == NULL)
@@ -267,13 +268,7 @@ void SlabsAlloc::remove(void * ptr) {
 
 }
 
-/*
-   template <class SourceHeap>
-   size_t SlabsAlloc<SourceHeap>::getSize(void * p) {
-   Header *h = (Header *)p-1;
-   size_t size = getSizeFromClass(getSizeClass(h->allocatedSize));
-   return size; 
-   }*/
+//Updates with data or rearanges objects in a manner that will help eviction. 
 void SlabsAlloc::cacheReplacementUpdates(Header* h)
 {
     if(algorithm == LRU)
@@ -296,6 +291,10 @@ void SlabsAlloc::cacheReplacementUpdates(Header* h)
         
     }
 }
+
+/*Rearanges objects by pushing most recently used objects to the tail so that
+ *heads always contain the objects that are meant for eviction in LRU.
+ */
 void SlabsAlloc::updateRecentlyUsed(Header* h)
 {
     Header* temp;
@@ -327,28 +326,14 @@ size_t SlabsAlloc::bytesAllocated() {
     return allocated; 
 }
 
-// max number of bytes allocated  
-size_t SlabsAlloc::maxBytesAllocated() {
-    return maxAllocated; 
-}
-
-// number of bytes *requested* (e.g., malloc(4) might result in an allocation of 8; 4 = bytes requested, 8 = bytes allocated)
-size_t SlabsAlloc::bytesRequested() {
-    return requested; 
-}
-
-// max number of bytes *requested*
-size_t SlabsAlloc::maxBytesRequested() {
-    return maxRequested; 
-}
-
-
+//Gives the max size of data that can be stored in that class.
 size_t SlabsAlloc::getSizeFromClass(int index) {
 
     return (size_t)(pow(2,index));
 
 }
 
+//Gives the index of the slab class.
 int SlabsAlloc::getSizeClass(size_t sz) {
     if (sz < 1) {
         return 0;
@@ -357,6 +342,7 @@ int SlabsAlloc::getSizeClass(size_t sz) {
 
 }
 
+//Used for flush_all
 Header* SlabsAlloc::getFirstObject(int i)
 {
     return head_AllocatedObjects[i];

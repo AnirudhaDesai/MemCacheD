@@ -4,51 +4,15 @@
 #include <string>
 #include <cstdint>
 #include <unordered_map>
+#include <cstring>
+#include <stdlib.h>
+#include <limits.h>
+#include <exception>
+#include <mutex>
+#include <thread>
 
+#include "time.h"
 #include "slabsalloc.h"
-
-typedef enum {
-    SET =0,
-    ADD ,
-    REPLACE ,
-    APPEND ,
-    PREPEND ,
-    CAS ,
-    // Retrieval commands
-    GET ,
-    GETS ,
-    DELETE ,
-    INCR ,
-    DECR ,
-    // Stats commands
-    STATS ,
-    // Misc commands
-    FLUSH_ALL ,
-    VERSION ,
-    QUIT,
-    NONE
-} COMMAND;
-
-
-typedef enum 
-{
-    // error strings
-    ERROR=0,
-    CLIENT_ERROR,
-    SERVER_ERROR,
-    // storage command responses 
-    STORED,
-    EXISTS,
-    NOT_FOUND,
-    NOT_STORED,
-    // retrieval command responses
-    VALUE,
-    END,
-    // deletion
-    DELETED,
-    OK
-
-} RESPONSE;
 
 const auto SecondsIn30Days =  60 * 60 * 24 * 30;
 
