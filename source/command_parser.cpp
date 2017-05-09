@@ -575,7 +575,7 @@ void handle_flush_all(std::sregex_token_iterator param_itr, char*& response_str,
 
 void handle_version(char*& response_str, size_t* response_len)
 {
-    send_response(response_str, response_len, RESPONSE_MAP[VERSION].res_str, MEM_VERSION);
+    send_response(response_str, response_len, RESPONSE_MAP[VERSION_STR].res_str, MEM_VERSION);
 }
 
 void handle_invalid_command(char*& response_str, size_t* response_len)

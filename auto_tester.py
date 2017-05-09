@@ -38,46 +38,49 @@ def sendMessage(message,noreply=False):
 
 class HappyPath(unittest.TestCase):
 
-    def setUp(self):
-        pass
-
-    def test_000_add_new_key(self):       
+    def test_000_version(self):
+        message = "version\r\n"
+        valid_result = "VERSION 1.0.0\r\n"
+        test_result = sendMessage(message)
+        self.assertEqual(test_result, valid_result)
+ 
+    def test_001_add_new_key(self):       
         message = "add addkey 012 3000 11\\r\\nADD MESSAGE\\r\\n"
         valid_result = "STORED\r\n"
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
     
-    def test_001_get_existing_key(self):
+    def test_002_get_existing_key(self):
         message = "get addkey\\r\\n"
         valid_result = "VALUE addkey 12 11\r\nADD MESSAGE\r\nEND\r\n" 
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
-    def test_002_add_existing_key(self):
+    def test_003_add_existing_key(self):
         message = "add addkey 012 3000 11\\r\\nADD MESSAGE\\r\\n"
         valid_result = "NOT_STORED\r\n"
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
-    def test_003_set_existing_key(self):
+    def test_004_set_existing_key(self):
         message = "set addkey 012 3000 11\\r\\nADD MESSAGE\\r\\n"
         valid_result = "STORED\r\n"
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
-    def test_004_delete_existing_key(self):
+    def test_005_delete_existing_key(self):
         message = "delete addkey \\r\\n"
         valid_result = "DELETED\r\n"
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
-    def test_005_delete_deleted_key(self):
+    def test_006_delete_deleted_key(self):
         message = "delete addkey \\r\\n"
         valid_result = "NOT_FOUND\r\n"
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
-    def test_006_expiration_time_add_positive(self):
+    def test_007_expiration_time_add_positive(self):
         
         message = "add expkey 012 5 11\\r\\nEXP MESSAGE\\r\\n"
         test_result = sendMessage(message)
@@ -87,8 +90,7 @@ class HappyPath(unittest.TestCase):
         valid_result = "VALUE expkey 12 11\r\nEXP MESSAGE\r\nEND\r\n"
         self.assertEqual(test_result, valid_result)
     
-    
-    def test_007_expiration_time_add_negative(self):
+    def test_008_expiration_time_add_negative(self):
         
         message = "add expkey 012 5 11\\r\\nEXP MESSAGE\\r\\n"
         test_result = sendMessage(message)
@@ -99,13 +101,36 @@ class HappyPath(unittest.TestCase):
         self.assertEqual(test_result, valid_result)
 
 
-class CacheReplacement(unittest.TestCase):
+class CacheReplacementLRU(unittest.TestCase):
 
-    def test_000_cache_replacement(self):
+    def test_000_cache_replacement_populate_cache(self):
         for i in range(1027):
             message = "add repKey%s 012 3000 11\\r\\nADD MESSAGE\\r\\n"%i
             test_result = sendMessage(message)
             self.assertTrue(test_result)
+
+    def test_001_cache_replacement_check_least_recently_used_keys_eviction(self):
+        message = "get repKey0 repKey1 repKey2\r\n"
+        test_result = sendMessage(message)
+        valid_result = "END\r\n"
+        self.assertEqual(test_result, valid_result)
+
+class LandlordCacheReplacement(unittest.TestCase):
+    
+    def test_000_landlordCacheReplacement(self):
+        for i in range(1024):
+            message = "add lrdrepKey%s 012 3000 11\\r\\nADD MESSAGE\\r\\n"%i
+            test_result = sendMessage(message)
+            sleep(0.1)
+        for i in range(3,1024):
+            message = "get lrdrepKey%s\\r\\n"%i
+            test_result = sendMessage(message)
+        for i in range(1024,1027):
+            message = "add lrdrepKey%s 012 3000 11\\r\\nADD MESSAGE\\r\\n"%i
+            test_result = sendMessage(message)
+        message = "get lrdrepKey0 lrdrepKey1 lrdrepKey2\\r\\n"
+        valid_result = "END\r\n"
+        self.assertEqual(test_result,valid_result)
 
 
 class Stats(unittest.TestCase):
@@ -140,6 +165,69 @@ class LargeData(unittest.TestCase):
         self.assertEqual(test_result, valid_result)
 
 
+class IncrementDecrement(unittest.TestCase):
+
+    def test_000_increment_before_add(self):
+        message = "incr incrkey 2\\r\\n"
+        test_result = sendMessage(message)
+        valid_result = "NOT_FOUND\r\n"
+        self.assertEqual(test_result, valid_result)
+
+    def test_001_increment_add(self):
+        message = "add incrkey 1200 5 1\\r\\n1\\r\\n"
+        test_result = sendMessage(message)
+        valid_result = "STORED\r\n"
+        self.assertEqual(test_result, valid_result)
+
+    def test_002_increment_get(self):
+        message = "get incrkey\\r\\n"
+        valid_result = "VALUE incrkey 1200 1\r\n1\r\nEND\r\n" 
+        test_result = sendMessage(message)
+        self.assertEqual(test_result, valid_result)
+
+    def test_003_increment_increment(self):
+        message = "incr incrkey 2\\r\\n"
+        test_result = sendMessage(message)
+        valid_result = "3\r\n"
+        self.assertEqual(test_result, valid_result)
+
+    def test_004_increment_get_after_incr(self):
+        message = "get incrkey\\r\\n"
+        valid_result = "VALUE incrkey 1200 1\r\n3\r\nEND\r\n" 
+        test_result = sendMessage(message)
+        self.assertEqual(test_result, valid_result)
+
+    def test_005_decrement_before_add(self):
+        message = "decr decrkey 2\\r\\n"
+        test_result = sendMessage(message)
+        valid_result = "NOT_FOUND\r\n"
+        self.assertEqual(test_result, valid_result)
+
+    def test_006_decrement_add(self):
+        message = "add decrkey 1200 500 1\\r\\n3\\r\\n"
+        test_result = sendMessage(message)
+        valid_result = "STORED\r\n"
+        self.assertEqual(test_result, valid_result)
+
+    def test_007_decrement_get(self):
+        message = "get decrkey\\r\\n"
+        valid_result = "VALUE decrkey 1200 1\r\n3\r\nEND\r\n" 
+        test_result = sendMessage(message)
+        self.assertEqual(test_result, valid_result)
+
+    def test_008_decrement_decrement(self):
+        message = "decr decrkey 2\\r\\n"
+        test_result = sendMessage(message)
+        valid_result = "1\r\n"
+        self.assertEqual(test_result, valid_result)
+
+    def test_009_decrement_get_after_decr(self):
+        message = "get decrkey\\r\\n"
+        valid_result = "VALUE decrkey 1200 1\r\n1\r\nEND\r\n" 
+        test_result = sendMessage(message)
+        self.assertEqual(test_result, valid_result)
+
+
 class AppendPrepend(unittest.TestCase):
 
     def test_000_append(self):
@@ -152,7 +240,7 @@ class AppendPrepend(unittest.TestCase):
         valid_result = "VALUE appkey 12 12\r\nAPP MESSAGES\r\nEND\r\n"
         self.assertEqual(test_result, valid_result)
 
-    def test__001_prepend(self):
+    def test_001_prepend(self):
         message = "add prepkey 12 5 11\\r\\nAPP MESSAGE\\r\\n"
         test_result = sendMessage(message)
         message = "prepend prepkey 1\\r\\nS\\r\\n"
@@ -170,6 +258,9 @@ class InvalidCommand(unittest.TestCase):
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
+
+
+        
 
 if __name__ == '__main__':
     global sock
@@ -191,16 +282,21 @@ if __name__ == '__main__':
     # suite = unittest.TestLoader().loadTestsFromTestCase(Stats)
     # unittest.TextTestRunner(verbosity=2).run(suite)
 
-    # suite = unittest.TestLoader().loadTestsFromTestCase(CacheReplacement)
+    # suite = unittest.TestLoader().loadTestsFromTestCase(CacheReplacementLRU)
+    # unittest.TextTestRunner(verbosity=2).run(suite)
+
+
+    # suite = unittest.TestLoader().loadTestsFromTestCase(LandlordCacheReplacement)
     # unittest.TextTestRunner(verbosity=2).run(suite)
 
     # suite = unittest.TestLoader().loadTestsFromTestCase(InvalidCommand)
     # unittest.TextTestRunner(verbosity=2).run(suite)
 
-    suite = unittest.TestLoader().loadTestsFromTestCase(AppendPrepend)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    # suite = unittest.TestLoader().loadTestsFromTestCase(IncrementDecrement)
+    # unittest.TextTestRunner(verbosity=2).run(suite)
 
-
+    # suite = unittest.TestLoader().loadTestsFromTestCase(AppendPrepend)
+    # unittest.TextTestRunner(verbosity=2).run(suite)
 
     print 'closing socket'
     sock.close()
