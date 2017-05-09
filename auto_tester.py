@@ -104,7 +104,25 @@ class HappyPath(unittest.TestCase):
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
+    def test_append(self):
+        message = "add appkey 12 5 11\\r\\nAPP MESSAGE\\r\\n"
+        test_result = sendMessage(message)
+        message = "append appkey 1\\r\\nS\\r\\n"
+        test_result = sendMessage(message)
+        message = "get appkey\\r\\n"
+        test_result = sendMessage(message)
+        valid_result = "VALUE appkey 12 12\r\nAPP MESSAGES\r\nEND\r\n"
+        self.assertEqual(test_result, valid_result)
 
+    def test_prepend(self):
+        message = "add prepkey 12 5 11\\r\\nAPP MESSAGE\\r\\n"
+        test_result = sendMessage(message)
+        message = "prepend prepkey 1\\r\\nS\\r\\n"
+        test_result = sendMessage(message)
+        message = "get prepkey\\r\\n"
+        test_result = sendMessage(message)
+        valid_result = "VALUE prepkey 12 12\r\nSAPP MESSAGE\r\nEND\r\n"
+        self.assertEqual(test_result, valid_result)        
 
 if __name__ == '__main__':
     global sock
