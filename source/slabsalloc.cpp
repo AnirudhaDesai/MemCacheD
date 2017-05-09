@@ -89,7 +89,10 @@ void * SlabsAlloc::store(size_t sz, Header *& evictedObject) {
                 {
                     if(temp->landlordCost < delta)
                     {
-                        delta = temp->landlordCost;
+                        delta = temp->landlordCost; // Not considering size[f] from algorithm 
+                                                    // because our design involves eviction 
+                                                    // from a singl size class. Size should
+                                                    // not be a game changer. 
                     }
 
                 }
