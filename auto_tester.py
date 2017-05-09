@@ -100,13 +100,13 @@ class HappyPath(unittest.TestCase):
 
 class CacheReplacementLRU(unittest.TestCase):
 
-    def test_000_cache_replacement(self):
+    def test_000_cache_replacement_populate_cache(self):
         for i in range(1027):
             message = "add repKey%s 012 3000 11\\r\\nADD MESSAGE\\r\\n"%i
             test_result = sendMessage(message)
             self.assertTrue(test_result)
 
-    def test_001_cache_replacement(self):
+    def test_001_cache_replacement_check_least_recently_used_keys_eviction(self):
         message = "get repKey0 repKey1 repKey2\r\n"
         test_result = sendMessage(message)
         valid_result = "END\r\n"
@@ -140,6 +140,69 @@ class LargeData(unittest.TestCase):
         # print len(message)
         # assert(len(message)==1024*1024)
         valid_result = "STORED\r\n"
+        test_result = sendMessage(message)
+        self.assertEqual(test_result, valid_result)
+
+
+class IncrementDecrement(unittest.TestCase):
+
+    def test_000_increment_before_add(self):
+        message = "incr incrkey 2\\r\\n"
+        test_result = sendMessage(message)
+        valid_result = "NOT_FOUND\r\n"
+        self.assertEqual(test_result, valid_result)
+
+    def test_001_increment_add(self):
+        message = "add incrkey 1200 5 1\\r\\n1\\r\\n"
+        test_result = sendMessage(message)
+        valid_result = "STORED\r\n"
+        self.assertEqual(test_result, valid_result)
+
+    def test_002_increment_get(self):
+        message = "get incrkey\\r\\n"
+        valid_result = "VALUE incrkey 1200 1\r\n1\r\nEND\r\n" 
+        test_result = sendMessage(message)
+        self.assertEqual(test_result, valid_result)
+
+    def test_003_increment_increment(self):
+        message = "incr incrkey 2\\r\\n"
+        test_result = sendMessage(message)
+        valid_result = "3\r\n"
+        self.assertEqual(test_result, valid_result)
+
+    def test_004_increment_get_after_incr(self):
+        message = "get incrkey\\r\\n"
+        valid_result = "VALUE incrkey 1200 1\r\n3\r\nEND\r\n" 
+        test_result = sendMessage(message)
+        self.assertEqual(test_result, valid_result)
+
+    def test_005_decrement_before_add(self):
+        message = "decr decrkey 2\\r\\n"
+        test_result = sendMessage(message)
+        valid_result = "NOT_FOUND\r\n"
+        self.assertEqual(test_result, valid_result)
+
+    def test_006_decrement_add(self):
+        message = "add decrkey 1200 500 1\\r\\n3\\r\\n"
+        test_result = sendMessage(message)
+        valid_result = "STORED\r\n"
+        self.assertEqual(test_result, valid_result)
+
+    def test_007_decrement_get(self):
+        message = "get decrkey\\r\\n"
+        valid_result = "VALUE decrkey 1200 1\r\n3\r\nEND\r\n" 
+        test_result = sendMessage(message)
+        self.assertEqual(test_result, valid_result)
+
+    def test_008_decrement_decrement(self):
+        message = "decr decrkey 2\\r\\n"
+        test_result = sendMessage(message)
+        valid_result = "1\r\n"
+        self.assertEqual(test_result, valid_result)
+
+    def test_009_decrement_get_after_decr(self):
+        message = "get decrkey\\r\\n"
+        valid_result = "VALUE decrkey 1200 1\r\n1\r\nEND\r\n" 
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
@@ -195,11 +258,14 @@ if __name__ == '__main__':
     # suite = unittest.TestLoader().loadTestsFromTestCase(Stats)
     # unittest.TextTestRunner(verbosity=2).run(suite)
 
-    suite = unittest.TestLoader().loadTestsFromTestCase(CacheReplacementLRU)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    # suite = unittest.TestLoader().loadTestsFromTestCase(CacheReplacementLRU)
+    # unittest.TextTestRunner(verbosity=2).run(suite)
 
 #     suite = unittest.TestLoader().loadTestsFromTestCase(InvalidCommand)
     # unittest.TextTestRunner(verbosity=2).run(suite)
+
+    suite = unittest.TestLoader().loadTestsFromTestCase(IncrementDecrement)
+    unittest.TextTestRunner(verbosity=2).run(suite)
 
     # suite = unittest.TestLoader().loadTestsFromTestCase(AppendPrepend)
     # unittest.TextTestRunner(verbosity=2).run(suite)
