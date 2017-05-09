@@ -152,8 +152,8 @@ namespace  Memo
 
                 std::thread::id this_id = std::this_thread::get_id();
                 h->last_updated_client = this_id;
-                TRACE_DEBUG("Thread id: ",h->last_updated_client);
 
+                TRACE_DEBUG("Thread id: ",h->last_updated_client);
 
                 TRACE_DEBUG("adding ",key.c_str());
 
@@ -230,7 +230,6 @@ namespace  Memo
 
         Header* h;
         char* temp;
-        char* temp_key;
         int16_t temp_flags;
         int32_t temp_expiration_time; 
 
