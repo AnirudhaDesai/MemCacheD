@@ -10,7 +10,7 @@ almost_one_meg_data = "X"*(1024*1024-41)
 def sendMessage(message,noreply=False):
     global sock
     try:
-        # print 'sending "%s"' % message
+        print "sending {} bytes".format(len(message))
         sock.sendall(message)
 
         if noreply==True:
@@ -97,14 +97,14 @@ class Stats(unittest.TestCase):
 class LargeData(unittest.TestCase):
 
     def test_add_long(self):       
-        message = "add longvalue 012 3000 500\\r\\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\\r\\n"
+        message = "add longvalue 012 3000 500\\r\\n"+"X"*500+"\\r\\n"
         valid_result = "STORED\r\n"
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
     def test_get_long(self):
         message = "get longvalue\\r\\n"
-        valid_result = "VALUE longvalue 12 500\r\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\r\nEND\r\n" 
+        valid_result = "VALUE longvalue 12 500\r\n"+"X"*500+"\r\nEND\r\n" 
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
@@ -136,8 +136,8 @@ if __name__ == '__main__':
     # unittest.main()
     suite = unittest.TestLoader().loadTestsFromTestCase(HappyPath)
     unittest.TextTestRunner(verbosity=2).run(suite)
-    # suite = unittest.TestLoader().loadTestsFromTestCase(LargeData)
-    # unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(LargeData)
+    unittest.TextTestRunner(verbosity=2).run(suite)
     suite = unittest.TestLoader().loadTestsFromTestCase(Stats)
     unittest.TextTestRunner(verbosity=2).run(suite)
     suite = unittest.TestLoader().loadTestsFromTestCase(CacheReplacement)
