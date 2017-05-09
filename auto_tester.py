@@ -87,7 +87,6 @@ class HappyPath(unittest.TestCase):
         valid_result = "VALUE expkey 12 11\r\nEXP MESSAGE\r\nEND\r\n"
         self.assertEqual(test_result, valid_result)
     
-    
     def test_007_expiration_time_add_negative(self):
         
         message = "add expkey 012 5 11\\r\\nEXP MESSAGE\\r\\n"
@@ -199,8 +198,6 @@ if __name__ == '__main__':
 
     suite = unittest.TestLoader().loadTestsFromTestCase(AppendPrepend)
     unittest.TextTestRunner(verbosity=2).run(suite)
-
-
 
     print 'closing socket'
     sock.close()
