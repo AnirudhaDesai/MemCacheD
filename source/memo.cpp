@@ -152,7 +152,7 @@ namespace  Memo
 
                 std::thread::id this_id = std::this_thread::get_id();
                 h->last_updated_client = this_id;
-                printf("\nThread id: %d\n",h->last_updated_client);
+               // printf("\nThread id: %d\n",h->last_updated_client);
 
 
                 printf("adding %s\n",key.c_str());
@@ -230,7 +230,6 @@ namespace  Memo
 
         Header* h;
         char* temp;
-        char* temp_key;
         int16_t temp_flags;
         int32_t temp_expiration_time; 
 
