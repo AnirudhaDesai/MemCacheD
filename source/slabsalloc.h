@@ -23,12 +23,14 @@ using namespace std;
 #define CLASS_LIM   1024  //limit on number of objects per size class
 #define NUM_CLASSES 23
 
+//Different eviction algorithms
 typedef enum {
     LRU=0,
     RANDOM,
     LANDLORD
 } ALG_T;
 
+//Header tagged with each object.
 class Header {
     public:
         char key[251];
@@ -36,12 +38,10 @@ class Header {
         uint16_t flags;
         int32_t expiration_time;
         time_t expiration_timestamp;
-        time_t last_updated_timestamp;
         time_t insertedTimestamp;
         std::thread::id last_updated_client;
         int64_t cas_unique;
-        bool valid;
-
+        
         double landlordCost; //for landlord replacement algorithm
 
 
@@ -53,14 +53,10 @@ class SlabsAlloc {
     public:
         SlabsAlloc(ALG_T algorithm, size_t max_heap_size)
             : MAX_ALLOC(max_heap_size),
-            requested (0),
             allocated (0),
-            maxRequested (0),
-            maxAllocated (0),
             algorithm(algorithm)
 
     {
-        // statsObject->pid = ::getpid();
         for (auto& f : freedObjects) {
             f = nullptr;
         }
@@ -84,26 +80,23 @@ class SlabsAlloc {
         enum { Alignment = 16 };
 
 
+        //allocates memore and stores the object. Also handles eviction incase the class is full.
         void * store(size_t sz, Header *& evictedObject);
 
+        //remove objects and add to freed objects
         void remove(void * ptr);
-        size_t getSize(void * p);
+
+        /*Rearanges objects by pushing most recently used objects to the tail so that
+         *heads always contain the objects that are meant for eviction in LRU.
+         */
         void updateRecentlyUsed(Header* h);
+
+        //(Updates with data or rearanges objects ) in a manner that will help eviction. 
         void cacheReplacementUpdates(Header* h);
         Header* getFirstObject(int i);
 
         // number of bytes currently allocated  
         size_t bytesAllocated();
-
-        // max number of bytes allocated  
-        size_t maxBytesAllocated();
-
-        // number of bytes *requested*
-        // (e.g., malloc(4) might result in an allocation of 8; 4 = bytes requested, 8 = bytes allocated)
-        size_t bytesRequested();
-
-        // max number of bytes *requested*
-        size_t maxBytesRequested();
 
         ALG_T algorithm;
 
@@ -119,9 +112,7 @@ class SlabsAlloc {
 
         size_t MAX_ALLOC;
         size_t allocated;
-        size_t requested;
-        size_t maxAllocated;
-        size_t maxRequested;
+        
         uint16_t rndNum;
         std::random_device rd;
 
@@ -130,7 +121,6 @@ class SlabsAlloc {
         Header * head_AllocatedObjects[NUM_CLASSES];
         Header * tail_AllocatedObjects[NUM_CLASSES];
         Header * freedObjects[NUM_CLASSES];
-        //std::unordered_map<std::string, time_t> missTable;
 
 };
 

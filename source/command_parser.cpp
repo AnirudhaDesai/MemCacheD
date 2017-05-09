@@ -13,6 +13,7 @@ void handle_decr(std::sregex_token_iterator param_itr, char*& response_str, size
 void handle_stats(char*& response_str, size_t* response_len);
 void handle_flush_all(std::sregex_token_iterator param_itr, char*& response_str, size_t* response_len);
 void handle_version(char*& response_str, size_t* response_len);
+void handle_invalid_command(char*& response_str, size_t* response_len);
 
 PARSE_ERROR parse_command(std::string& cmd, char*& res_str, size_t* res_len)
 {
@@ -104,7 +105,8 @@ PARSE_ERROR parse_command(std::string& cmd, char*& res_str, size_t* res_len)
         case QUIT:
             result = PARSE_ERROR::QUIT;
         case NONE:
-            // do nothing
+            result = PARSE_ERROR::INVALID_COMMAND;
+            handle_invalid_command(res_str, res_len);
             break;
     }
 
@@ -445,6 +447,15 @@ void handle_version(char*& response_str, size_t* response_len)
 {
     response_str = (char*)malloc(strlen(RESPONSE_MAP[VERSION].res_str) + strlen(MEM_VERSION) +strlen("\r\n")+1);
     strcpy(response_str, "1.0.0");
+    strcat(response_str, "\r\n");
+    *response_len = strlen(response_str);
+}
+
+void handle_invalid_command(char*& response_str, size_t* response_len)
+{
+    char* response_option = RESPONSE_MAP[ERROR].res_str;
+    response_str = (char*)malloc(strlen(response_option) + strlen("\r\n")+1);
+    strcpy(response_str,response_option);
     strcat(response_str, "\r\n");
     *response_len = strlen(response_str);
 }
