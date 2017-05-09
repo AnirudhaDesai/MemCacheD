@@ -67,7 +67,7 @@ class HappyPath(unittest.TestCase):
 
     def test_004_delete_existing_key(self):
         message = "delete addkey \\r\\n"
-        valid_result = "STORED\r\n"
+        valid_result = "DELETED\r\n"
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
@@ -87,7 +87,6 @@ class HappyPath(unittest.TestCase):
         valid_result = "VALUE expkey 12 11\r\nEXP MESSAGE\r\nEND\r\n"
         self.assertEqual(test_result, valid_result)
     
-    
     def test_007_expiration_time_add_negative(self):
         
         message = "add expkey 012 5 11\\r\\nEXP MESSAGE\\r\\n"
@@ -99,13 +98,14 @@ class HappyPath(unittest.TestCase):
         self.assertEqual(test_result, valid_result)
 
 
-class CacheReplacement(unittest.TestCase):
+class CacheReplacementLRU(unittest.TestCase):
 
     def test_000_cache_replacement(self):
         for i in range(1027):
             message = "add repKey%s 012 3000 11\\r\\nADD MESSAGE\\r\\n"%i
             test_result = sendMessage(message)
             self.assertTrue(test_result)
+
 
 class LandlordCacheReplacement(unittest.TestCase):
     
@@ -123,6 +123,13 @@ class LandlordCacheReplacement(unittest.TestCase):
         message = "get lrdrepKey0 lrdrepKey1 lrdrepKey2\\r\\n"
         valid_result = "END\r\n"
         self.assertEqual(test_result,valid_result)
+
+    def test_001_cache_replacement(self):
+        message = "get repKey0 repKey1 repKey2\r\n"
+        test_result = sendMessage(message)
+        valid_result = "END\r\n"
+        self.assertEqual(test_result, valid_result)
+
 
 class Stats(unittest.TestCase):
 
@@ -168,7 +175,7 @@ class AppendPrepend(unittest.TestCase):
         valid_result = "VALUE appkey 12 12\r\nAPP MESSAGES\r\nEND\r\n"
         self.assertEqual(test_result, valid_result)
 
-    def test__001_prepend(self):
+    def test_001_prepend(self):
         message = "add prepkey 12 5 11\\r\\nAPP MESSAGE\\r\\n"
         test_result = sendMessage(message)
         message = "prepend prepkey 1\\r\\nS\\r\\n"
@@ -201,8 +208,8 @@ if __name__ == '__main__':
 
     unittest.TestLoader.sortTestMethodsUsing = None
 
-    suite = unittest.TestLoader().loadTestsFromTestCase(HappyPath)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+#     suite = unittest.TestLoader().loadTestsFromTestCase(HappyPath)
+    # unittest.TextTestRunner(verbosity=2).run(suite)
 
     # suite = unittest.TestLoader().loadTestsFromTestCase(LargeData)
     # unittest.TextTestRunner(verbosity=2).run(suite)
@@ -210,18 +217,19 @@ if __name__ == '__main__':
     # suite = unittest.TestLoader().loadTestsFromTestCase(Stats)
     # unittest.TextTestRunner(verbosity=2).run(suite)
 
-    # suite = unittest.TestLoader().loadTestsFromTestCase(CacheReplacement)
-    # unittest.TextTestRunner(verbosity=2).run(suite)
-
-    # suite = unittest.TestLoader().loadTestsFromTestCase(InvalidCommand)
-    # unittest.TextTestRunner(verbosity=2).run(suite)
-
-    suite = unittest.TestLoader().loadTestsFromTestCase(AppendPrepend)
+    suite = unittest.TestLoader().loadTestsFromTestCase(CacheReplacementLRU)
     unittest.TextTestRunner(verbosity=2).run(suite)
+
 
     suite = unittest.TestLoader().loadTestsFromTestCase(LandlordCacheReplacement)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
+#     suite = unittest.TestLoader().loadTestsFromTestCase(InvalidCommand)
+    # unittest.TextTestRunner(verbosity=2).run(suite)
+
+
+    # suite = unittest.TestLoader().loadTestsFromTestCase(AppendPrepend)
+    # unittest.TextTestRunner(verbosity=2).run(suite)
 
     print 'closing socket'
     sock.close()

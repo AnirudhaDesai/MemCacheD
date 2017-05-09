@@ -1,7 +1,7 @@
 add key 0 0 4\r\ndata\r\n
 get key\r\n
 replace key 1 0 7\r\nrevalue\r\n
-get key\r\n
+get key key2\r\n
 add key2 0 0 4\r\ndata\r\n
 get key key2\r\n
 append key2 1\r\ns\r\n
