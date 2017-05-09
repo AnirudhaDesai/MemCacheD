@@ -1,6 +1,7 @@
 import socket
 import sys
 import unittest
+import threading
 from time import sleep
 
 one_meg_data = "X"*(1024*1024)
@@ -21,6 +22,7 @@ def sendMessage(message,noreply=False):
         data_received = ""
 
         while True: 
+            # print "waiitng for data...."
             data = sock.recv(256)
             data_received+=data
             length_received = len(data)
@@ -258,9 +260,73 @@ class InvalidCommand(unittest.TestCase):
         test_result = sendMessage(message)
         self.assertEqual(test_result, valid_result)
 
+class MultipleClients(unittest.TestCase):
 
 
-        
+    def sendMessage(self,message,sock,noreply=False):
+
+
+        try:
+            # print "sending {} bytes".format(len(message))
+            sock.sendall(message)
+
+            if noreply==True:
+                return True
+
+            # Look for the response
+            total_length_received = 0
+            data_received = ""
+
+            while True: 
+                # print "waiitng for data...."
+                data = sock.recv(256)
+                data_received+=data
+                length_received = len(data)
+                total_length_received += length_received
+                # print length_received,data
+                if length_received < 256:
+                    break
+
+        except:
+            return False
+
+        # print "received: ",data_received
+
+        return data_received
+
+    def add_key(self,thread_name,delay):
+
+        sleep(delay)
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_address = ('localhost', 9005)
+
+        print 'connecting to %s port %s' % server_address
+        sock.connect(server_address)
+
+        for i in xrange(2000):
+            message = "add {}_{} 012 3000 5\\r\\nvalue\\r\\n".format(thread_name,i)
+            print "sending",message
+            valid_result = "STORED\r\n"
+            test_result = self.sendMessage(message,sock)
+            self.assertEqual(test_result, valid_result)
+
+    def test_000_multiple_add(self):
+
+        t1 = threading.Thread(name='Thread1', target=self.add_key, args=("Thread1",0))
+        t2 = threading.Thread(name='Thread2', target=self.add_key, args=("Thread2",0.001))
+        # t3 = threading.Thread(name='Thread3', target=self.add_key, args=("Thread3",0.002))
+
+        t1.start()
+        t2.start()
+        # t3.start()
+
+        t1.join()
+        print "t1 joined"
+        t2.join()
+        print "t2 joined"
+        # t3.join()
+
 
 if __name__ == '__main__':
     global sock
@@ -276,27 +342,30 @@ if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(HappyPath)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
-    # suite = unittest.TestLoader().loadTestsFromTestCase(LargeData)
-    # unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(LargeData)
+    unittest.TextTestRunner(verbosity=2).run(suite)
 
-    # suite = unittest.TestLoader().loadTestsFromTestCase(Stats)
-    # unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(Stats)
+    unittest.TextTestRunner(verbosity=2).run(suite)
 
-    # suite = unittest.TestLoader().loadTestsFromTestCase(CacheReplacementLRU)
-    # unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(CacheReplacementLRU)
+    unittest.TextTestRunner(verbosity=2).run(suite)
 
 
-    # suite = unittest.TestLoader().loadTestsFromTestCase(LandlordCacheReplacement)
-    # unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(LandlordCacheReplacement)
+    unittest.TextTestRunner(verbosity=2).run(suite)
 
-    # suite = unittest.TestLoader().loadTestsFromTestCase(InvalidCommand)
-    # unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(InvalidCommand)
+    unittest.TextTestRunner(verbosity=2).run(suite)
 
-    # suite = unittest.TestLoader().loadTestsFromTestCase(IncrementDecrement)
-    # unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(IncrementDecrement)
+    unittest.TextTestRunner(verbosity=2).run(suite)
 
-    # suite = unittest.TestLoader().loadTestsFromTestCase(AppendPrepend)
-    # unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(AppendPrepend)
+    unittest.TextTestRunner(verbosity=2).run(suite)
+
+    suite = unittest.TestLoader().loadTestsFromTestCase(MultipleClients)
+    unittest.TextTestRunner(verbosity=2).run(suite)
 
     print 'closing socket'
     sock.close()
